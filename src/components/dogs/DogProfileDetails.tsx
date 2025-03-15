@@ -10,6 +10,12 @@ type DogDetailsProps = {
     id: string;
     name: string;
     breedName: string;
+    breedObj?: {
+      id?: string;
+      name: string;
+      group?: string;
+      origin?: string;
+    };
     gender: 'male' | 'female';
     color: string;
     dateOfBirth: Date;
@@ -78,7 +84,7 @@ export default function DogProfileDetails({
           <dl className="mt-4 grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
             <div className="sm:col-span-1">
               <dt className="text-sm font-medium text-gray-500">Breed</dt>
-              <dd className="mt-1 text-sm text-gray-900">{dog.breedName}</dd>
+              <dd className="mt-1 text-sm text-gray-900">{dog.breedObj?.name || dog.breedName}</dd>
             </div>
             <div className="sm:col-span-1">
               <dt className="text-sm font-medium text-gray-500">Color</dt>

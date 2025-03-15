@@ -44,6 +44,12 @@ export const GET_DOG_PEDIGREE = gql`
           name
           registrationNumber
           breed
+          breedObj {
+            id
+            name
+            group
+            origin
+          }
           gender
           dateOfBirth
           color
@@ -56,6 +62,12 @@ export const GET_DOG_PEDIGREE = gql`
           name
           registrationNumber
           breed
+          breedObj {
+            id
+            name
+            group
+            origin
+          }
           gender
           dateOfBirth
           color
@@ -87,6 +99,12 @@ export const GET_DOG_PEDIGREE = gql`
           name
           registrationNumber
           breed
+          breedObj {
+            id
+            name
+            group
+            origin
+          }
           gender
           dateOfBirth
           color
@@ -99,6 +117,12 @@ export const GET_DOG_PEDIGREE = gql`
           name
           registrationNumber
           breed
+          breedObj {
+            id
+            name
+            group
+            origin
+          }
           gender
           dateOfBirth
           color

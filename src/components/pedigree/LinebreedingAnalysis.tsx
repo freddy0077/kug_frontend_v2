@@ -89,7 +89,7 @@ const LinebreedingAnalysis: React.FC<LinebreedingAnalysisProps> = ({
             <span className="text-gray-500">Name:</span> {dogName}
           </div>
           <div>
-            <span className="text-gray-500">Breed:</span> {analysis.dog.breed}
+            <span className="text-gray-500">Breed:</span> {analysis.dog.breedObj?.name || analysis.dog.breed}
           </div>
           {analysis.dog.registrationNumber && (
             <div>
@@ -161,7 +161,7 @@ const LinebreedingAnalysis: React.FC<LinebreedingAnalysisProps> = ({
                 </div>
                 <div className="text-sm">
                   <div className="mb-1">
-                    <span className="text-gray-500">Breed:</span> {ancestor.dog.breed}
+                    <span className="text-gray-500">Breed:</span> {ancestor.dog.breedObj?.name || ancestor.dog.breed}
                   </div>
                   {ancestor.dog.registrationNumber && (
                     <div className="mb-1">

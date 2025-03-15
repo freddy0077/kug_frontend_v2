@@ -8,6 +8,12 @@ export interface DogCardProps {
     id: string;
     name: string;
     breed: string;
+    breedObj?: {
+      id?: string;
+      name: string;
+      group?: string;
+      origin?: string;
+    };
     breedId?: string;
     gender: string;
     dateOfBirth: string;
@@ -98,7 +104,7 @@ const DogCard: React.FC<DogCardProps> = ({ dog }) => {
         </div>
         
         <div className="mt-1">
-          <span className="text-sm text-gray-600 inline-block">{dog.breed}</span>
+          <span className="text-sm text-gray-600 inline-block">{dog.breedObj?.name || dog.breed}</span>
           {dog.registrationNumber && (
             <div className="mt-1 text-xs text-gray-500 inline-block bg-gray-100 px-2 py-0.5 rounded">
               Reg: {dog.registrationNumber}

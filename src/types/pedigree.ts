@@ -5,6 +5,13 @@ export interface DogPedigreeData {
   name: string;
   registrationNumber: string;
   breedName: string;
+  // Add breedObj for enhanced breed information
+  breedObj?: {
+    id: string;
+    name: string;
+    group?: string;
+    origin?: string;
+  };
   color: string;
   gender: 'male' | 'female';
   dateOfBirth: Date;

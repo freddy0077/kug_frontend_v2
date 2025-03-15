@@ -9,6 +9,12 @@ interface DogProfileProps {
     id: string;
     name: string;
     breed: string;
+    breedObj?: {
+      id?: string;
+      name: string;
+      group?: string;
+      origin?: string;
+    };
     breedId?: string;
     gender: string;
     color: string;
@@ -109,7 +115,7 @@ const DogProfile: React.FC<DogProfileProps> = ({ dog }) => {
           )}
         </div>
         
-        <p className="mt-2 text-lg text-gray-700">{dog.breed} {dog.breedId && `(${dog.breedId})`}</p>
+        <p className="mt-2 text-lg text-gray-700">{dog.breedObj?.name || 'Unknown Breed'} {dog.breedId && `(${dog.breedId})`}</p>
         
         {/* Basic information */}
         <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">

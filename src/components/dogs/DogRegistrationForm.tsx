@@ -44,6 +44,7 @@ export default function DogRegistrationForm({
     name: '',
     breedId: '',
     breed: '',
+    breedObj: undefined,
     gender: 'male',
     dateOfBirth: new Date(),
     color: '',
@@ -129,13 +130,14 @@ export default function DogRegistrationForm({
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     
-    // Special handling for breed selection to set both breedId and breed
+    // Special handling for breed selection to set both breedId, breed and breedObj
     if (name === 'breedId' && value) {
       const selectedBreed = BREEDS.find(breed => breed.id === value);
       setFormData(prev => ({
         ...prev,
         breedId: value,
-        breed: selectedBreed ? selectedBreed.name : ''
+        breed: selectedBreed ? selectedBreed.name : '',
+        breedObj: selectedBreed ? { id: selectedBreed.id, name: selectedBreed.name } : undefined
       }));
     } else {
       setFormData(prev => ({...prev, [name]: value}));

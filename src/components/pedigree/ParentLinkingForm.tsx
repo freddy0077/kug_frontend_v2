@@ -124,7 +124,7 @@ const ParentLinkingForm: React.FC<ParentLinkingFormProps> = ({ dogId }) => {
               <span className="text-gray-500">Name:</span> {dogData.dog.name}
             </div>
             <div>
-              <span className="text-gray-500">Breed:</span> {dogData.dog.breed}
+              <span className="text-gray-500">Breed:</span> {dogData.dog.breedObj?.name || dogData.dog.breed}
             </div>
             <div>
               <span className="text-gray-500">Gender:</span> {dogData.dog.gender}
@@ -167,7 +167,7 @@ const ParentLinkingForm: React.FC<ParentLinkingFormProps> = ({ dogId }) => {
               <option value="">No sire selected</option>
               {maleDogs.map((dog: any) => (
                 <option key={dog.id} value={dog.id}>
-                  {dog.name} - {dog.breed}
+                  {dog.name} - {dog.breedObj?.name || dog.breed}
                 </option>
               ))}
             </select>
@@ -193,7 +193,7 @@ const ParentLinkingForm: React.FC<ParentLinkingFormProps> = ({ dogId }) => {
               <option value="">No dam selected</option>
               {femaleDogs.map((dog: any) => (
                 <option key={dog.id} value={dog.id}>
-                  {dog.name} - {dog.breed}
+                  {dog.name} - {dog.breedObj?.name || dog.breed}
                 </option>
               ))}
             </select>

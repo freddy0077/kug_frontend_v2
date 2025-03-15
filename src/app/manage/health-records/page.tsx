@@ -9,6 +9,12 @@ interface Dog {
   id: number;
   name: string;
   breed: string;
+  breedObj?: {
+    id?: string;
+    name: string;
+    group?: string;
+    origin?: string;
+  };
   registrationNumber: string;
 }
 
@@ -228,7 +234,7 @@ export default function ManageHealthRecords() {
                   <option value="">Select a dog</option>
                   {dogs.map(dog => (
                     <option key={dog.id} value={dog.id}>
-                      {dog.name} ({dog.registrationNumber}) - {dog.breed}
+                      {dog.name} ({dog.registrationNumber}) - {dog.breedObj?.name || dog.breed}
                     </option>
                   ))}
                 </select>

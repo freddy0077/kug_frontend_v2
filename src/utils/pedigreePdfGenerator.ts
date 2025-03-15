@@ -139,7 +139,7 @@ export const generatePedigreeCertificate = async (
     name: dog.name,
     sire: sire,
     dam: dam,
-    breed: dog.breed,
+    breed: dog.breedObj?.name || dog.breed,
     gender: dog.gender
   };
   const fourthGen = extractFourthGeneration(tempDog);

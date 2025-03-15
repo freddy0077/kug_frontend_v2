@@ -18,6 +18,12 @@ export type DogFormData = {
   name: string;
   breedId: string;
   breed?: string; // Add the breed field for backward compatibility
+  breedObj?: { // Add breedObj field for enhanced breed information
+    id: string;
+    name: string;
+    group?: string;
+    origin?: string;
+  };
   gender: string;
   dateOfBirth: Date;
   dateOfDeath?: Date;

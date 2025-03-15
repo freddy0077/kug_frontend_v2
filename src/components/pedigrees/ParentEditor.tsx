@@ -10,6 +10,12 @@ interface Dog {
   id: string;
   name: string;
   breed?: string;
+  breedObj?: {
+    id?: string;
+    name: string;
+    group?: string;
+    origin?: string;
+  };
   registrationNumber?: string;
   gender?: string;
 }
@@ -468,9 +474,9 @@ const ParentEditor: React.FC<ParentEditorProps> = ({
                                 {dog.gender.charAt(0).toUpperCase() + dog.gender.slice(1)}
                               </span>
                             )}
-                            {dog.breed && (
+                            {(dog.breedObj?.name || dog.breed) && (
                               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                                {dog.breed.replace('-', ' ')}
+                                {(dog.breedObj?.name || dog.breed).replace('-', ' ')}
                               </span>
                             )}
                           </div>
@@ -564,9 +570,9 @@ const ParentEditor: React.FC<ParentEditorProps> = ({
                                 {dog.gender.charAt(0).toUpperCase() + dog.gender.slice(1)}
                               </span>
                             )}
-                            {dog.breed && (
+                            {(dog.breedObj?.name || dog.breed) && (
                               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                                {dog.breed.replace('-', ' ')}
+                                {(dog.breedObj?.name || dog.breed).replace('-', ' ')}
                               </span>
                             )}
                           </div>

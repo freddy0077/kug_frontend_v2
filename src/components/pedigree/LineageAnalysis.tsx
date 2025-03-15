@@ -259,7 +259,7 @@ export default function LineageAnalysis({
                             </div>
                             <div className="mt-1 flex">
                               <p className="text-sm text-gray-700">
-                                {ancestor.dog.breed || 'Unknown Breed'}{' • '}
+                                {ancestor.dog.breedObj?.name || ancestor.dog.breed || 'Unknown Breed'}{' • '}
                                 {formatDate(ancestor.dog.dateOfBirth)}
                               </p>
                             </div>

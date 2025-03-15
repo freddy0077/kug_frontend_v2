@@ -136,7 +136,7 @@ export default function PedigreePage() {
         </h1>
         {pedigreeData && (
           <p className="text-gray-600">
-            {pedigreeData.breedName} · {pedigreeData.registrationNumber}
+            {pedigreeData.breedObj?.name || pedigreeData.breedName} · {pedigreeData.registrationNumber}
           </p>
         )}
       </div>

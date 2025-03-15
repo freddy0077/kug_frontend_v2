@@ -111,8 +111,8 @@ const PedigreeChart: React.FC<PedigreeChartProps> = ({
               </button>
             )}
           </div>
-          {dog.breed && !isMiniCard && (
-            <p className="text-xs text-gray-600 capitalize truncate">{dog.breed.replace('-', ' ')}</p>
+          {(dog.breedObj?.name || dog.breed) && !isMiniCard && (
+            <p className="text-xs text-gray-600 capitalize truncate">{(dog.breedObj?.name || dog.breed).replace('-', ' ')}</p>
           )}
         </div>
         <div className="text-xs text-gray-500 truncate">

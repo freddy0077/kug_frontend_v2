@@ -238,7 +238,7 @@ const BreedingRecordForm: React.FC<BreedingRecordFormProps> = ({
                 <option value="">Select sire</option>
                 {maleDogs.map((dog: any) => (
                   <option key={dog.id} value={dog.id}>
-                    {dog.name} - {dog.breed}
+                    {dog.name} - {dog.breedObj?.name || dog.breed}
                   </option>
                 ))}
               </select>
@@ -263,7 +263,7 @@ const BreedingRecordForm: React.FC<BreedingRecordFormProps> = ({
                 <option value="">Select dam</option>
                 {femaleDogs.map((dog: any) => (
                   <option key={dog.id} value={dog.id}>
-                    {dog.name} - {dog.breed}
+                    {dog.name} - {dog.breedObj?.name || dog.breed}
                   </option>
                 ))}
               </select>
@@ -346,7 +346,7 @@ const BreedingRecordForm: React.FC<BreedingRecordFormProps> = ({
               <option value="">Add a puppy</option>
               {availablePuppies.map((dog: any) => (
                 <option key={dog.id} value={dog.id}>
-                  {dog.name} - {dog.breed} ({dog.gender})
+                  {dog.name} - {dog.breedObj?.name || dog.breed} ({dog.gender})
                 </option>
               ))}
             </select>

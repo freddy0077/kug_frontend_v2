@@ -282,11 +282,11 @@ export default function Pedigrees() {
   // Function to render a list of sample dogs when search is unavailable
   const renderSampleDogs = () => {
     const sampleDogs = [
-      { id: "sample1", name: "Max", breed: "German Shepherd", registrationNumber: "GS123456" },
-      { id: "sample2", name: "Bella", breed: "Labrador Retriever", registrationNumber: "LR654321" },
-      { id: "sample3", name: "Rocky", breed: "Rottweiler", registrationNumber: "RW789012" },
-      { id: "sample4", name: "Luna", breed: "Golden Retriever", registrationNumber: "GR345678" },
-      { id: "sample5", name: "Duke", breed: "Bulldog", registrationNumber: "BD901234" }
+      { id: "sample1", name: "Max", breed: "German Shepherd", breedObj: { id: "1", name: "German Shepherd" }, registrationNumber: "GS123456" },
+      { id: "sample2", name: "Bella", breed: "Labrador Retriever", breedObj: { id: "2", name: "Labrador Retriever" }, registrationNumber: "LR654321" },
+      { id: "sample3", name: "Rocky", breed: "Rottweiler", breedObj: { id: "3", name: "Rottweiler" }, registrationNumber: "RW789012" },
+      { id: "sample4", name: "Luna", breed: "Golden Retriever", breedObj: { id: "4", name: "Golden Retriever" }, registrationNumber: "GR345678" },
+      { id: "sample5", name: "Duke", breed: "Bulldog", breedObj: { id: "5", name: "Bulldog" }, registrationNumber: "BD901234" }
     ];
     
     return (
@@ -302,7 +302,7 @@ export default function Pedigrees() {
           <option value="">Select a sample dog to view pedigree</option>
           {sampleDogs.map(dog => (
             <option key={dog?.id} value={dog?.id}>
-              {dog?.name} - {dog?.breed} ({dog?.registrationNumber})
+              {dog?.name} - {dog?.breedObj?.name || dog?.breed} ({dog?.registrationNumber})
             </option>
           ))}
         </select>
@@ -529,7 +529,11 @@ export default function Pedigrees() {
                           <div>
                             <h3 className="text-sm font-medium text-gray-500">Breed</h3>
                             <p className="mt-1 text-sm text-gray-900 capitalize">
-                              {pedigreeData.dogPedigree.breed ? pedigreeData.dogPedigree.breed.replace('-', ' ') : 'Unknown'}
+                              {pedigreeData.dogPedigree.breedObj?.name 
+                                ? pedigreeData.dogPedigree.breedObj.name.replace('-', ' ')
+                                : pedigreeData.dogPedigree.breed
+                                  ? pedigreeData.dogPedigree.breed.replace('-', ' ') 
+                                  : 'Unknown'}
                             </p>
                           </div>
                           <div>

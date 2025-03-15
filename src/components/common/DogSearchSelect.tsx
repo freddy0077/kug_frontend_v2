@@ -26,6 +26,12 @@ interface Dog {
   name: string;
   registrationNumber?: string;
   breed?: string;
+  breedObj?: {
+    id?: string;
+    name: string;
+    group?: string;
+    origin?: string;
+  };
   gender?: string;
   dateOfBirth?: string;
   mainImageUrl?: string;
@@ -136,7 +142,7 @@ const DogSearchSelect = ({
   const formatDogDisplay = (dog: Dog) => {
     const details = [];
     if (dog.registrationNumber) details.push(dog.registrationNumber);
-    if (dog.breed) details.push(dog.breed.replace('-', ' '));
+    if (dog.breedObj?.name || dog.breed) details.push((dog.breedObj?.name || dog.breed).replace('-', ' '));
     if (dog.gender) details.push(dog.gender);
     
     // Format date of birth if available

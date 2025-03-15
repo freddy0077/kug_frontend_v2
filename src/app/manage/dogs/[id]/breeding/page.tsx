@@ -132,7 +132,7 @@ export default function DogBreedingPage() {
           
           {dog?.gender && (
             <p className="text-gray-600 mt-1">
-              {dog.gender === 'male' ? 'Male' : 'Female'} - {dog.breed}
+              {dog.gender === 'male' ? 'Male' : 'Female'} - {dog.breedObj?.name || dog.breed}
             </p>
           )}
         </div>

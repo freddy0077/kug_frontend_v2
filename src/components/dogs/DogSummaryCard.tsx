@@ -10,6 +10,12 @@ interface DogSummaryCardProps {
     id: string;
     name: string;
     breed: string;
+    breedObj?: {
+      id?: string;
+      name: string;
+      group?: string;
+      origin?: string;
+    };
     gender: 'male' | 'female';
     color: string;
     dateOfBirth: Date;
@@ -64,7 +70,7 @@ export default function DogSummaryCard({ dog }: DogSummaryCardProps) {
       <div className="px-4 py-4">
         <h3 className="text-lg font-medium text-gray-900 truncate">{dog.name}</h3>
         <p className="mt-1 text-sm text-gray-500">
-          {dog.breed} • {dog.color} • {calculateAge()}
+          {dog.breedObj?.name || dog.breed} • {dog.color} • {calculateAge()}
         </p>
         <p className="mt-1 text-xs text-gray-500">
           {dog.registrationNumber ? `Reg: ${dog.registrationNumber}` : 'Not registered'}

@@ -10,6 +10,12 @@ export type PedigreeNode = {
   name: string;
   gender: string;
   breed?: string;
+  breedObj?: {
+    id?: string;
+    name: string;
+    group?: string;
+    origin?: string;
+  };
   registrationNumber?: string;
   dateOfBirth?: string;
   dateOfDeath?: string;
@@ -82,6 +88,12 @@ export default function PedigreeChart({
         id
         name
         breed
+        breedObj {
+          id
+          name
+          group
+          origin
+        }
         gender
         registrationNumber
         dateOfBirth
@@ -93,40 +105,52 @@ export default function PedigreeChart({
           id
           name
           breed
+          breedObj {
+            id
+            name
+            group
+            origin
+          }
           gender
           registrationNumber
           dateOfBirth
           color
           mainImageUrl
           sire { 
-            id name breed gender registrationNumber dateOfBirth color mainImageUrl 
-            sire { id name breed gender registrationNumber dateOfBirth color mainImageUrl }
-            dam { id name breed gender registrationNumber dateOfBirth color mainImageUrl }
+            id name breed breedObj { id name } gender registrationNumber dateOfBirth color mainImageUrl 
+            sire { id name breed breedObj { id name } gender registrationNumber dateOfBirth color mainImageUrl }
+            dam { id name breed breedObj { id name } gender registrationNumber dateOfBirth color mainImageUrl }
           }
           dam { 
-            id name breed gender registrationNumber dateOfBirth color mainImageUrl 
-            sire { id name breed gender registrationNumber dateOfBirth color mainImageUrl }
-            dam { id name breed gender registrationNumber dateOfBirth color mainImageUrl }
+            id name breed breedObj { id name } gender registrationNumber dateOfBirth color mainImageUrl 
+            sire { id name breed breedObj { id name } gender registrationNumber dateOfBirth color mainImageUrl }
+            dam { id name breed breedObj { id name } gender registrationNumber dateOfBirth color mainImageUrl }
           }
         }
         dam {
           id
           name
           breed
+          breedObj {
+            id
+            name
+            group
+            origin
+          }
           gender
           registrationNumber
           dateOfBirth
           color
           mainImageUrl
           sire { 
-            id name breed gender registrationNumber dateOfBirth color mainImageUrl 
-            sire { id name breed gender registrationNumber dateOfBirth color mainImageUrl }
-            dam { id name breed gender registrationNumber dateOfBirth color mainImageUrl }
+            id name breed breedObj { id name } gender registrationNumber dateOfBirth color mainImageUrl 
+            sire { id name breed breedObj { id name } gender registrationNumber dateOfBirth color mainImageUrl }
+            dam { id name breed breedObj { id name } gender registrationNumber dateOfBirth color mainImageUrl }
           }
           dam { 
-            id name breed gender registrationNumber dateOfBirth color mainImageUrl 
-            sire { id name breed gender registrationNumber dateOfBirth color mainImageUrl }
-            dam { id name breed gender registrationNumber dateOfBirth color mainImageUrl }
+            id name breed breedObj { id name } gender registrationNumber dateOfBirth color mainImageUrl 
+            sire { id name breed breedObj { id name } gender registrationNumber dateOfBirth color mainImageUrl }
+            dam { id name breed breedObj { id name } gender registrationNumber dateOfBirth color mainImageUrl }
           }
         }
       }
@@ -177,6 +201,7 @@ export default function PedigreeChart({
             name: pedigree.name || 'Unknown',
             gender: pedigree.gender || '',
             breed: pedigree.breed || '',
+            breedObj: pedigree.breedObj || undefined,
             registrationNumber: pedigree.registrationNumber || '',
             dateOfBirth: pedigree.dateOfBirth || undefined,
             // Fields not in PedigreeNode type are set with defaults
@@ -192,6 +217,7 @@ export default function PedigreeChart({
               name: pedigree.sire?.name || 'Unknown',
               gender: pedigree.sire?.gender || '',
               breed: pedigree.sire?.breed || '',
+              breedObj: pedigree.sire?.breedObj || undefined,
               registrationNumber: pedigree.sire?.registrationNumber || '',
               dateOfBirth: pedigree.sire?.dateOfBirth || undefined
             } : undefined,
@@ -200,8 +226,9 @@ export default function PedigreeChart({
               name: pedigree.dam?.name || 'Unknown',
               gender: pedigree.dam?.gender || '',
               breed: pedigree.dam?.breed || '',
+              breedObj: pedigree.dam?.breedObj || undefined,
               registrationNumber: pedigree.dam?.registrationNumber || '',
-              dateOfBirth: pedigree.dam?.dateOfBirth
+              dateOfBirth: pedigree.dam?.dateOfBirth || undefined
             } : undefined
           },
           grandparents: {
@@ -210,17 +237,19 @@ export default function PedigreeChart({
               name: pedigree.sire.sire?.name || 'Unknown',
               gender: pedigree.sire.sire?.gender || '',
               breed: pedigree.sire.sire?.breed || '',
+              breedObj: pedigree.sire.sire?.breedObj || undefined,
               registrationNumber: pedigree.sire.sire?.registrationNumber || '',
-              dateOfBirth: pedigree.sire.sire?.dateOfBirth,
+              dateOfBirth: pedigree.sire.sire?.dateOfBirth || undefined,
               color: pedigree.sire.sire?.color || ''
             } : undefined,
             paternalGranddam: pedigree.sire?.dam ? {
               id: pedigree.sire.dam?.id || '',
-              name: pedigree.sire.dam.name,
-              gender: pedigree.sire.dam.gender,
-              breed: pedigree.sire.dam.breed || '',
-              registrationNumber: pedigree.sire.dam.registrationNumber,
-              dateOfBirth: pedigree.sire.dam.dateOfBirth,
+              name: pedigree.sire.dam?.name || 'Unknown',
+              gender: pedigree.sire.dam?.gender || '',
+              breed: pedigree.sire.dam?.breed || '',
+              breedObj: pedigree.sire.dam?.breedObj || undefined,
+              registrationNumber: pedigree.sire.dam?.registrationNumber || '',
+              dateOfBirth: pedigree.sire.dam?.dateOfBirth || undefined,
               color: pedigree.sire.dam?.color || ''
             } : undefined,
             maternalGrandsire: pedigree.dam?.sire ? {
@@ -228,17 +257,19 @@ export default function PedigreeChart({
               name: pedigree.dam.sire?.name || 'Unknown',
               gender: pedigree.dam.sire?.gender || '',
               breed: pedigree.dam.sire?.breed || '',
+              breedObj: pedigree.dam.sire?.breedObj || undefined,
               registrationNumber: pedigree.dam.sire?.registrationNumber || '',
-              dateOfBirth: pedigree.dam.sire?.dateOfBirth,
+              dateOfBirth: pedigree.dam.sire?.dateOfBirth || undefined,
               color: pedigree.dam.sire?.color || ''
             } : undefined,
             maternalGranddam: pedigree.dam?.dam ? {
               id: pedigree.dam.dam?.id || '',
               name: pedigree.dam.dam?.name || 'Unknown',
               gender: pedigree.dam.dam?.gender || '',
-              breed: pedigree.dam.dam.breed || '',
-              registrationNumber: pedigree.dam.dam.registrationNumber,
-              dateOfBirth: pedigree.dam.dam.dateOfBirth,
+              breed: pedigree.dam.dam?.breed || '',
+              breedObj: pedigree.dam.dam?.breedObj || undefined,
+              registrationNumber: pedigree.dam.dam?.registrationNumber || '',
+              dateOfBirth: pedigree.dam.dam?.dateOfBirth || undefined,
               color: pedigree.dam.dam?.color || ''
             } : undefined
           },
@@ -249,8 +280,9 @@ export default function PedigreeChart({
               name: pedigree.sire.sire.sire?.name || 'Unknown',
               gender: pedigree.sire.sire.sire?.gender || '',
               breed: pedigree.sire.sire.sire?.breed || '',
+              breedObj: pedigree.sire.sire.sire?.breedObj || undefined,
               registrationNumber: pedigree.sire.sire.sire?.registrationNumber || '',
-              dateOfBirth: pedigree.sire.sire.sire?.dateOfBirth,
+              dateOfBirth: pedigree.sire.sire.sire?.dateOfBirth || undefined,
               color: pedigree.sire.sire.sire?.color || ''
             } : undefined,
             paternalPaternalGreatGranddam: pedigree.sire?.sire?.dam ? {
@@ -258,8 +290,9 @@ export default function PedigreeChart({
               name: pedigree.sire.sire.dam?.name || 'Unknown',
               gender: pedigree.sire.sire.dam?.gender || '',
               breed: pedigree.sire.sire.dam?.breed || '',
+              breedObj: pedigree.sire.sire.dam?.breedObj || undefined,
               registrationNumber: pedigree.sire.sire.dam?.registrationNumber || '',
-              dateOfBirth: pedigree.sire.sire.dam?.dateOfBirth,
+              dateOfBirth: pedigree.sire.sire.dam?.dateOfBirth || undefined,
               color: pedigree.sire.sire.dam?.color || ''
             } : undefined,
             
@@ -269,8 +302,9 @@ export default function PedigreeChart({
               name: pedigree.sire.dam.sire?.name || 'Unknown',
               gender: pedigree.sire.dam.sire?.gender || '',
               breed: pedigree.sire.dam.sire?.breed || '',
+              breedObj: pedigree.sire.dam.sire?.breedObj || undefined,
               registrationNumber: pedigree.sire.dam.sire?.registrationNumber || '',
-              dateOfBirth: pedigree.sire.dam.sire?.dateOfBirth,
+              dateOfBirth: pedigree.sire.dam.sire?.dateOfBirth || undefined,
               color: pedigree.sire.dam.sire?.color || ''
             } : undefined,
             paternalMaternalGreatGranddam: pedigree.sire?.dam?.dam ? {
@@ -278,8 +312,9 @@ export default function PedigreeChart({
               name: pedigree.sire.dam.dam?.name || 'Unknown',
               gender: pedigree.sire.dam.dam?.gender || '',
               breed: pedigree.sire.dam.dam?.breed || '',
+              breedObj: pedigree.sire.dam.dam?.breedObj || undefined,
               registrationNumber: pedigree.sire.dam.dam?.registrationNumber || '',
-              dateOfBirth: pedigree.sire.dam.dam?.dateOfBirth,
+              dateOfBirth: pedigree.sire.dam.dam?.dateOfBirth || undefined,
               color: pedigree.sire.dam.dam?.color || ''
             } : undefined,
             
@@ -289,8 +324,9 @@ export default function PedigreeChart({
               name: pedigree.dam.sire.sire?.name || 'Unknown',
               gender: pedigree.dam.sire.sire?.gender || '',
               breed: pedigree.dam.sire.sire?.breed || '',
+              breedObj: pedigree.dam.sire.sire?.breedObj || undefined,
               registrationNumber: pedigree.dam.sire.sire?.registrationNumber || '',
-              dateOfBirth: pedigree.dam.sire.sire?.dateOfBirth,
+              dateOfBirth: pedigree.dam.sire.sire?.dateOfBirth || undefined,
               color: pedigree.dam.sire.sire?.color || ''
             } : undefined,
             maternalPaternalGreatGranddam: pedigree.dam?.sire?.dam ? {
@@ -298,29 +334,32 @@ export default function PedigreeChart({
               name: pedigree.dam.sire.dam?.name || 'Unknown',
               gender: pedigree.dam.sire.dam?.gender || '',
               breed: pedigree.dam.sire.dam?.breed || '',
+              breedObj: pedigree.dam.sire.dam?.breedObj || undefined,
               registrationNumber: pedigree.dam.sire.dam?.registrationNumber || '',
-              dateOfBirth: pedigree.dam.sire.dam?.dateOfBirth,
+              dateOfBirth: pedigree.dam.sire.dam?.dateOfBirth || undefined,
               color: pedigree.dam.sire.dam?.color || ''
             } : undefined,
             
             // Maternal great-grandparents (dam's parents)
             maternalMaternalGreatGrandsire: pedigree.dam?.dam?.sire ? {
-              id: pedigree.dam.dam.sire?.id || '',
-              name: pedigree.dam.dam.sire?.name || 'Unknown',
-              gender: pedigree.dam.dam.sire?.gender || '',
-              breed: pedigree.dam.dam.sire?.breed || '',
-              registrationNumber: pedigree.dam.dam.sire?.registrationNumber || '',
-              dateOfBirth: pedigree.dam.dam.sire?.dateOfBirth,
-              color: pedigree.dam.dam.sire?.color || ''
+              id: pedigree.dam.dam?.sire?.id || '',
+              name: pedigree.dam.dam?.sire?.name || 'Unknown',
+              gender: pedigree.dam.dam?.sire?.gender || '',
+              breed: pedigree.dam.dam?.sire?.breed || '',
+              breedObj: pedigree.dam.dam?.sire?.breedObj || undefined,
+              registrationNumber: pedigree.dam.dam?.sire?.registrationNumber || '',
+              dateOfBirth: pedigree.dam.dam?.sire?.dateOfBirth || undefined,
+              color: pedigree.dam.dam?.sire?.color || ''
             } : undefined,
             maternalMaternalGreatGranddam: pedigree.dam?.dam?.dam ? {
-              id: pedigree.dam.dam.dam?.id || '',
-              name: pedigree.dam.dam.dam?.name || 'Unknown',
-              gender: pedigree.dam.dam.dam?.gender || '',
-              breed: pedigree.dam.dam.dam?.breed || '',
-              registrationNumber: pedigree.dam.dam.dam?.registrationNumber || '',
-              dateOfBirth: pedigree.dam.dam.dam?.dateOfBirth,
-              color: pedigree.dam.dam.dam?.color || ''
+              id: pedigree.dam.dam?.dam?.id || '',
+              name: pedigree.dam.dam?.dam?.name || 'Unknown',
+              gender: pedigree.dam.dam?.dam?.gender || '',
+              breed: pedigree.dam.dam?.dam?.breed || '',
+              breedObj: pedigree.dam.dam?.dam?.breedObj || undefined,
+              registrationNumber: pedigree.dam.dam?.dam?.registrationNumber || '',
+              dateOfBirth: pedigree.dam.dam?.dam?.dateOfBirth || undefined,
+              color: pedigree.dam.dam?.dam?.color || ''
             } : undefined
           }
         };
@@ -655,7 +694,7 @@ function renderDogCard(
       
       {canViewDetails ? (
         <>
-          <p className="text-sm text-gray-500">{dog.breed || 'Unknown breed'}</p>
+          <p className="text-sm text-gray-500">{dog.breedObj?.name || dog.breed || 'Unknown breed'}</p>
           {dog.registrationNumber && (
             <p className="text-xs text-gray-500">Reg: {dog.registrationNumber}</p>
           )}

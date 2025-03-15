@@ -19,9 +19,9 @@ interface CompetitionResultFormData {
 
 // Sample data for dogs selection
 const dogSampleData = [
-  { id: '1', name: 'Max', breed: 'Golden Retriever', registrationNumber: 'PD-12345' },
-  { id: '2', name: 'Luna', breed: 'German Shepherd', registrationNumber: 'PD-67890' },
-  { id: '3', name: 'Charlie', breed: 'Labrador Retriever', registrationNumber: 'PD-54321' },
+  { id: '1', name: 'Max', breed: 'Golden Retriever', breedObj: { name: 'Golden Retriever' }, registrationNumber: 'PD-12345' },
+  { id: '2', name: 'Luna', breed: 'German Shepherd', breedObj: { name: 'German Shepherd' }, registrationNumber: 'PD-67890' },
+  { id: '3', name: 'Charlie', breed: 'Labrador Retriever', breedObj: { name: 'Labrador Retriever' }, registrationNumber: 'PD-54321' },
 ];
 
 // Sample categories
@@ -189,7 +189,7 @@ export default function AddCompetitionResult() {
                     <option value="">-- Select a dog --</option>
                     {dogs.map(dog => (
                       <option key={dog.id} value={dog.id}>
-                        {dog.name} ({dog.breed}) - {dog.registrationNumber}
+                        {dog.name} ({dog.breedObj?.name || dog.breed}) - {dog.registrationNumber}
                       </option>
                     ))}
                   </select>
