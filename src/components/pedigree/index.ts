@@ -1,0 +1,11 @@
+// Export all pedigree components for easier imports
+export { default as ModernPedigreeChart } from './ModernPedigreeChart';
+export { default as ModernPedigreeControls } from './ModernPedigreeControls';
+export { default as ModernHorizontalPedigree } from './ModernHorizontalPedigree';
+export { default as ModernVerticalPedigree } from './ModernVerticalPedigree';
+export { default as ModernPedigreeCard } from './ModernPedigreeCard';
+export { default as PedigreeCreateContainer } from './PedigreeCreateContainer';
+export { default as PedigreeInstructionsPanel } from './PedigreeInstructionsPanel';
+export { default as PedigreePageHeader } from './PedigreePageHeader';
+export { default as DogSearchPanel } from './DogSearchPanel';
+export { default as SamplePedigreePanel } from './SamplePedigreePanel';
