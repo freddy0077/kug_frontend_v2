@@ -4,11 +4,12 @@ interface SearchInputProps {
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
+  className?: string;
 }
 
-const SearchInput: React.FC<SearchInputProps> = ({ value, onChange, placeholder = "Search..." }) => {
+const SearchInput: React.FC<SearchInputProps> = ({ value, onChange, placeholder = "Search...", className = "" }) => {
   return (
-    <div className="w-full">
+    <div className={`w-full ${className}`}>
       <div className="relative">
         <input
           type="text"

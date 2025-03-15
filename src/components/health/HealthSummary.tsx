@@ -109,7 +109,7 @@ export default function HealthSummary({ dogId }: HealthSummaryProps) {
       <div className="mb-6">
         <h4 className="text-sm font-medium text-gray-700 mb-2">Records by Type</h4>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-          {summary.recordsByType?.map((item) => (
+          {summary.recordsByType?.map((item: { type: string; count: number }) => (
             <div key={item.type} className="bg-gray-50 p-3 rounded-md">
               <div className="text-sm font-medium text-gray-700">
                 {item.type.replace(/_/g, ' ')}
@@ -127,7 +127,7 @@ export default function HealthSummary({ dogId }: HealthSummaryProps) {
         <div>
           <h4 className="text-sm font-medium text-gray-700 mb-2">Recent Records</h4>
           <ul className="divide-y divide-gray-200">
-            {summary.recentRecords.map((record) => (
+            {summary.recentRecords.map((record: { id: string; description: string; date: string; type: string; results?: string }) => (
               <li key={record.id} className="py-3">
                 <Link href={`/manage/health-records/${record.id}`} className="block hover:bg-gray-50 -m-3 p-3 rounded-md">
                   <div className="flex justify-between">

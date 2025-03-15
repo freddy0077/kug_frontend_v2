@@ -240,9 +240,9 @@ export default function ImportDogRegistrations({
           const dateValue = value ? new Date(value) : new Date();
           if (isNaN(dateValue.getTime())) {
             // If date parsing failed, use current date
-            dogData[field as keyof DogFormData] = new Date();
+            dogData[field as keyof DogFormData] = new Date() as any;
           } else {
-            dogData[field as keyof DogFormData] = dateValue;
+            dogData[field as keyof DogFormData] = dateValue as any;
           }
         }
         // Special handling for gender field

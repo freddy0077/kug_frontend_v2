@@ -84,8 +84,10 @@ export default function ClubEvents() {
     return null; // We already redirect in the useEffect, this is just a safeguard
   }
 
-  const formatEventDate = (date) => {
-    return format(date, 'MMMM d, yyyy');
+  const formatEventDate = (date: Date | string | number) => {
+    // Convert string to Date if needed
+    const dateObj = typeof date === 'string' ? new Date(date) : date;
+    return format(dateObj, 'MMMM d, yyyy');
   };
 
   return (

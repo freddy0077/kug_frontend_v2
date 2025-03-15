@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useMutation, useQuery } from '@apollo/client';
+import { useMutation, useQuery, gql } from '@apollo/client';
 import {
   GET_OWNERSHIP_RECORDS,
   GET_DOG_OWNERSHIP_HISTORY,

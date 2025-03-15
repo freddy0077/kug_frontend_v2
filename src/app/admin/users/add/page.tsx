@@ -4,6 +4,27 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
+interface FormData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  role: string;
+  status: string;
+  password: string;
+  confirmPassword: string;
+}
+
+interface FormErrors {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  role?: string;
+  status?: string;
+  password?: string;
+  confirmPassword?: string;
+  [key: string]: string | undefined;
+}
+
 export default function AddUser() {
   const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -11,7 +32,7 @@ export default function AddUser() {
   const [isLoading, setIsLoading] = useState(true);
   
   // Form state
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     firstName: '',
     lastName: '',
     email: '',
@@ -21,7 +42,7 @@ export default function AddUser() {
     confirmPassword: ''
   });
   
-  const [errors, setErrors] = useState({});
+  const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitMessage, setSubmitMessage] = useState({ type: '', message: '' });
 
@@ -43,7 +64,7 @@ export default function AddUser() {
   }, [router]);
 
   const validateForm = () => {
-    let tempErrors = {};
+    let tempErrors: FormErrors = {};
     let isValid = true;
 
     if (!formData.firstName.trim()) {
@@ -81,7 +102,7 @@ export default function AddUser() {
     return isValid;
   };
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prevState => ({
       ...prevState,
@@ -89,7 +110,7 @@ export default function AddUser() {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
     if (validateForm()) {

@@ -53,7 +53,7 @@ export default function LinebreedingAnalysisPage() {
   }, [router]);
 
   // Check if user has permission to view linebreeding analysis
-  const canView = hasPermission(['admin', 'breeder', 'vet'], userRole);
+  const canView = hasPermission(userRole, 'breeding-program', 'view');
 
   // Get potential mates based on dog gender
   const potentialMates = dogsData?.dogs?.items

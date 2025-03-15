@@ -26,17 +26,19 @@ const DOG_COLORS = [
 ];
 
 type DogRegistrationFormProps = {
-  onSubmit: (formData: DogFormData) => void;
+  onSubmit?: (formData: DogFormData) => void;
   userRole: string;
   userId: string;
   initialData?: Partial<DogFormData>;
+  onSuccess?: (dogId: string) => void;
 };
 
 export default function DogRegistrationForm({
   onSubmit,
   userRole,
   userId,
-  initialData
+  initialData,
+  onSuccess
 }: DogRegistrationFormProps) {
   const [formData, setFormData] = useState<DogFormData>({
     name: '',
@@ -161,7 +163,15 @@ export default function DogRegistrationForm({
       }
       
       // Submit the form data
-      onSubmit(dogData);
+      if (onSubmit) {
+        onSubmit(dogData);
+      }
+      
+      // Call onSuccess with a mock dog ID (this would normally come from the API)
+      if (onSuccess) {
+        onSuccess('mock-dog-id-12345');
+      }
+      
       setIsSubmitting(false);
     }
   };

@@ -8,7 +8,7 @@ import { formatPedigreeDate } from '@/utils/pedigreeUtils';
 interface PedigreeNodeProps {
   dog: DogPedigreeData | null;
   generation: number;
-  theme: 'standard' | 'classic' | 'modern';
+  theme: 'standard' | 'classic' | 'modern' | 'minimal';
   showChampions: boolean;
   showHealthTests: boolean;
   showDates: boolean;
@@ -35,7 +35,8 @@ const PedigreeNode: React.FC<PedigreeNodeProps> = ({
   const cardThemeClasses = {
     standard: 'bg-white border border-gray-200',
     classic: 'bg-amber-50 border border-amber-200',
-    modern: 'bg-gradient-to-br from-blue-50 to-white border border-blue-200'
+    modern: 'bg-gradient-to-br from-blue-50 to-white border border-blue-200',
+    minimal: 'bg-gray-50 border border-gray-100'
   };
   
   const genderClasses = dog.gender === 'male' 

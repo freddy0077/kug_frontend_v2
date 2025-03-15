@@ -49,12 +49,17 @@ export default function HealthRecordFormContainer({
     update: (cache, { data: { createHealthRecord } }) => {
       try {
         // Read the current query data
-        const existingData = cache.readQuery({
+        const existingData = cache.readQuery<{
+          dogHealthRecords: {
+            totalCount: number;
+            items: any[];
+          } 
+        }>({
           query: GET_DOG_HEALTH_RECORDS,
           variables: { dogId, limit: 20, offset: 0 }
-        });
+        }) || { dogHealthRecords: null };
         
-        if (existingData && existingData.dogHealthRecords) {
+        if (existingData.dogHealthRecords) {
           // Write back with the new item
           cache.writeQuery({
             query: GET_DOG_HEALTH_RECORDS,
@@ -106,12 +111,13 @@ export default function HealthRecordFormContainer({
       // Prepare the input object
       const input = {
         dogId: recordData.dogId,
-        type: recordData.type as HealthRecordType || HealthRecordType.GENERAL,
+        // Use recordData properties that actually exist in HealthRecordFormData
         date: recordData.date,
         description: recordData.description,
         results: recordData.results,
-        veterinarian: recordData.veterinarianId,
-        vetName: recordData.vetName || ''
+        // Map to fields that exist in the GraphQL mutation variables
+        veterinarianId: recordData.veterinarianId
+        // Remove properties not in the interface: type, vetName
       };
       
       // Create or update the health record

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useMutation } from '@apollo/client';
 import { CREATE_HEALTH_RECORD } from '@/graphql/queries/healthRecordQueries';
@@ -8,7 +8,8 @@ import { HealthRecordType, DogOption, CreateHealthRecordInput } from '@/types/he
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import { useAuth } from '@/contexts/AuthContext';
 
-export default function AddHealthRecordPage() {
+// Component that uses searchParams wrapped in Suspense
+function AddHealthRecordContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, loading: authLoading } = useAuth();
@@ -327,5 +328,14 @@ export default function AddHealthRecordPage() {
         </div>
       </div>
     </ProtectedRoute>
+  );
+}
+
+// Main component with Suspense boundary
+export default function AddHealthRecordPage() {
+  return (
+    <Suspense fallback={<div className="flex justify-center items-center min-h-screen">Loading...</div>}>
+      <AddHealthRecordContent />
+    </Suspense>
   );
 }

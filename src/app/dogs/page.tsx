@@ -4,6 +4,19 @@ import { useState } from 'react';
 import { useQuery } from '@apollo/client';
 import { GET_DOGS, DogSortField, SortDirection } from '@/graphql/queries/dogQueries';
 import { GET_BREEDS, GET_BREED_GROUPS } from '@/graphql/queries/breedQueries';
+
+// Define breed interface based on the API response structure
+interface Breed {
+  id: string;
+  name: string;
+  group: string;
+  origin?: string;
+  temperament?: string;
+  average_lifespan?: string;
+  average_height?: string;
+  average_weight?: string;
+  description?: string;
+}
 import DogCard from '@/components/dogs/DogCard';
 import BreedFilter from '@/components/dogs/BreedFilter';
 import SearchInput from '@/components/common/SearchInput';
@@ -33,13 +46,13 @@ export default function Dogs() {
   const breedGroups = Array.from(
     new Set(
       breedsData?.breeds?.items
-        ?.map(breed => breed.group)
+        ?.map((breed: Breed) => breed.group)
         .filter(Boolean) || []
     )
   );
 
   // Breed categories from fetched data
-  const breedCategories = breedsData?.breeds?.items?.map(breed => ({ 
+  const breedCategories = breedsData?.breeds?.items?.map((breed: Breed) => ({ 
     id: breed.id, 
     name: breed.name, 
     group: breed.group 
@@ -162,7 +175,7 @@ export default function Dogs() {
                 className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm rounded-md"
               >
                 <option value="">All Breed Groups</option>
-                {breedsData?.breeds?.items?.map(breed => (
+                {breedsData?.breeds?.items?.map((breed: Breed) => (
                   <option key={breed.id} value={breed.id}>{breed.name}</option>
                 ))}
               </select>
@@ -179,8 +192,8 @@ export default function Dogs() {
                 >
                   <option value="">All Breeds in {selectedBreedGroup}</option>
                   {breedCategories
-                    .filter(breed => breed.group === selectedBreedGroup)
-                    .map(breed => (
+                    .filter((breed: {id: string, name: string, group: string}) => breed.group === selectedBreedGroup)
+                    .map((breed: {id: string, name: string, group: string}) => (
                       <option key={breed.id} value={breed.id}>{breed.name}</option>
                     ))
                   }

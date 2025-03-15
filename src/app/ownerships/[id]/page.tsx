@@ -51,7 +51,7 @@ export default function OwnershipDetailsPage() {
   }
 
   return (
-    <ProtectedRoute requiredRoles={['ADMIN', 'OWNER', 'BREEDER', 'CLUB']}>
+    <ProtectedRoute allowedRoles={['ADMIN', 'OWNER', 'BREEDER', 'CLUB']}>
       <div className="container mx-auto p-4">
         <div className="bg-white shadow-md rounded-lg overflow-hidden">
           {/* Header */}

@@ -88,10 +88,12 @@ export default function LineageAnalysis({
   };
 
   // Format date function
-  const formatDate = (date?: Date): string => {
+  const formatDate = (date?: Date | string): string => {
     if (!date) return 'Unknown';
     try {
-      return format(date, 'MMM d, yyyy');
+      // Convert string to Date if it's a string
+      const dateObj = typeof date === 'string' ? new Date(date) : date;
+      return format(dateObj, 'MMM d, yyyy');
     } catch (error) {
       return 'Invalid date';
     }
@@ -257,7 +259,7 @@ export default function LineageAnalysis({
                             </div>
                             <div className="mt-1 flex">
                               <p className="text-sm text-gray-700">
-                                {ancestor.dog.breedName}{' • '}
+                                {ancestor.dog.breed || 'Unknown Breed'}{' • '}
                                 {formatDate(ancestor.dog.dateOfBirth)}
                               </p>
                             </div>

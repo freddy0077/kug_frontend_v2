@@ -27,7 +27,7 @@ export default function HealthRecordFormSimple({
   const [formData, setFormData] = useState<HealthRecordInput>({
     dogId,
     date: new Date(),
-    type: HealthRecordType.GENERAL,
+    type: HealthRecordType.OTHER, // Changed from GENERAL to OTHER which exists in the enum
     description: '',
     results: '',
     veterinarian: '',
@@ -43,7 +43,7 @@ export default function HealthRecordFormSimple({
       setFormData({
         dogId,
         date: initialData.date ? new Date(initialData.date) : new Date(),
-        type: initialData.type || HealthRecordType.GENERAL,
+        type: initialData.type || HealthRecordType.OTHER, // Changed from GENERAL to OTHER
         description: initialData.description || '',
         results: initialData.results || '',
         veterinarian: initialData.veterinarian || '',

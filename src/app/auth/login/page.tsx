@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { ApolloError } from '@apollo/client';
 
-export default function Login() {
+// Component that uses searchParams wrapped in Suspense
+function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { login, isAuthenticated } = useAuth();
@@ -201,5 +202,14 @@ export default function Login() {
         </div>
       </div>
     </div>
+  );
+}
+
+// Main Login component with Suspense boundary
+export default function Login() {
+  return (
+    <Suspense fallback={<div className="flex justify-center items-center min-h-screen">Loading...</div>}>
+      <LoginContent />
+    </Suspense>
   );
 }

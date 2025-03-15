@@ -1,16 +1,18 @@
 import { DogNode } from './pedigreeFormatters';
 
 /**
- * Formats a date string in a user-friendly format
+ * Formats a date string or Date object in a user-friendly format
  */
-export function formatDate(dateString?: string | null): string {
-  if (!dateString) return "N/A";
+export function formatDate(date?: string | Date | null): string {
+  if (!date) return "N/A";
   
   try {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    // If it's already a Date object, use it directly, otherwise create a new Date
+    const dateObj = date instanceof Date ? date : new Date(date);
+    return dateObj.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
   } catch (error) {
-    return dateString || "N/A";
+    // If conversion fails, return the original string or N/A
+    return typeof date === 'string' ? date : "N/A";
   }
 }
 

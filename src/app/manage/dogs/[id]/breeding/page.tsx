@@ -7,6 +7,7 @@ import Link from 'next/link';
 import BreedingRecords from '@/components/pedigree/BreedingRecords';
 import { GET_DOG } from '@/graphql/queries/dogQueries';
 import { hasPermission } from '@/utils/permissionUtils';
+import { BreedingRole } from '@/graphql/queries/pedigreeQueries';
 
 export default function DogBreedingPage() {
   const params = useParams();
@@ -45,7 +46,7 @@ export default function DogBreedingPage() {
   }, [router]);
 
   // Check if user has permission to view
-  const canView = hasPermission(['admin', 'breeder', 'owner'], userRole);
+  const canView = hasPermission(userRole, 'breeding-program', 'view');
 
   if (isLoading || dogLoading) {
     return (
@@ -138,7 +139,7 @@ export default function DogBreedingPage() {
         
         <BreedingRecords 
           dogId={dogId} 
-          initialRole={dog?.gender === 'male' ? 'SIRE' : dog?.gender === 'female' ? 'DAM' : 'BOTH'}
+          initialRole={dog?.gender === 'male' ? BreedingRole.SIRE : dog?.gender === 'female' ? BreedingRole.DAM : BreedingRole.BOTH}
         />
       </div>
     </div>

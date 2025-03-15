@@ -45,7 +45,7 @@ export default function NewBreedingRecordPage() {
   }, [router]);
 
   // Check if user has permission to create breeding records
-  const canCreateBreedingRecord = hasPermission(['admin', 'breeder'], userRole);
+  const canCreateBreedingRecord = hasPermission(userRole, 'breeding-program', 'create');
 
   if (isLoading || dogLoading) {
     return (

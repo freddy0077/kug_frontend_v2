@@ -98,7 +98,7 @@ const DogCard: React.FC<DogCardProps> = ({ dog }) => {
         </div>
         
         <div className="mt-1">
-          <span className="text-sm text-gray-600 inline-block">{dog.breedObj?.name}</span>
+          <span className="text-sm text-gray-600 inline-block">{dog.breed}</span>
           {dog.registrationNumber && (
             <div className="mt-1 text-xs text-gray-500 inline-block bg-gray-100 px-2 py-0.5 rounded">
               Reg: {dog.registrationNumber}

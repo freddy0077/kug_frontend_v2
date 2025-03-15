@@ -14,6 +14,28 @@ interface FilterOptions {
   searchQuery?: string;
 }
 
+// Define ownership record interface
+interface OwnershipRecord {
+  id: string;
+  dog: {
+    id: string;
+    name: string;
+    registrationNumber: string;
+    breed?: string;
+    mainImageUrl?: string;
+  };
+  owner: {
+    id: string;
+    name: string;
+    contactEmail?: string;
+    contactPhone?: string;
+  };
+  startDate: string;
+  endDate?: string;
+  is_current: boolean;
+  transferDocumentUrl?: string;
+}
+
 export default function OwnershipRecordsPage() {
   const { user } = useAuth();
   const [filters, setFilters] = useState<FilterOptions>({
@@ -32,15 +54,15 @@ export default function OwnershipRecordsPage() {
     hasMore 
   } = fetchOwnershipRecords({
     // Apply filters from state
-    is_current: filters.statusFilter === 'current' 
+    includeFormer: filters.statusFilter === 'previous' 
       ? true 
-      : filters.statusFilter === 'previous' 
-        ? false 
-        : undefined
+      : filters.statusFilter === 'all'
+        ? true
+        : false
   });
 
   // Apply client-side filtering for search and additional criteria
-  const filteredRecords = records.filter(record => {
+  const filteredRecords = records.filter((record: OwnershipRecord) => {
     // Search query filter
     if (searchQuery) {
       const lowerQuery = searchQuery.toLowerCase();
@@ -92,9 +114,9 @@ export default function OwnershipRecordsPage() {
 
   // Extract unique dogs for filter dropdown
   const dogOptions = Array.from(
-    new Set(records.map(record => record.dog.id))
+    new Set(records.map((record: OwnershipRecord) => record.dog.id))
   ).map(dogId => {
-    const dog = records.find(r => r.dog.id === dogId)?.dog;
+    const dog = records.find((r: OwnershipRecord) => r.dog.id === dogId)?.dog;
     return {
       id: dogId,
       name: dog?.name || `Dog ${dogId}`
@@ -102,7 +124,7 @@ export default function OwnershipRecordsPage() {
   });
 
   return (
-    <ProtectedRoute requiredRoles={['ADMIN', 'OWNER', 'BREEDER']}>
+    <ProtectedRoute allowedRoles={['ADMIN', 'OWNER', 'BREEDER']}>
       <div className="container mx-auto p-4">
         <h1 className="text-2xl font-bold mb-4">Ownership Records</h1>
 
@@ -164,7 +186,7 @@ export default function OwnershipRecordsPage() {
               </tr>
             </thead>
             <tbody>
-              {filteredRecords.map(record => (
+              {filteredRecords.map((record: OwnershipRecord) => (
                 <tr key={record.id}>
                   <td>
                     <div className="flex items-center space-x-3">

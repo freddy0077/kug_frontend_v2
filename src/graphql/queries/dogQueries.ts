@@ -159,6 +159,9 @@ export const GET_DOG_BY_ID = gql`
   }
 `;
 
+// Alias GET_DOG_BY_ID as GET_DOG for backward compatibility
+export const GET_DOG = GET_DOG_BY_ID;
+
 // Query to get a dog's pedigree
 export const GET_DOG_PEDIGREE = gql`
   query GetDogPedigree($dogId: ID!, $generations: Int = 4) {

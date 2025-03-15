@@ -78,13 +78,16 @@ export function extractFourthGeneration(dogPedigree: DogNode): Record<string, Do
 }
 
 /**
- * Formats a date string in a user-friendly format
+ * Formats a date value in a user-friendly format
+ * @param dateValue A date string, Date object, or null/undefined
+ * @returns Formatted date string
  */
-export function formatDate(dateString?: string | null): string {
-  if (!dateString) return "N/A";
+export function formatDate(dateValue?: string | Date | null | undefined): string {
+  if (!dateValue) return "N/A";
   
   try {
-    const date = new Date(dateString);
+    // Handle case where dateValue is already a Date object
+    const date = dateValue instanceof Date ? dateValue : new Date(dateValue);
     return new Intl.DateTimeFormat('en-US', {
       year: 'numeric',
       month: 'long',

@@ -1,5 +1,22 @@
 import { gql } from '@apollo/client';
 
+// Direct query for owners
+export const GET_OWNERS = gql`
+  query GetOwners($limit: Int = 100, $offset: Int = 0, $searchTerm: String) {
+    owners(limit: $limit, offset: $offset, searchTerm: $searchTerm) {
+      totalCount
+      hasMore
+      items {
+        id
+        name
+        contactEmail
+        contactPhone
+        address
+      }
+    }
+  }
+`;
+
 // Get owners from the users endpoint
 export const GET_USERS_WITH_OWNERS = gql`
   query GetUsersWithOwners(

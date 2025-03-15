@@ -1,6 +1,6 @@
 // Test file for role-based permissions and navigation
 
-import { hasPermission, getPermittedActions } from '../utils/permissionUtils';
+import { hasPermission, getPermittedActions, Entity, Permission } from '../utils/permissionUtils';
 
 /**
  * Test suite for permission utilities
@@ -254,10 +254,10 @@ const runPermissionTests = () => {
   const testActionsList = (
     testName: string,
     userRole: string,
-    entity: any,
+    entity: Entity,
     ownerId: string | undefined,
     userId: string | undefined,
-    expectedActions: string[]
+    expectedActions: Permission[]
   ) => {
     const actions = getPermittedActions(userRole, entity, ownerId, userId);
     const actionsSet = new Set(actions);

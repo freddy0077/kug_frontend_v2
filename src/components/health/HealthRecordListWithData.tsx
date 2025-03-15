@@ -48,10 +48,10 @@ export default function HealthRecordListWithData({
     const typeColors: Record<string, string> = {
       [HealthRecordType.VACCINATION]: 'bg-green-100 text-green-800',
       [HealthRecordType.EXAMINATION]: 'bg-blue-100 text-blue-800',
+      [HealthRecordType.TREATMENT]: 'bg-yellow-100 text-yellow-800', // Changed from MEDICATION to TREATMENT
       [HealthRecordType.SURGERY]: 'bg-red-100 text-red-800',
       [HealthRecordType.TEST]: 'bg-purple-100 text-purple-800',
-      [HealthRecordType.MEDICATION]: 'bg-yellow-100 text-yellow-800',
-      [HealthRecordType.GENERAL]: 'bg-gray-100 text-gray-800'
+      [HealthRecordType.OTHER]: 'bg-gray-100 text-gray-800' // Changed from GENERAL to OTHER
     };
     
     return typeColors[type] || 'bg-gray-100 text-gray-800';
@@ -108,7 +108,7 @@ export default function HealthRecordListWithData({
     <div>
       <div className="bg-white shadow overflow-hidden sm:rounded-md">
         <ul className="divide-y divide-gray-200">
-          {healthRecords.map((record) => (
+          {healthRecords.map((record: any) => (
             <li key={record.id}>
               <Link href={`/manage/health-records/${record.id}`} className="block hover:bg-gray-50">
                 <div className="px-4 py-4 sm:px-6">
@@ -162,7 +162,9 @@ export default function HealthRecordListWithData({
           >
             {loading ? (
               <>
-                <LoadingSpinner size="small" className="mr-2" />
+                <div className="mr-2">
+                  <LoadingSpinner size="small" />
+                </div>
                 Loading...
               </>
             ) : (

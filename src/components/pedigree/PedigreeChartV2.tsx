@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { PedigreeChartOptions, defaultPedigreeOptions, DogPedigreeData } from '@/types/pedigree';
+import { PedigreeChartOptions, defaultPedigreeOptions, DogPedigreeData, PedigreeNode as PedigreeNodeType } from '@/types/pedigree';
 import { buildPedigreeTree, calculateNodePositions } from '@/utils/pedigreeUtils';
 import { fetchAncestors, calculateInbreedingCoefficient } from '@/services/pedigreeService';
 import PedigreeControls from './PedigreeControls';
@@ -29,6 +29,8 @@ const PedigreeChartV2: React.FC<PedigreeChartProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [ancestorsMap, setAncestorsMap] = useState<Map<string, DogPedigreeData>>(new Map());
   const [rootDog, setRootDog] = useState<DogPedigreeData | null>(null);
+  // Create a properly formatted PedigreeNodeType for the components
+  const [pedigreeRoot, setPedigreeRoot] = useState<PedigreeNodeType | null>(null);
   const [coi, setCoi] = useState<number | null>(null);
   
   const pedigreeRef = useRef<HTMLDivElement>(null);
@@ -47,6 +49,18 @@ const PedigreeChartV2: React.FC<PedigreeChartProps> = ({
         // Set the root dog
         const root = ancestors.get(dogId) || null;
         setRootDog(root);
+        
+        // Convert the root dog to a PedigreeNodeType format
+        if (root) {
+          setPedigreeRoot({
+            dog: root,
+            generation: 0,
+            position: 0,
+            children: [] // No children in this simple conversion
+          });
+        } else {
+          setPedigreeRoot(null);
+        }
         
         // Calculate coefficient of inbreeding
         if (root) {
@@ -145,13 +159,13 @@ const PedigreeChartV2: React.FC<PedigreeChartProps> = ({
         ) : rootDog ? (
           options.orientation === 'horizontal' ? (
             <HorizontalPedigree 
-              rootNode={rootDog} 
+              rootNode={pedigreeRoot} 
               maxGenerations={options.generations}
               options={options}
             />
           ) : (
             <VerticalPedigree 
-              rootNode={rootDog} 
+              rootNode={pedigreeRoot} 
               maxGenerations={options.generations}
               options={options}
             />
