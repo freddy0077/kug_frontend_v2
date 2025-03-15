@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useMutation } from '@apollo/client';
 import { REGISTER_MUTATION } from '@/graphql/mutations/userMutations';
 import { useAuth } from '@/contexts/AuthContext';
+import { SITE_NAME, SITE_DESCRIPTION } from '@/config/site';
 
 export default function Register() {
   const router = useRouter();
@@ -94,7 +95,7 @@ export default function Register() {
         <div className="px-6 py-8">
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-gray-900">Create an Account</h1>
-            <p className="text-gray-600 mt-2">Join Pedigree Database and start managing your dog pedigrees</p>
+            <p className="text-gray-600 mt-2">Join {SITE_NAME} and start managing your dog pedigrees</p>
           </div>
 
           {error && (
@@ -317,7 +318,7 @@ export default function Register() {
             </Link>
           </div>
           <div className="text-center text-xs text-gray-600 mt-2">
-            Pedigree Database - Your comprehensive dog pedigree management system
+            {SITE_NAME} - {SITE_DESCRIPTION}
           </div>
         </div>
       </div>

@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { format } from 'date-fns';
 
 export interface DogCardProps {
@@ -39,7 +40,13 @@ const DogCard: React.FC<DogCardProps> = ({ dog }) => {
         age--;
       }
       
-      return age;
+      // Display years and months for young dogs
+      if (age === 0) {
+        const months = today.getMonth() - birthDate.getMonth();
+        return months <= 0 ? '< 1 month' : `${months} months`;
+      }
+      
+      return `${age} ${age === 1 ? 'year' : 'years'}`;
     } catch (error) {
       console.error("Invalid date format:", error);
       return "?";
@@ -56,86 +63,103 @@ const DogCard: React.FC<DogCardProps> = ({ dog }) => {
       return "N/A";
     }
   };
+  
+  // Determine card accent color based on gender
+  const genderColor = dog.gender.toLowerCase() === 'male' ? 'blue' : 'pink';
+  
+  // Generate a coat color class (just for visual variety, in real app would come from dog data)
+  const getCoatDisplay = () => {
+    // This would normally come from dog data
+    return { 
+      color: 'Brown & White',
+      icon: '🐾'
+    };
+  };
+  
+  const coatInfo = getCoatDisplay();
 
   return (
     <Link 
       href={`/dogs/${dog.id}`} 
-      className="group bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-all duration-300 flex flex-col h-full border border-gray-100"
+      className="group w-full h-full"
     >
-      {/* Image container with gradient overlay and gender badge */}
-      <div className="relative h-56 overflow-hidden">
-        {dog.mainImageUrl ? (
-          <img 
-            src={dog.mainImageUrl} 
-            alt={dog.name} 
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-green-50 to-green-100">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 text-green-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-            </svg>
-          </div>
-        )}
-        
-        {/* Gender badge */}
-        <div className="absolute top-3 right-3">
-          <span className={`px-3 py-1 text-xs font-semibold rounded-full ${
-            dog.gender.toLowerCase() === 'male' 
-              ? 'bg-blue-100 text-blue-800' 
-              : 'bg-pink-100 text-pink-800'
-          }`}>
-            {dog.gender.charAt(0).toUpperCase() + dog.gender.slice(1)}
-          </span>
+      {/* Simplified card with clean design */}
+      <div className={`relative rounded-lg overflow-hidden bg-white border-l-4 border-${genderColor}-500 shadow hover:shadow-md transition-all duration-300 h-full`}>
+        {/* Header section */}
+        <div className="px-4 py-3 border-b border-gray-100">
+          <h3 className="text-lg font-semibold text-gray-800">{dog.name}</h3>
+          <p className="text-sm text-gray-500">{dog.breedObj?.name || dog.breed}</p>
         </div>
-        
-        {/* Age badge */}
-        <div className="absolute bottom-3 left-3">
-          <span className="px-3 py-1 text-xs font-semibold rounded-full bg-gray-900 bg-opacity-70 text-white">
-            {calculateAge(dog.dateOfBirth)} years old
-          </span>
-        </div>
-      </div>
-      
-      {/* Content */}
-      <div className="p-4 flex-1 flex flex-col">
-        <div className="flex justify-between items-start">
-          <h3 className="text-lg font-semibold text-gray-900 group-hover:text-green-700 transition-colors duration-200">{dog.name}</h3>
-        </div>
-        
-        <div className="mt-1">
-          <span className="text-sm text-gray-600 inline-block">{dog.breedObj?.name || dog.breed}</span>
-          {dog.registrationNumber && (
-            <div className="mt-1 text-xs text-gray-500 inline-block bg-gray-100 px-2 py-0.5 rounded">
-              Reg: {dog.registrationNumber}
+
+        <div className="flex flex-col md:flex-row">
+          {/* Left side - Image */}
+          <div className="md:w-2/5 p-3">
+            <div className="relative h-44 w-full rounded overflow-hidden">
+              {dog.mainImageUrl ? (
+                <Image 
+                  src={dog.mainImageUrl} 
+                  alt={dog.name} 
+                  layout="fill"
+                  objectFit="cover"
+                  className="transition-transform duration-500 group-hover:scale-105" 
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center bg-gray-50">
+                  <svg xmlns="http://www.w3.org/2000/svg" className={`h-12 w-12 text-${genderColor}-200`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                  </svg>
+                </div>
+              )}
+              
+              {/* Gender badge over image */}
+              <div className="absolute top-0 right-0 m-2">
+                <span className={`px-2 py-0.5 text-xs font-medium rounded-sm ${dog.gender.toLowerCase() === 'male' ? 'bg-blue-100 text-blue-800' : 'bg-pink-100 text-pink-800'}`}>
+                  {dog.gender}
+                </span>
+              </div>
+
+              {/* Age badge */}
+              <div className="absolute bottom-0 left-0 m-2">
+                <span className="px-2 py-0.5 text-xs bg-black bg-opacity-50 text-white rounded-sm">
+                  {calculateAge(dog.dateOfBirth)}
+                </span>
+              </div>
             </div>
-          )}
-        </div>
-        
-        <div className="mt-3 pt-3 border-t border-gray-100 flex-1">
-          <div className="flex items-center text-xs text-gray-500">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
-            <span>Born: {formatDogDate(dog.dateOfBirth)}</span>
           </div>
-          
-          {dog.currentOwner?.name && (
-            <div className="flex items-center mt-2 text-xs text-gray-500">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-              </svg>
-              <span>Owner: {dog.currentOwner.name}</span>
+
+          {/* Right side - Details */}
+          <div className="md:w-3/5 p-3 flex flex-col">
+            {/* Key details - clean display */}
+            <div className="flex-1 space-y-2 text-sm">
+              {dog.registrationNumber && (
+                <div>
+                  <p className="text-gray-500 text-xs">Registration</p>
+                  <p className="text-gray-800">{dog.registrationNumber}</p>
+                </div>
+              )}
+              
+              <div>
+                <p className="text-gray-500 text-xs">Date of Birth</p>
+                <p className="text-gray-800">{formatDogDate(dog.dateOfBirth)}</p>
+              </div>
+              
+              {dog.currentOwner?.name && (
+                <div>
+                  <p className="text-gray-500 text-xs">Owner</p>
+                  <p className="text-gray-800 truncate">{dog.currentOwner.name}</p>
+                </div>
+              )}
             </div>
-          )}
-        </div>
-        
-        <div className="mt-4">
-          <div className="inline-flex items-center text-xs font-medium text-green-700 group-hover:text-green-800 transition-colors">
-            View Details
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-            </svg>
+
+            {/* View details link */}
+            <div className="mt-3 pt-2 border-t border-gray-100">
+              <div className="inline-flex items-center text-sm font-medium text-green-600 group-hover:text-green-800 transition-colors">
+                View Details
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
+              </div>
+            </div>
           </div>
         </div>
       </div>

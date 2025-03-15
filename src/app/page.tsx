@@ -7,6 +7,7 @@ import { useQuery } from "@apollo/client";
 import { GET_DOGS, DogSortField, SortDirection } from "@/graphql/queries/dogQueries";
 import { useState, useEffect } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { SITE_NAME } from "@/config/site";
 
 // Define types for dog data
 interface Owner {
@@ -184,7 +185,7 @@ export default function Home() {
       {/* Features */}
       <section className="py-16">
         <div className="max-w-7xl mx-auto px-6">
-          <h2 className="text-3xl font-bold text-center mb-12">Pedigree Database Features</h2>
+          <h2 className="text-3xl font-bold text-center mb-12">{SITE_NAME} Features</h2>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="text-center p-6 rounded-lg">

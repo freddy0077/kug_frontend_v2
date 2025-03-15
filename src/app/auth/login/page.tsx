@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { ApolloError } from '@apollo/client';
+import { SITE_NAME, SITE_DESCRIPTION } from '@/config/site';
 
 // Component that uses searchParams wrapped in Suspense
 function LoginContent() {
@@ -96,7 +97,7 @@ function LoginContent() {
       <div className="max-w-md mx-auto bg-white rounded-lg shadow-md overflow-hidden">
         <div className="px-6 py-8">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">Welcome to Pedigree Database</h1>
+            <h1 className="text-3xl font-bold text-gray-900">Welcome to {SITE_NAME}</h1>
             <p className="text-gray-600 mt-2">Sign in to access your dog pedigree management system</p>
           </div>
 
@@ -197,7 +198,7 @@ function LoginContent() {
             </Link>
           </div>
           <div className="text-center text-xs text-gray-600 mt-2">
-            Pedigree Database - Your comprehensive dog pedigree management system
+            {SITE_NAME} - {SITE_DESCRIPTION}
           </div>
         </div>
       </div>

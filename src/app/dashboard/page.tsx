@@ -1,9 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useQuery } from '@apollo/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { SITE_NAME } from '@/config/site';
 import { 
   GET_DASHBOARD_SUMMARY, 
   GET_RECENT_DOGS, 
@@ -25,18 +27,26 @@ const formatDate = (dateString: string) => {
 };
 
 export default function Dashboard() {
+  const router = useRouter();
   const { user, isAuthenticated } = useAuth();
   const [loading, setLoading] = useState(true);
   
-  // Fetch dashboard summary data - remove the authentication skip to debug
-  const { data: summaryData, loading: summaryLoading, error: summaryError } = useQuery(GET_DASHBOARD_SUMMARY);
-  
-  // Debug logging
+  // Redirect to login if not authenticated
   useEffect(() => {
-    console.log('Auth Status:', { isAuthenticated, user });
-    console.log('Summary Data:', summaryData);
-    console.log('Summary Error:', summaryError);
-  }, [isAuthenticated, user, summaryData, summaryError]);
+    if (!isAuthenticated && !loading) {
+      router.push('/auth/login');
+    }
+  }, [isAuthenticated, loading, router]);
+
+  // Redirect non-admin users to user dashboard
+  useEffect(() => {
+    if (isAuthenticated && user && user.role !== 'ADMIN') {
+      router.push('/user-dashboard');
+    }
+  }, [isAuthenticated, user, router]);
+  
+  // Fetch dashboard summary data for admins only
+  const { data: summaryData, loading: summaryLoading, error: summaryError } = useQuery(GET_DASHBOARD_SUMMARY);
 
   // Fetch recent dogs - removed authentication skip
   const { data: recentDogsData, loading: dogsLoading, error: dogsError } = useQuery(GET_RECENT_DOGS, {
@@ -97,7 +107,7 @@ export default function Dashboard() {
   return (
     <div className="bg-gray-50 min-h-screen py-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-6">Pedigree Database Dashboard</h1>
+        <h1 className="text-3xl font-bold text-gray-900 mb-6">{SITE_NAME} Dashboard</h1>
         
         {/* Summary Statistics */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-8">
