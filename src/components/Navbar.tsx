@@ -23,8 +23,8 @@ export default function Navbar() {
   const menuItems: MenuItem[] = [
     { href: '/', label: 'Home', roles: [] }, // Available to all
     { href: '/dogs', label: 'Dogs', roles: [] }, // Available to all
-    { href: '/pedigrees', label: 'Pedigrees', roles: [] }, // Available to all
-    { href: '/breeds', label: 'Breeds', roles: [] }, // Available to all
+    { href: '/pedigrees', label: 'Pedigrees', roles: ['ADMIN', 'OWNER', 'BREEDER', 'HANDLER', 'CLUB'] }, // Authenticated users only
+    { href: '/breeds', label: 'Breeds', roles: ['ADMIN', 'OWNER', 'BREEDER', 'HANDLER', 'CLUB'] }, // Authenticated users only
     // { href: '/health-records', label: 'Health Records', roles: ['ADMIN', 'OWNER', 'BREEDER', 'HANDLER'] },
     // { href: '/competitions', label: 'Competitions', roles: ['ADMIN', 'OWNER', 'HANDLER', 'CLUB'] },
     // { href: '/ownerships', label: 'Ownerships', roles: ['ADMIN', 'OWNER', 'BREEDER', 'CLUB'] },
@@ -46,20 +46,21 @@ export default function Navbar() {
 
   // Filter menu items based on user role
   const filterMenuItems = (items: MenuItem[]) => {
-    return items.filter(item => {
-      // If no roles specified, menu item is available to everyone
-      if (item.roles.length === 0) return true;
-
-      // If roles specified but user not authenticated, hide item
-      if (!isAuthenticated) return false;
-
-      // If user authenticated and has required role, show item
-      // First normalize the role for comparison (uppercase)
-      const normalizedUserRole = (user?.role || '').toUpperCase();
-
-      // Now check if the normalized role is in the allowed roles
-      return item.roles.some(role => role.toUpperCase() === normalizedUserRole);
-    });
+    // If user is not authenticated, show all public items
+    if (!isAuthenticated) {
+      return items.filter(item => item.roles.length === 0);
+    }
+    
+    // Get normalized user role
+    const normalizedUserRole = (user?.role || '').toUpperCase();
+    
+    // If user is not an admin, only show the Home and Dogs items
+    if (normalizedUserRole !== 'ADMIN') {
+      return items.filter(item => item.href === '/dogs' || item.href === '/');
+    }
+    
+    // For admin users, show all items
+    return items;
   };
 
   const handleLogout = () => {

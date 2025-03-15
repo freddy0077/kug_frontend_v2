@@ -373,7 +373,10 @@ export default function Pedigrees() {
   };
 
   return (
-    <ProtectedRoute allowedRoles={['ADMIN', 'OWNER', 'BREEDER', 'HANDLER']}>
+    <ProtectedRoute
+      allowedRoles={['ADMIN', 'OWNER', 'BREEDER', 'HANDLER', 'CLUB']}
+      fallbackPath="/auth/login">
+
       <div className="min-h-screen bg-gray-50">
         {/* Header Section */}
         <div className="bg-gradient-to-r from-green-700 to-green-900 text-white">

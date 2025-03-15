@@ -94,7 +94,7 @@ export default function Register() {
         <div className="px-6 py-8">
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-gray-900">Create an Account</h1>
-            <p className="text-gray-600 mt-2">Join PedigreeTrack and start managing your dog pedigrees</p>
+            <p className="text-gray-600 mt-2">Join Pedigree Database and start managing your dog pedigrees</p>
           </div>
 
           {error && (
@@ -317,7 +317,7 @@ export default function Register() {
             </Link>
           </div>
           <div className="text-center text-xs text-gray-600 mt-2">
-            PedigreeTrack - Your comprehensive dog pedigree management system
+            Pedigree Database - Your comprehensive dog pedigree management system
           </div>
         </div>
       </div>
