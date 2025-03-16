@@ -47,6 +47,7 @@ interface DogSearchSelectProps {
   error?: string;
   className?: string;
   filterGender?: 'MALE' | 'FEMALE';
+  disabled?: boolean;
 }
 
 const DogSearchSelect = ({
@@ -58,7 +59,8 @@ const DogSearchSelect = ({
   required = false,
   error,
   className = '',
-  filterGender
+  filterGender,
+  disabled = false
 }: DogSearchSelectProps) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isOpen, setIsOpen] = useState(false);
@@ -226,27 +228,29 @@ const DogSearchSelect = ({
         {/* Selected dog display or search input */}
         {selectedDog ? (
           <div
-            className="flex items-center justify-between p-2 border border-gray-300 rounded-md shadow-sm bg-white cursor-pointer hover:bg-gray-50"
-            onClick={() => setIsOpen(true)}
+            className={`flex items-center justify-between p-2 border border-gray-300 rounded-md shadow-sm bg-white ${disabled ? 'opacity-70 cursor-not-allowed' : 'cursor-pointer hover:bg-gray-50'}`}
+            onClick={() => !disabled && setIsOpen(true)}
           >
             <div className="flex-1">{formatDogDisplay(selectedDog)}</div>
-            <button
-              type="button"
-              className="ml-2 text-gray-400 hover:text-gray-600"
-              onClick={(e) => {
-                e.stopPropagation();
-                setSelectedDog(null);
-                onChange('');
-              }}
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                <path
-                  fillRule="evenodd"
-                  d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            </button>
+            {!disabled && (
+              <button
+                type="button"
+                className="ml-2 text-gray-400 hover:text-gray-600"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSelectedDog(null);
+                  onChange('');
+                }}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                  <path
+                    fillRule="evenodd"
+                    d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </button>
+            )}
           </div>
         ) : (
           <div className="relative">
@@ -260,9 +264,10 @@ const DogSearchSelect = ({
               }}
               onFocus={() => setIsOpen(true)}
               placeholder={placeholder}
+              disabled={disabled}
               className={`block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm ${
                 error ? 'border-red-300' : ''
-              }`}
+              } ${disabled ? 'bg-gray-100 cursor-not-allowed' : ''}`}
             />
             <button
               type="button"

@@ -55,6 +55,18 @@ export const GET_USERS = gql`
   }
 `;
 
+export const GET_OWNERS = gql`
+  query GetOwners($limit: Int = 100) {
+    owners(limit: $limit) {
+      id
+      name
+      contactEmail
+      contactPhone
+      address
+    }
+  }
+`;
+
 export const GET_USER_BY_ID = gql`
   query GetUserById($id: ID!) {
     user(id: $id) {

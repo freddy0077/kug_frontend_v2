@@ -33,6 +33,7 @@ export default function Navbar() {
     },
     { href: '/', label: 'Home', roles: [] }, // Available to all
     { href: '/dogs', label: 'Dogs', roles: [] }, // Available to all
+    { href: '/litters', label: 'Litters', roles: [UserRole.ADMIN, UserRole.OWNER] }, // Only for admin and owners
     // Dog Records submenu grouping
     { 
       href: '#',
