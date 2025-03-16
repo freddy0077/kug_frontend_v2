@@ -3,28 +3,29 @@
 import { ReactNode, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import { UserRole } from '@/utils/permissionUtils';
 
 interface ProtectedRouteProps {
   children: ReactNode;
-  allowedRoles?: string[];
+  allowedRoles?: UserRole[];
   fallbackPath?: string;
 }
 
 export const ProtectedRoute = ({ 
   children, 
-  allowedRoles = ["ADMIN", "OWNER"],
+  allowedRoles = [UserRole.ADMIN, UserRole.OWNER],
   fallbackPath = "/user/dashboard" 
 }: ProtectedRouteProps) => {
   const { user, loading, isAuthenticated } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
 
-  // Check if user has the required role, case-insensitive
+  // Check if user has the required role
   const hasRequiredRole = () => {
     if (!user || allowedRoles.length === 0) return false;
     
-    const userRole = user.role.toUpperCase();
-    return allowedRoles.some(role => role.toUpperCase() === userRole);
+    const userRole = user.role as UserRole;
+    return allowedRoles.includes(userRole);
   };
 
   useEffect(() => {

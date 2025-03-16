@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useQuery } from '@apollo/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+import { UserRole } from '@/utils/permissionUtils';
 import { GET_BREEDING_PROGRAMS } from '@/graphql/queries/breedingProgramQueries';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 
@@ -70,7 +71,7 @@ export default function BreedingPrograms() {
   };
 
   return (
-    <ProtectedRoute allowedRoles={['BREEDER', 'ADMIN']}>
+    <ProtectedRoute allowedRoles={[UserRole.OWNER, UserRole.ADMIN]}>
       <div className="bg-gray-100 min-h-screen py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Page Header */}

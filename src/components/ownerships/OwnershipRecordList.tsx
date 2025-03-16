@@ -79,7 +79,7 @@ export const OwnershipRecordList: React.FC<OwnershipRecordListProps> = ({ record
                     View
                   </Link>
                   {/* Show edit/delete only for users with right permissions */}
-                  {user && ['ADMIN', 'OWNER', 'BREEDER', 'CLUB'].some(role => 
+                  {user && ['ADMIN', 'OWNER', 'HANDLER', 'CLUB'].some(role => 
                     role.toUpperCase() === user.role.toUpperCase()
                   ) && (
                     <>

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { hasPermission } from '@/utils/permissionUtils';
+import { hasPermission, UserRole } from '@/utils/permissionUtils';
 
 type DashboardWidgetProps = {
   title: string;
@@ -43,7 +43,7 @@ const DashboardWidget = ({
 type UserData = {
   id: string;
   name: string;
-  role: string;
+  role: UserRole;
   ownedDogs: number;
   upcomingEvents: number;
   pendingHealthRecords: number;
@@ -54,16 +54,18 @@ type UserData = {
 };
 
 export default function RoleBasedDashboard() {
-  const [userRole, setUserRole] = useState<string>('');
+  const [userRole, setUserRole] = useState<UserRole>(UserRole.VIEWER);
   const [userData, setUserData] = useState<UserData | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [userId, setUserId] = useState<string>('');
 
   useEffect(() => {
     // In a real application, this would be fetched from an API
-    const role = localStorage.getItem('userRole') || '';
+    const storedRole = localStorage.getItem('userRole') || 'VIEWER';
     const uid = localStorage.getItem('userId') || '1'; // Default to '1' for demo
     
+    // Convert stored string role to UserRole enum
+    const role = storedRole as UserRole;
     setUserRole(role);
     setUserId(uid);
     
@@ -73,14 +75,14 @@ export default function RoleBasedDashboard() {
       const mockData: UserData = {
         id: uid,
         name: 'John Doe',
-        role: role,
+        role: role as UserRole,
         ownedDogs: 5,
         upcomingEvents: 3,
         pendingHealthRecords: 2,
         recentCompetitions: 4,
-        activeLitters: role === 'breeder' ? 2 : 0,
-        upcomingBreedings: role === 'breeder' ? 1 : 0,
-        managedEvents: role === 'club' ? 3 : 0,
+        activeLitters: role === UserRole.OWNER ? 2 : 0,
+        upcomingBreedings: role === UserRole.OWNER ? 1 : 0,
+        managedEvents: role === UserRole.CLUB ? 3 : 0,
       };
       
       setUserData(mockData);
@@ -138,7 +140,7 @@ export default function RoleBasedDashboard() {
   const roleSpecificWidgets = [];
 
   // Owner-specific widgets
-  if (userRole === 'owner' || userRole === 'admin') {
+  if (userRole === UserRole.OWNER || userRole === UserRole.ADMIN) {
     roleSpecificWidgets.push({
       title: 'Health Records',
       count: userData.pendingHealthRecords,
@@ -155,7 +157,7 @@ export default function RoleBasedDashboard() {
   }
 
   // Handler-specific widgets
-  if (userRole === 'handler' || userRole === 'admin') {
+  if (userRole === UserRole.HANDLER || userRole === UserRole.ADMIN) {
     roleSpecificWidgets.push({
       title: 'Recent Competitions',
       count: userData.recentCompetitions,
@@ -171,8 +173,8 @@ export default function RoleBasedDashboard() {
     });
   }
 
-  // Breeder-specific widgets
-  if (userRole === 'breeder' || userRole === 'admin') {
+  // Owner-specific breeding widgets
+  if (userRole === UserRole.OWNER || userRole === UserRole.ADMIN) {
     roleSpecificWidgets.push({
       title: 'Active Litters',
       count: userData.activeLitters,
@@ -203,7 +205,7 @@ export default function RoleBasedDashboard() {
   }
 
   // Club-specific widgets
-  if (userRole === 'club' || userRole === 'admin') {
+  if (userRole === UserRole.CLUB || userRole === UserRole.ADMIN) {
     roleSpecificWidgets.push({
       title: 'Managed Events',
       count: userData.managedEvents,
@@ -220,7 +222,7 @@ export default function RoleBasedDashboard() {
   }
 
   // Admin-specific widgets
-  if (userRole === 'admin') {
+  if (userRole === UserRole.ADMIN) {
     roleSpecificWidgets.push({
       title: 'User Management',
       count: 42, // Example total user count

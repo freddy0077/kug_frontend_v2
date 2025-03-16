@@ -5,12 +5,13 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+import { UserRole } from '@/utils/permissionUtils';
 
 interface FormData {
   firstName: string;
   lastName: string;
   email: string;
-  role: string;
+  role: UserRole;
   status: string;
   password: string;
   confirmPassword: string;
@@ -37,7 +38,7 @@ export default function AddUser() {
     firstName: '',
     lastName: '',
     email: '',
-    role: 'owner',
+    role: UserRole.OWNER,
     status: 'active',
     password: '',
     confirmPassword: ''
@@ -139,7 +140,7 @@ export default function AddUser() {
   }
 
   return (
-    <ProtectedRoute allowedRoles={['ADMIN']}>
+    <ProtectedRoute allowedRoles={[UserRole.ADMIN]}>
       <div className="bg-gray-100 min-h-screen py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Page Header */}
@@ -238,11 +239,11 @@ export default function AddUser() {
                   onChange={handleChange}
                   className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
                 >
-                  <option value="owner">Owner</option>
-                  <option value="breeder">Breeder</option>
-                  <option value="handler">Handler</option>
-                  <option value="club">Club</option>
-                  <option value="admin">Admin</option>
+                  <option value="OWNER">Owner</option>
+                  <option value="HANDLER">Handler</option>
+                  <option value="CLUB">Club</option>
+                  <option value="VIEWER">Viewer</option>
+                  <option value="ADMIN">Admin</option>
                 </select>
               </div>
               
@@ -268,33 +269,33 @@ export default function AddUser() {
             {/* Role Description */}
             <div className="mb-6">
               <div className={`p-4 rounded-md 
-                ${formData.role === 'owner' ? 'bg-green-50' : 
-                  formData.role === 'breeder' ? 'bg-blue-50' : 
-                  formData.role === 'handler' ? 'bg-purple-50' : 
-                  formData.role === 'club' ? 'bg-amber-50' : 
-                  'bg-red-50'}`}
+                ${formData.role === UserRole.OWNER ? 'bg-green-50' : 
+                  formData.role === UserRole.HANDLER ? 'bg-purple-50' : 
+                  formData.role === UserRole.CLUB ? 'bg-amber-50' : 
+                  formData.role === UserRole.ADMIN ? 'bg-red-50' : 
+                  'bg-gray-50'}`}
               >
                 <h4 className="text-sm font-medium 
-                  ${formData.role === 'owner' ? 'text-green-800' : 
-                    formData.role === 'breeder' ? 'text-blue-800' : 
-                    formData.role === 'handler' ? 'text-purple-800' : 
-                    formData.role === 'club' ? 'text-amber-800' : 
-                    'text-red-800'}"
+                  ${formData.role === UserRole.OWNER ? 'text-green-800' : 
+                    formData.role === UserRole.HANDLER ? 'text-purple-800' : 
+                    formData.role === UserRole.CLUB ? 'text-amber-800' : 
+                    formData.role === UserRole.ADMIN ? 'text-red-800' : 
+                    'text-gray-800'}"
                 >
                   {formData.role.charAt(0).toUpperCase() + formData.role.slice(1)} Role Permissions
                 </h4>
                 <p className="mt-1 text-sm 
-                  ${formData.role === 'owner' ? 'text-green-700' : 
-                    formData.role === 'breeder' ? 'text-blue-700' : 
-                    formData.role === 'handler' ? 'text-purple-700' : 
-                    formData.role === 'club' ? 'text-amber-700' : 
-                    'text-red-700'}"
+                  ${formData.role === UserRole.OWNER ? 'text-green-700' : 
+                    formData.role === UserRole.HANDLER ? 'text-purple-700' : 
+                    formData.role === UserRole.CLUB ? 'text-amber-700' : 
+                    formData.role === UserRole.ADMIN ? 'text-red-700' : 
+                    'text-gray-700'}"
                 >
-                  {formData.role === 'owner' ? 'Dog owners can register dogs, manage health records, and track competition results.' : 
-                   formData.role === 'breeder' ? 'Breeders can manage breeding programs, dog health records, and ownership transfers.' : 
-                   formData.role === 'handler' ? 'Handlers can manage competition results and training records for dogs they handle.' : 
-                   formData.role === 'club' ? 'Kennel clubs can manage events, competitions, and verify registrations.' : 
-                   'Administrators have full access to all system features and user management.'}
+                  {formData.role === UserRole.OWNER ? 'Dog owners can register dogs, manage health records, and track competition results.' : 
+                   formData.role === UserRole.HANDLER ? 'Handlers can manage competition results and training records for dogs they handle.' : 
+                   formData.role === UserRole.CLUB ? 'Kennel clubs can manage events, competitions, and verify registrations.' : 
+                   formData.role === UserRole.ADMIN ? 'Administrators have full access to all system features and user management.' : 
+                   'This role allows limited access to system features.'}
                 </p>
               </div>
             </div>

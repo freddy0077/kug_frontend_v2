@@ -2,14 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { hasPermission } from '@/utils/permissionUtils';
+import { hasPermission, UserRole } from '@/utils/permissionUtils';
 import { recordBreeding } from '@/utils/lineageUtils';
 import { format } from 'date-fns';
 
 type BreedingRecorderProps = {
   dogId: string;
   dogGender: 'male' | 'female';
-  userRole: string;
+  userRole: UserRole;
   userId: string;
   ownerId: string;
 };
@@ -71,7 +71,7 @@ export default function BreedingRecorder({
     // In a real app, this would fetch the user's name
     setFormData(prev => ({
       ...prev,
-      breederName: userRole === 'breeder' ? 'Jane Smith' : 'Current User'
+      breederName: userRole === UserRole.OWNER ? 'Jane Smith' : 'Current User'
     }));
   }, [dogId, userRole, userId, ownerId, dogGender]);
 

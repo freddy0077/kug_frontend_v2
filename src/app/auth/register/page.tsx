@@ -7,6 +7,7 @@ import { useMutation } from '@apollo/client';
 import { REGISTER_MUTATION } from '@/graphql/mutations/userMutations';
 import { useAuth } from '@/contexts/AuthContext';
 import { SITE_NAME, SITE_DESCRIPTION } from '@/config/site';
+import { UserRole } from '@/utils/permissionUtils';
 
 export default function Register() {
   const router = useRouter();
@@ -19,7 +20,7 @@ export default function Register() {
     email: '',
     password: '',
     confirmPassword: '',
-    userRole: 'OWNER', // Using enum value expected by API
+    userRole: UserRole.OWNER, // Using the proper UserRole enum
     acceptTerms: false
   });
   const [isLoading, setIsLoading] = useState(false);
@@ -75,8 +76,8 @@ export default function Register() {
         // Refresh user data in context
         await refreshUser();
         
-        // Redirect to management dashboard after successful registration
-        router.push('/manage');
+        // Redirect to user dashboard after successful registration
+        router.push('/user-dashboard');
       }
     } catch (err: any) {
       if (err.graphQLErrors?.length > 0) {
@@ -206,27 +207,13 @@ export default function Register() {
                         id="role-owner"
                         name="userRole"
                         type="radio"
-                        value="OWNER"
-                        checked={formData.userRole === 'OWNER'}
+                        value={UserRole.OWNER}
+                        checked={formData.userRole === UserRole.OWNER}
                         onChange={handleChange}
                         className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300"
                       />
                       <label htmlFor="role-owner" className="ml-2 block text-sm text-gray-700">
-                        Dog Owner
-                      </label>
-                    </div>
-                    <div className="flex items-center">
-                      <input
-                        id="role-breeder"
-                        name="userRole"
-                        type="radio"
-                        value="BREEDER"
-                        checked={formData.userRole === 'BREEDER'}
-                        onChange={handleChange}
-                        className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300"
-                      />
-                      <label htmlFor="role-breeder" className="ml-2 block text-sm text-gray-700">
-                        Breeder
+                        Dog Owner/Breeder
                       </label>
                     </div>
                     <div className="flex items-center">
@@ -234,8 +221,8 @@ export default function Register() {
                         id="role-handler"
                         name="userRole"
                         type="radio"
-                        value="HANDLER"
-                        checked={formData.userRole === 'HANDLER'}
+                        value={UserRole.HANDLER}
+                        checked={formData.userRole === UserRole.HANDLER}
                         onChange={handleChange}
                         className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300"
                       />
@@ -248,8 +235,8 @@ export default function Register() {
                         id="role-club"
                         name="userRole"
                         type="radio"
-                        value="ORGANIZATION"
-                        checked={formData.userRole === 'ORGANIZATION'}
+                        value={UserRole.CLUB}
+                        checked={formData.userRole === UserRole.CLUB}
                         onChange={handleChange}
                         className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300"
                       />

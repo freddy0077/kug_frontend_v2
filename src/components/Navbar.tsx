@@ -5,13 +5,14 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import { UserRole } from '@/utils/permissionUtils';
 import { SITE_NAME } from '@/config/site';
 
 // Define menu items with their roles
 interface MenuItem {
   href: string;
   label: string;
-  roles: string[];
+  roles: UserRole[];
   submenu?: MenuItem[];
 }
 
@@ -28,7 +29,7 @@ export default function Navbar() {
     { 
       href: '#', // This will be overridden in filterMenuItems
       label: 'Dashboard', 
-      roles: ['ADMIN', 'OWNER', 'BREEDER', 'HANDLER', 'CLUB'] // Available to authenticated users
+      roles: [UserRole.ADMIN, UserRole.OWNER, UserRole.HANDLER, UserRole.CLUB, UserRole.VIEWER] // Available to authenticated users
     },
     { href: '/', label: 'Home', roles: [] }, // Available to all
     { href: '/dogs', label: 'Dogs', roles: [] }, // Available to all
@@ -36,13 +37,13 @@ export default function Navbar() {
     { 
       href: '#',
       label: 'Dog Records', 
-      roles: ['ADMIN', 'OWNER', 'BREEDER', 'HANDLER', 'CLUB'],
+      roles: [UserRole.ADMIN],
       submenu: [
-        { href: '/pedigrees', label: 'Pedigrees', roles: ['ADMIN', 'OWNER', 'BREEDER', 'HANDLER', 'CLUB'] },
-        { href: '/breeds', label: 'Breeds', roles: ['ADMIN', 'OWNER', 'BREEDER', 'HANDLER', 'CLUB'] },
-        // { href: '/health-records', label: 'Health Records', roles: ['ADMIN', 'OWNER', 'BREEDER', 'HANDLER'] },
-        { href: '/competitions', label: 'Competitions', roles: ['ADMIN', 'OWNER', 'HANDLER', 'CLUB'] },
-        // { href: '/ownerships', label: 'Ownerships', roles: ['ADMIN', 'OWNER', 'BREEDER', 'CLUB'] },
+        { href: '/pedigrees', label: 'Pedigrees', roles: [UserRole.ADMIN] },
+        { href: '/breeds', label: 'Breeds', roles: [UserRole.ADMIN] },
+        // { href: '/health-records', label: 'Health Records', roles: [UserRole.ADMIN] },
+        { href: '/competitions', label: 'Competitions', roles: [UserRole.ADMIN, UserRole.OWNER, UserRole.HANDLER, UserRole.CLUB] },
+        // { href: '/ownerships', label: 'Ownerships', roles: [UserRole.ADMIN, UserRole.OWNER] },
       ]
     },
    
@@ -50,32 +51,32 @@ export default function Navbar() {
     { 
       href: '#',
       label: 'Admin', 
-      roles: ['ADMIN'],
+      roles: [UserRole.ADMIN],
       submenu: [
-        { href: '/admin/users', label: 'User Management', roles: ['ADMIN'] },
-        { href: '/admin/roles', label: 'Role Management', roles: ['ADMIN'] },
-        // { href: '/admin/settings', label: 'System Settings', roles: ['ADMIN'] },
-        // { href: '/admin/logs', label: 'System Logs', roles: ['ADMIN'] },
+        { href: '/admin/users', label: 'User Management', roles: [UserRole.ADMIN] },
+        { href: '/admin/roles', label: 'Role Management', roles: [UserRole.ADMIN] },
+        // { href: '/admin/settings', label: 'System Settings', roles: [UserRole.ADMIN] },
+        // { href: '/admin/logs', label: 'System Logs', roles: [UserRole.ADMIN] },
       ]
     },
-    // Breeder specific menu grouping
+    // Owner specific menu grouping for breeding
     // { 
     //   href: '#',
     //   label: 'Breeding', 
-    //   roles: ['BREEDER'],
+    //   roles: [UserRole.OWNER],
     //   submenu: [
-    //     { href: '/breeding-programs', label: 'Breeding Programs', roles: ['ADMIN', 'BREEDER'] },
-    //     { href: '/breeding/matings', label: 'Planned Matings', roles: ['ADMIN', 'BREEDER'] },
+    //     { href: '/breeding-programs', label: 'Breeding Programs', roles: [UserRole.ADMIN, UserRole.OWNER] },
+    //     { href: '/breeding/matings', label: 'Planned Matings', roles: [UserRole.ADMIN, UserRole.OWNER] },
     //   ]
     // },
     // Club specific menu grouping
     // { 
     //   href: '#',
     //   label: 'Club', 
-    //   roles: ['CLUB'],
+    //   roles: [UserRole.CLUB],
     //   submenu: [
-    //     { href: '/club-events', label: 'Club Events', roles: ['CLUB'] },
-    //     { href: '/club/members', label: 'Club Members', roles: ['CLUB'] },
+    //     { href: '/club-events', label: 'Club Events', roles: [UserRole.CLUB] },
+    //     { href: '/club/members', label: 'Club Members', roles: [UserRole.CLUB] },
     //   ]
     // },
     // { href: '/about', label: 'About', roles: [] } // Available to all
@@ -85,7 +86,7 @@ export default function Navbar() {
   const getDashboardLink = () => {
     if (!user) return { href: '/user-dashboard', label: 'Dashboard' };
 
-    return user.role === 'ADMIN'
+    return user.role === UserRole.ADMIN
       ? { href: '/dashboard', label: 'Admin Dashboard' }
       : { href: '/user-dashboard', label: 'Dashboard' };
   };
@@ -97,8 +98,8 @@ export default function Navbar() {
       return items.filter(item => item.roles.length === 0);
     }
     
-    // Get normalized user role
-    const normalizedUserRole = (user?.role || '').toUpperCase();
+    // Get user role
+    const userRole = user?.role || UserRole.VIEWER;
     
     // Process the menu items, adjusting the dashboard URL based on role and handling submenus
     const processedItems = items.map(item => {
@@ -106,7 +107,7 @@ export default function Navbar() {
       if (item.label === 'Dashboard') {
         return {
           ...item,
-          href: normalizedUserRole === 'ADMIN' ? '/dashboard' : '/user-dashboard'
+          href: userRole === UserRole.ADMIN ? '/dashboard' : '/user-dashboard'
         };
       }
       
@@ -115,7 +116,8 @@ export default function Navbar() {
         // Only include submenu items that match user's role
         const filteredSubmenu = item.submenu.filter(subItem => 
           subItem.roles.length === 0 || // Public items
-          subItem.roles.includes(normalizedUserRole)
+          // Check if current user role is in allowed roles
+          (userRole && subItem.roles.some(role => role === userRole))
         );
         
         // Only return submenu parent if it has accessible children
@@ -134,11 +136,12 @@ export default function Navbar() {
     
     // Filter the top-level items based on role
     // If user is not an admin, only show permitted items
-    if (normalizedUserRole !== 'ADMIN') {
+    if (userRole !== UserRole.ADMIN) {
       return processedItems.filter(item => 
         item.roles.length === 0 || // Public items
         item.label === 'Dashboard' || // Dashboard is always visible for logged-in users
-        item.roles.includes(normalizedUserRole)
+        // Check if current user role is in allowed roles
+        (userRole && item.roles.some(role => role === userRole))
       );
     }
     

@@ -6,6 +6,20 @@ export type Permission = 'view' | 'create' | 'edit' | 'delete';
 // Define entity types
 export type Entity = 'dog' | 'health-record' | 'competition' | 'ownership' | 'breeding-program' | 'club-event' | 'user' | 'pedigree';
 
+// Define user roles to match GraphQL schema
+export enum UserRole {
+  ADMIN = 'ADMIN',
+  OWNER = 'OWNER',
+  HANDLER = 'HANDLER',
+  CLUB = 'CLUB',
+  VIEWER = 'VIEWER'
+}
+
+// Helper to check if a role is in a list of roles
+const hasRole = (userRole: UserRole, roles: UserRole[]): boolean => {
+  return roles.includes(userRole);
+}
+
 /**
  * Checks if the user has permission to perform an action on a specific entity
  * @param userRole The role of the user
@@ -16,14 +30,14 @@ export type Entity = 'dog' | 'health-record' | 'competition' | 'ownership' | 'br
  * @returns Boolean indicating whether the user has permission
  */
 export const hasPermission = (
-  userRole: string,
+  userRole: UserRole,
   entity: Entity,
   action: Permission,
   ownerId?: string,
   userId?: string
 ): boolean => {
   // Admin has all permissions
-  if (userRole === 'admin') {
+  if (userRole === UserRole.ADMIN) {
     return true;
   }
 
@@ -37,11 +51,11 @@ export const hasPermission = (
         case 'view':
           return true; // All users can view dogs
         case 'create':
-          return Boolean(['owner', 'breeder'].includes(userRole));
+          return hasRole(userRole, [UserRole.OWNER]);
         case 'edit':
-          return Boolean(isOwner || ['owner', 'breeder'].includes(userRole));
+          return isOwner || hasRole(userRole, [UserRole.OWNER]);
         case 'delete':
-          return Boolean(isOwner || userRole === 'breeder');
+          return isOwner || userRole === UserRole.OWNER;
         default:
           return false;
       }
@@ -49,13 +63,13 @@ export const hasPermission = (
     case 'health-record':
       switch (action) {
         case 'view':
-          return Boolean(['owner', 'breeder', 'handler'].includes(userRole) || isOwner);
+          return isOwner || hasRole(userRole, [UserRole.OWNER, UserRole.HANDLER]);
         case 'create':
-          return Boolean(['owner', 'breeder'].includes(userRole));
+          return hasRole(userRole, [UserRole.OWNER]);
         case 'edit':
-          return Boolean(isOwner || userRole === 'breeder');
+          return isOwner || userRole === UserRole.OWNER;
         case 'delete':
-          return Boolean(isOwner || userRole === 'breeder');
+          return isOwner || userRole === UserRole.OWNER;
         default:
           return false;
       }
@@ -65,11 +79,11 @@ export const hasPermission = (
         case 'view':
           return true; // All users can view competitions
         case 'create':
-          return Boolean(['owner', 'handler', 'club'].includes(userRole));
+          return hasRole(userRole, [UserRole.OWNER, UserRole.HANDLER, UserRole.CLUB]);
         case 'edit':
-          return Boolean(isOwner || ['handler', 'club'].includes(userRole));
+          return isOwner || hasRole(userRole, [UserRole.HANDLER, UserRole.CLUB]);
         case 'delete':
-          return Boolean(userRole === 'club' || isOwner);
+          return isOwner || userRole === UserRole.CLUB;
         default:
           return false;
       }
@@ -77,13 +91,13 @@ export const hasPermission = (
     case 'ownership':
       switch (action) {
         case 'view':
-          return Boolean(isOwner || ['owner', 'breeder', 'club'].includes(userRole));
+          return isOwner || hasRole(userRole, [UserRole.OWNER, UserRole.CLUB]);
         case 'create':
-          return Boolean(['owner', 'breeder', 'club'].includes(userRole));
+          return hasRole(userRole, [UserRole.OWNER, UserRole.CLUB]);
         case 'edit':
-          return Boolean(userRole === 'club' || isOwner);
+          return isOwner || userRole === UserRole.CLUB;
         case 'delete':
-          return Boolean(userRole === 'club');
+          return userRole === UserRole.CLUB;
         default:
           return false;
       }
@@ -91,13 +105,13 @@ export const hasPermission = (
     case 'breeding-program':
       switch (action) {
         case 'view':
-          return Boolean(['breeder', 'owner'].includes(userRole) || isOwner);
+          return isOwner || hasRole(userRole, [UserRole.OWNER]);
         case 'create':
-          return Boolean(userRole === 'breeder');
+          return userRole === UserRole.OWNER;
         case 'edit':
-          return Boolean(userRole === 'breeder' && isOwner);
+          return isOwner && userRole === UserRole.OWNER;
         case 'delete':
-          return Boolean(userRole === 'breeder' && isOwner);
+          return isOwner && userRole === UserRole.OWNER;
         default:
           return false;
       }
@@ -107,11 +121,11 @@ export const hasPermission = (
         case 'view':
           return true; // All users can view club events
         case 'create':
-          return Boolean(userRole === 'club');
+          return userRole === UserRole.CLUB;
         case 'edit':
-          return Boolean(userRole === 'club' && isOwner);
+          return isOwner && userRole === UserRole.CLUB;
         case 'delete':
-          return Boolean(userRole === 'club' && isOwner);
+          return isOwner && userRole === UserRole.CLUB;
         default:
           return false;
       }
@@ -119,13 +133,13 @@ export const hasPermission = (
     case 'user':
       switch (action) {
         case 'view':
-          return Boolean(userRole === 'admin' || isOwner);
+          return isOwner || userRole.toString() === UserRole.ADMIN.toString();
         case 'create':
-          return Boolean(userRole === 'admin');
+          return userRole.toString() === UserRole.ADMIN.toString();
         case 'edit':
-          return Boolean(userRole === 'admin' || isOwner);
+          return isOwner || userRole.toString() === UserRole.ADMIN.toString();
         case 'delete':
-          return Boolean(userRole === 'admin');
+          return userRole.toString() === UserRole.ADMIN.toString();
         default:
           return false;
       }
@@ -135,11 +149,11 @@ export const hasPermission = (
         case 'view':
           return true; // All users can view pedigrees
         case 'create':
-          return Boolean(['owner', 'breeder'].includes(userRole));
+          return hasRole(userRole, [UserRole.OWNER]);
         case 'edit':
-          return Boolean(isOwner || ['owner', 'breeder'].includes(userRole));
+          return isOwner || hasRole(userRole, [UserRole.OWNER]);
         case 'delete':
-          return Boolean(isOwner || userRole === 'breeder');
+          return isOwner || userRole === UserRole.OWNER;
         default:
           return false;
       }
@@ -158,7 +172,7 @@ export const hasPermission = (
  * @returns Array of permitted actions
  */
 export const getPermittedActions = (
-  userRole: string,
+  userRole: UserRole,
   entity: Entity,
   ownerId?: string,
   userId?: string
@@ -188,7 +202,7 @@ export const checkPermission = ({
   ownerId,
   userId
 }: {
-  userRole: string;
+  userRole: UserRole;
   entity: Entity;
   action: Permission;
   ownerId?: string;

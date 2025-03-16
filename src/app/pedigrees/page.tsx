@@ -7,6 +7,7 @@ import { useQuery } from '@apollo/client';
 import { GET_DOG_PEDIGREE, GET_DOGS } from '@/graphql/queries/dogQueries';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import { useAuth } from '@/contexts/AuthContext';
+import { UserRole } from '@/utils/permissionUtils';
 import { useDebounce } from '@/hooks/useDebounce';
 import PedigreeChart from '@/components/pedigree/PedigreeChart';
 import ParentEditor from '@/components/pedigrees/ParentEditor';
@@ -374,7 +375,7 @@ export default function Pedigrees() {
 
   return (
     <ProtectedRoute
-      allowedRoles={['ADMIN', 'OWNER', 'BREEDER', 'HANDLER', 'CLUB']}
+      allowedRoles={[UserRole.ADMIN]}
       fallbackPath="/auth/login">
 
       <div className="min-h-screen bg-gray-50">
