@@ -41,6 +41,17 @@ export default function AdminDashboard() {
       )
     },
     { 
+      title: 'Role Management', 
+      description: 'Define and manage user roles and permissions',
+      href: '/admin/roles',
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-8 h-8">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15.75 5.25a3 3 0 013 3m-3-3a3 3 0 00-3 3m3-3v1.5m0 4.5h1.5m0 0v1.5m0-1.5h1.5m-7.5-1.5h.008v.008h-.008v-.008zm1.5 0h.008v.008h-.008v-.008zm1.5 0h.008v.008h-.008v-.008zm-1.5 1.5h.008v.008h-.008v-.008zm1.5 0h.008v.008h-.008v-.008zm-1.5 1.5h.008v.008h-.008v-.008zm1.5 0h.008v.008h-.008v-.008z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" />
+        </svg>
+      )
+    },
+    { 
       title: 'System Settings', 
       description: 'Configure application settings and preferences',
       href: '/admin/settings',
@@ -74,20 +85,21 @@ export default function AdminDashboard() {
   ];
 
   useEffect(() => {
-    // Check authentication status from localStorage
+    // We'll be using the auth context in a real implementation
+    // but for demo purposes, we still use localStorage
     const authStatus = localStorage.getItem('isAuthenticated') === 'true';
     const role = localStorage.getItem('userRole') || '';
     const name = localStorage.getItem('userName') || 'User';
     
     setIsAuthenticated(authStatus);
-    setUserRole(role);
+    setUserRole(role.toUpperCase());
     setUserName(name);
     setIsLoading(false);
     
     // Redirect if not authenticated or not an admin
     if (!authStatus) {
       router.push('/auth/login');
-    } else if (role !== 'admin') {
+    } else if (role.toUpperCase() !== 'ADMIN') {
       router.push('/user/dashboard');
     }
   }, [router]);

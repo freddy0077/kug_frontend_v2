@@ -63,7 +63,12 @@ export const UPDATE_USER_ROLE_MUTATION = gql`
     updateUserRole(userId: $userId, role: $role) {
       id
       email
+      firstName
+      lastName
+      fullName
       role
+      isActive
+      updatedAt
     }
   }
 `;
@@ -72,7 +77,13 @@ export const DEACTIVATE_USER_MUTATION = gql`
   mutation DeactivateUser($userId: ID!) {
     deactivateUser(userId: $userId) {
       id
+      email
+      firstName
+      lastName
+      fullName
+      role
       isActive
+      updatedAt
     }
   }
 `;

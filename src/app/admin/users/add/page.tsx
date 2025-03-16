@@ -1,8 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useAuth } from '@/contexts/AuthContext';
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 
 interface FormData {
   firstName: string;
@@ -27,9 +29,8 @@ interface FormErrors {
 
 export default function AddUser() {
   const router = useRouter();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userRole, setUserRole] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
+  const { user, isAuthenticated } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
   
   // Form state
   const [formData, setFormData] = useState<FormData>({
@@ -46,22 +47,7 @@ export default function AddUser() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitMessage, setSubmitMessage] = useState({ type: '', message: '' });
 
-  useEffect(() => {
-    // Check authentication status from localStorage
-    const authStatus = localStorage.getItem('isAuthenticated') === 'true';
-    const role = localStorage.getItem('userRole') || '';
-    
-    setIsAuthenticated(authStatus);
-    setUserRole(role);
-    setIsLoading(false);
-    
-    // Redirect if not authenticated or not an admin
-    if (!authStatus) {
-      router.push('/auth/login');
-    } else if (role !== 'admin') {
-      router.push('/user/dashboard');
-    }
-  }, [router]);
+
 
   const validateForm = () => {
     let tempErrors: FormErrors = {};
@@ -110,25 +96,37 @@ export default function AddUser() {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
     if (validateForm()) {
       setIsSubmitting(true);
       
-      // Simulate API call to create user
-      setTimeout(() => {
-        setIsSubmitting(false);
+      try {
+        // Here you would typically make the actual API call to create the user
+        // For example: await createUser(formData);
+        
+        // For now we're simulating the API call
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
         setSubmitMessage({
           type: 'success',
           message: 'User created successfully!'
         });
         
-        // Clear form or redirect
+        // Redirect to users list after a short delay to show the success message
         setTimeout(() => {
           router.push('/admin/users');
-        }, 2000);
-      }, 1500);
+        }, 1500);
+      } catch (error) {
+        console.error('Error creating user:', error);
+        setSubmitMessage({
+          type: 'error',
+          message: 'Failed to create user. Please try again.'
+        });
+      } finally {
+        setIsSubmitting(false);
+      }
     }
   };
 
@@ -139,14 +137,11 @@ export default function AddUser() {
       </div>
     );
   }
-  
-  if (!isAuthenticated || userRole !== 'admin') {
-    return null; // We already redirect in the useEffect, this is just a safeguard
-  }
 
   return (
-    <div className="bg-gray-100 min-h-screen py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <ProtectedRoute allowedRoles={['ADMIN']}>
+      <div className="bg-gray-100 min-h-screen py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Page Header */}
         <div className="mb-8">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between">
@@ -367,7 +362,8 @@ export default function AddUser() {
             </div>
           </form>
         </div>
+        </div>
       </div>
-    </div>
+    </ProtectedRoute>
   );
 }

@@ -6,17 +6,22 @@ import { useAuth } from '@/contexts/AuthContext';
 
 // Interface using title_earned instead of certificate as per memory
 export interface CompetitionResult {
-  id: number;
-  dogId: number;
+  id: string;
+  dogId: string;
   dogName: string;
   eventName: string;
   eventDate: Date;
   location: string;
+  category: string;
   rank: number;
   title_earned: string; // Correct field name per memory
   judge: string;
   points: number;
-  category: string;
+  description?: string;
+  totalParticipants?: number;
+  imageUrl?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 interface CompetitionResultListProps {

@@ -8,23 +8,23 @@ interface FilterOptions {
   dateRange?: string;
 }
 
-// Define the category options available
+// Define the category options available - matching enum CompetitionCategory from the schema
 export const competitionCategories = [
-  { id: "conformation", name: "Conformation" },
-  { id: "obedience", name: "Obedience" },
-  { id: "agility", name: "Agility" },
-  { id: "field-trials", name: "Field Trials" },
-  { id: "herding", name: "Herding" },
-  { id: "tracking", name: "Tracking" },
-  { id: "rally", name: "Rally" },
-  { id: "scent-work", name: "Scent Work" }
+  { id: "CONFORMATION", name: "Conformation" },
+  { id: "OBEDIENCE", name: "Obedience" },
+  { id: "AGILITY", name: "Agility" },
+  { id: "FIELD_TRIALS", name: "Field Trials" },
+  { id: "HERDING", name: "Herding" },
+  { id: "TRACKING", name: "Tracking" },
+  { id: "RALLY", name: "Rally" },
+  { id: "SCENT_WORK", name: "Scent Work" }
 ];
 
 interface CompetitionFiltersProps {
   onFilterChange: (filters: FilterOptions) => void;
-  dogOptions: { id: number; name: string }[];
-  searchQuery: string;
-  onSearchChange: (query: string) => void;
+  dogOptions: { value: string; label: string }[];
+  searchQuery?: string;
+  onSearchChange?: (query: string) => void;
 }
 
 export const CompetitionFilters: React.FC<CompetitionFiltersProps> = ({ 
@@ -77,8 +77,8 @@ export const CompetitionFilters: React.FC<CompetitionFiltersProps> = ({
             >
               <option value="">All Dogs</option>
               {dogOptions.map(dog => (
-                <option key={dog.id} value={dog.id.toString()}>
-                  {dog.name}
+                <option key={dog.value} value={dog.value}>
+                  {dog.label}
                 </option>
               ))}
             </select>

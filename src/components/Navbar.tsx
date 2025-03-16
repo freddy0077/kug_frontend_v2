@@ -12,6 +12,7 @@ interface MenuItem {
   href: string;
   label: string;
   roles: string[];
+  submenu?: MenuItem[];
 }
 
 export default function Navbar() {
@@ -23,21 +24,60 @@ export default function Navbar() {
 
   // Menu items with role-based access control
   const menuItems: MenuItem[] = [
-    { href: '/', label: 'Home', roles: [] }, // Available to all
-    { href: '/dogs', label: 'Dogs', roles: [] }, // Available to all
     // Dynamic dashboard link based on user role
     { 
       href: '#', // This will be overridden in filterMenuItems
       label: 'Dashboard', 
       roles: ['ADMIN', 'OWNER', 'BREEDER', 'HANDLER', 'CLUB'] // Available to authenticated users
     },
-    { href: '/pedigrees', label: 'Pedigrees', roles: ['ADMIN', 'OWNER', 'BREEDER', 'HANDLER', 'CLUB'] }, // Authenticated users only
-    { href: '/breeds', label: 'Breeds', roles: ['ADMIN', 'OWNER', 'BREEDER', 'HANDLER', 'CLUB'] }, // Authenticated users only
-    // { href: '/health-records', label: 'Health Records', roles: ['ADMIN', 'OWNER', 'BREEDER', 'HANDLER'] },
-    // { href: '/competitions', label: 'Competitions', roles: ['ADMIN', 'OWNER', 'HANDLER', 'CLUB'] },
-    // { href: '/ownerships', label: 'Ownerships', roles: ['ADMIN', 'OWNER', 'BREEDER', 'CLUB'] },
-    // { href: '/breeding-programs', label: 'Breeding Programs', roles: ['BREEDER'] },
-    // { href: '/club-events', label: 'Club Events', roles: ['CLUB'] },
+    { href: '/', label: 'Home', roles: [] }, // Available to all
+    { href: '/dogs', label: 'Dogs', roles: [] }, // Available to all
+    // Dog Records submenu grouping
+    { 
+      href: '#',
+      label: 'Dog Records', 
+      roles: ['ADMIN', 'OWNER', 'BREEDER', 'HANDLER', 'CLUB'],
+      submenu: [
+        { href: '/pedigrees', label: 'Pedigrees', roles: ['ADMIN', 'OWNER', 'BREEDER', 'HANDLER', 'CLUB'] },
+        { href: '/breeds', label: 'Breeds', roles: ['ADMIN', 'OWNER', 'BREEDER', 'HANDLER', 'CLUB'] },
+        // { href: '/health-records', label: 'Health Records', roles: ['ADMIN', 'OWNER', 'BREEDER', 'HANDLER'] },
+        { href: '/competitions', label: 'Competitions', roles: ['ADMIN', 'OWNER', 'HANDLER', 'CLUB'] },
+        // { href: '/ownerships', label: 'Ownerships', roles: ['ADMIN', 'OWNER', 'BREEDER', 'CLUB'] },
+      ]
+    },
+   
+    // Admin menu grouping
+    { 
+      href: '#',
+      label: 'Admin', 
+      roles: ['ADMIN'],
+      submenu: [
+        { href: '/admin/users', label: 'User Management', roles: ['ADMIN'] },
+        { href: '/admin/roles', label: 'Role Management', roles: ['ADMIN'] },
+        // { href: '/admin/settings', label: 'System Settings', roles: ['ADMIN'] },
+        // { href: '/admin/logs', label: 'System Logs', roles: ['ADMIN'] },
+      ]
+    },
+    // Breeder specific menu grouping
+    // { 
+    //   href: '#',
+    //   label: 'Breeding', 
+    //   roles: ['BREEDER'],
+    //   submenu: [
+    //     { href: '/breeding-programs', label: 'Breeding Programs', roles: ['ADMIN', 'BREEDER'] },
+    //     { href: '/breeding/matings', label: 'Planned Matings', roles: ['ADMIN', 'BREEDER'] },
+    //   ]
+    // },
+    // Club specific menu grouping
+    // { 
+    //   href: '#',
+    //   label: 'Club', 
+    //   roles: ['CLUB'],
+    //   submenu: [
+    //     { href: '/club-events', label: 'Club Events', roles: ['CLUB'] },
+    //     { href: '/club/members', label: 'Club Members', roles: ['CLUB'] },
+    //   ]
+    // },
     // { href: '/about', label: 'About', roles: [] } // Available to all
   ];
 
@@ -60,7 +100,7 @@ export default function Navbar() {
     // Get normalized user role
     const normalizedUserRole = (user?.role || '').toUpperCase();
     
-    // Process the menu items, adjusting the dashboard URL based on role
+    // Process the menu items, adjusting the dashboard URL based on role and handling submenus
     const processedItems = items.map(item => {
       // If this is the dashboard menu item, update its href based on role
       if (item.label === 'Dashboard') {
@@ -69,14 +109,36 @@ export default function Navbar() {
           href: normalizedUserRole === 'ADMIN' ? '/dashboard' : '/user-dashboard'
         };
       }
+      
+      // Process submenu items if they exist
+      if (item.submenu) {
+        // Only include submenu items that match user's role
+        const filteredSubmenu = item.submenu.filter(subItem => 
+          subItem.roles.length === 0 || // Public items
+          subItem.roles.includes(normalizedUserRole)
+        );
+        
+        // Only return submenu parent if it has accessible children
+        if (filteredSubmenu.length > 0) {
+          return {
+            ...item,
+            submenu: filteredSubmenu
+          };
+        } else {
+          return null; // Don't include empty submenus
+        }
+      }
+      
       return item;
-    });
+    }).filter(Boolean) as MenuItem[]; // Remove any null items
     
-    // If user is not an admin, only show the public items and dashboard
+    // Filter the top-level items based on role
+    // If user is not an admin, only show permitted items
     if (normalizedUserRole !== 'ADMIN') {
       return processedItems.filter(item => 
         item.roles.length === 0 || // Public items
-        item.label === 'Dashboard' // Dashboard is always visible for logged-in users
+        item.label === 'Dashboard' || // Dashboard is always visible for logged-in users
+        item.roles.includes(normalizedUserRole)
       );
     }
     
@@ -119,15 +181,46 @@ export default function Navbar() {
         </Link>
 
         {/* Desktop Navigation */}
-        <div className="hidden md:flex space-x-8">
+        <div className="hidden md:flex items-center space-x-6">
           {filteredMenuItems.map((item, index) => (
-            <Link
-              key={`desktop-${item.href}-${index}`}
-              href={item.href}
-              className="hover:text-green-400 transition"
-            >
-              {item.label}
-            </Link>
+            <div key={`desktop-${index}`} className="relative group">
+              {item.submenu ? (
+                <>
+                  <div 
+                    className="flex items-center cursor-pointer hover:text-green-400 transition py-4"
+                  >
+                    <span className="font-medium">{item.label}</span>
+                    <svg 
+                      className="ml-1 h-4 w-4 text-gray-400 group-hover:text-green-400 transition-transform group-hover:rotate-180" 
+                      xmlns="http://www.w3.org/2000/svg" 
+                      viewBox="0 0 20 20" 
+                      fill="currentColor"
+                    >
+                      <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <div className="absolute left-0 top-full mt-1 w-56 bg-gray-800 rounded-md shadow-lg py-2 z-20 hidden group-hover:block">
+                    {item.submenu.map((subItem, subIndex) => (
+                      <Link
+                        key={`desktop-sub-${subIndex}`}
+                        href={subItem.href}
+                        className="block px-4 py-2 text-sm text-gray-200 hover:bg-gray-700 hover:text-white"
+                        onClick={() => router.push(subItem.href)}
+                      >
+                        {subItem.label}
+                      </Link>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <Link
+                  href={item.href}
+                  className="font-medium hover:text-green-400 transition py-4"
+                >
+                  {item.label}
+                </Link>
+              )}
+            </div>
           ))}
 
           {/* Authenticated user links */}
@@ -202,6 +295,29 @@ export default function Navbar() {
                   >
                     Profile Settings
                   </Link>
+                  
+                  {/* Admin Section */}
+                  {user?.role === 'ADMIN' && (
+                    <>
+                      <hr className="my-1 border-gray-700" />
+                      <div className="px-4 py-1 text-xs font-semibold text-gray-400">Admin</div>
+                      <Link 
+                        href="/admin/users"
+                        className="block px-4 py-2 text-sm text-gray-200 hover:bg-gray-700 hover:text-white"
+                        onClick={() => setProfileDropdownOpen(false)}
+                      >
+                        User Management
+                      </Link>
+                      <Link 
+                        href="/admin/roles"
+                        className="block px-4 py-2 text-sm text-gray-200 hover:bg-gray-700 hover:text-white"
+                        onClick={() => setProfileDropdownOpen(false)}
+                      >
+                        Role Management
+                      </Link>
+                    </>
+                  )}
+                  
                   <hr className="my-1 border-gray-700" />
                   <button
                     onClick={() => {
@@ -258,15 +374,40 @@ export default function Navbar() {
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
         <div className="md:hidden mt-4 pt-4 border-t border-gray-700">
-          <div className="flex flex-col space-y-3 px-4">
+          <div className="flex flex-col px-4">
             {filteredMenuItems.map((item, index) => (
-              <Link
-                key={`mobile-${item.href}-${index}`}
-                href={item.href}
-                className="hover:text-green-400 py-2 transition"
-              >
-                {item.label}
-              </Link>
+              <div key={`mobile-${index}`} className="py-2 border-b border-gray-700 last:border-b-0">
+                {item.submenu ? (
+                  <>
+                    <div className="flex items-center justify-between py-2 text-white font-medium">
+                      <span className="text-green-400">{item.label}</span>
+                    </div>
+                    <div className="pl-4 mt-1 space-y-0 border-l border-gray-700">
+                      {item.submenu.map((subItem, subIndex) => (
+                        <Link
+                          key={`mobile-sub-${subIndex}`}
+                          href={subItem.href}
+                          className="block py-3 text-sm text-gray-300 hover:text-green-400 transition"
+                          onClick={() => {
+                            setIsMobileMenuOpen(false);
+                            router.push(subItem.href);
+                          }}
+                        >
+                          {subItem.label}
+                        </Link>
+                      ))}
+                    </div>
+                  </>
+                ) : (
+                  <Link
+                    href={item.href}
+                    className="block py-2 text-white hover:text-green-400 transition font-medium"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    {item.label}
+                  </Link>
+                )}
+              </div>
             ))}
 
             {/* Authenticated user links */}
