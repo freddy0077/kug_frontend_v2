@@ -70,7 +70,7 @@ function LoadingSpinner() {
 
 export default function PedigreeChart({
   dogId,
-  generations = 3,
+  generations = 4,
   orientation = 'horizontal',
   userRole,
   userId,
