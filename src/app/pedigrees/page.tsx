@@ -41,7 +41,7 @@ export default function Pedigrees() {
   const [selectedDogId, setSelectedDogId] = useState<string | null>(null);
   const [availableDogs, setAvailableDogs] = useState<DogListItem[]>([]);
   const [searchErrorMessage, setSearchErrorMessage] = useState<string | null>(null);
-  const [generationsToShow, setGenerationsToShow] = useState<number>(3);
+  const [generationsToShow, setGenerationsToShow] = useState<number>(4);
   const [editingParentsForDog, setEditingParentsForDog] = useState<{id: string, name: string, sire?: DogNode | null, dam?: DogNode | null} | null>(null);
   const [parentEditorMode, setParentEditorMode] = useState<'edit' | 'add'>('edit');
 
