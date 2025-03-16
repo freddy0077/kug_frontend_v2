@@ -17,7 +17,6 @@ type FormInputs = {
   color: string;
   dateOfBirth: string;
   dateOfDeath?: string;
-  registrationNumber?: string;
   microchipNumber?: string;
   isNeutered: boolean;
   height?: number;
@@ -422,23 +421,7 @@ const DogFormWithOwner: React.FC<DogFormProps> = ({ onSuccess }) => {
       {/* Registration Information */}
       <div>
         <h2 className="text-lg font-medium text-gray-900 mb-4">Registration Information</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Registration Number */}
-          <div>
-            <label htmlFor="registrationNumber" className="block text-sm font-medium text-gray-700 mb-1">
-              Registration Number
-            </label>
-            <input
-              type="text"
-              name="registrationNumber"
-              id="registrationNumber"
-              value={formData.registrationNumber || ''}
-              onChange={handleChange}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
-              placeholder="Official registration number"
-            />
-          </div>
-          
+        <div className="grid grid-cols-1 gap-6">
           {/* Microchip Number */}
           <div>
             <label htmlFor="microchipNumber" className="block text-sm font-medium text-gray-700 mb-1">

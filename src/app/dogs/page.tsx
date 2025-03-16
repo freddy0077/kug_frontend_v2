@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery } from '@apollo/client';
 import { GET_DOGS, DogSortField, SortDirection } from '@/graphql/queries/dogQueries';
-import { GET_BREEDS, GET_BREED_GROUPS } from '@/graphql/queries/breedQueries';
+import { GET_BREEDS } from '@/graphql/queries/breedQueries';
 
 // Define breed interface based on the API response structure
 interface Breed {
@@ -17,62 +17,93 @@ interface Breed {
   average_weight?: string;
   description?: string;
 }
+
 import DogCard from '@/components/dogs/DogCard';
-import BreedFilter from '@/components/dogs/BreedFilter';
-import SearchInput from '@/components/common/SearchInput';
+import AdvancedDogSearch from '@/components/dogs/AdvancedDogSearch';
 import Pagination from '@/components/common/Pagination';
 import Link from 'next/link';
 
+// Define search filters interface
+interface DogSearchFilters {
+  searchQuery: string;
+  breed: string;
+  breedGroup: string;
+  gender: string;
+  minAge: number | null;
+  maxAge: number | null;
+  titles: string[];
+  hasOffspring: boolean | null;
+  isNeutered: boolean | null;
+  sortField: DogSortField;
+  sortDirection: SortDirection;
+}
+
 export default function Dogs() {
-  // State for filtering and pagination
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedBreed, setSelectedBreed] = useState("");
-  const [selectedBreedGroup, setSelectedBreedGroup] = useState("");
-  const [currentPage, setCurrentPage] = useState(0);
-  const [sortField, setSortField] = useState<DogSortField>(DogSortField.NAME);
-  const [sortDirection, setSortDirection] = useState<SortDirection>(SortDirection.ASC);
   const pageSize = 10;
+  
+  // Initialize search filters
+  const initialFilters: DogSearchFilters = {
+    searchQuery: '',
+    breed: '',
+    breedGroup: '',
+    gender: '',
+    minAge: null,
+    maxAge: null,
+    titles: [],
+    hasOffspring: null,
+    isNeutered: null,
+    sortField: DogSortField.NAME,
+    sortDirection: SortDirection.ASC
+  };
+  
+  // State for filtering and pagination
+  const [searchFilters, setSearchFilters] = useState<DogSearchFilters>(initialFilters);
+  const [currentPage, setCurrentPage] = useState(0);
   
   // Fetch breeds
   const { loading: breedsLoading, error: breedsError, data: breedsData } = useQuery(GET_BREEDS, {
     variables: { 
       offset: 0, 
-      limit: 100, // Fetch all breeds
+      limit: 500, // Fetch a good number of breeds
       searchTerm: '' // Empty search term to get all
     }
   });
   
-  // Extract unique breed groups
-  const breedGroups = Array.from(
-    new Set(
-      breedsData?.breeds?.items
-        ?.map((breed: Breed) => breed.group)
-        .filter(Boolean) || []
-    )
-  );
-
-  // Breed categories from fetched data
-  const breedCategories = breedsData?.breeds?.items?.map((breed: Breed) => ({ 
+  // Extract breed data and groups
+  const breeds = breedsData?.breeds?.items?.map((breed: Breed) => ({ 
     id: breed.id, 
     name: breed.name, 
     group: breed.group 
   })) || [];
+  
+  // Extract unique breed groups
+  const breedGroups: string[] = Array.from(
+    new Set(
+      breeds.map(breed => breed.group).filter(Boolean)
+    )
+  );
 
   // GraphQL query to fetch dogs with filters
   const { loading, error, data } = useQuery(GET_DOGS, {
     variables: {
       offset: currentPage * pageSize,
       limit: pageSize,
-      searchTerm: searchQuery || undefined,
-      breedId: selectedBreed || undefined,
-      breedGroup: selectedBreedGroup || undefined,
-      sortBy: sortField,
-      sortDirection: sortDirection
+      searchTerm: searchFilters.searchQuery || undefined,
+      breedId: searchFilters.breed || undefined,
+      breedGroup: searchFilters.breedGroup || undefined,
+      gender: searchFilters.gender || undefined,
+      hasOffspring: searchFilters.hasOffspring,
+      isNeutered: searchFilters.isNeutered,
+      minAge: searchFilters.minAge,
+      maxAge: searchFilters.maxAge,
+      titles: searchFilters.titles.length > 0 ? searchFilters.titles as string[] : undefined,
+      sortBy: searchFilters.sortField,
+      sortDirection: searchFilters.sortDirection
     },
     fetchPolicy: 'network-only'
   });
 
-  // Handle breed group and breed loading state
+  // Handle breed data loading state
   if (breedsLoading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
@@ -81,7 +112,7 @@ export default function Dogs() {
     );
   }
 
-  // Handle breed group and breed error state
+  // Handle breed data error state
   if (breedsError) {
     return (
       <div className="container mx-auto p-4">
@@ -110,20 +141,10 @@ export default function Dogs() {
     }
   };
 
-  // Handle sort changes
-  const toggleSort = (field: DogSortField) => {
-    if (sortField === field) {
-      setSortDirection(prev => prev === SortDirection.ASC ? SortDirection.DESC : SortDirection.ASC);
-    } else {
-      setSortField(field);
-      setSortDirection(SortDirection.ASC);
-    }
-  };
-
-  // Get sort icon
-  const getSortIcon = (field: DogSortField) => {
-    if (sortField !== field) return '↕️';
-    return sortDirection === SortDirection.ASC ? '↑' : '↓';
+  // Handle filters change
+  const handleFiltersChange = (newFilters: DogSearchFilters) => {
+    setSearchFilters(newFilters);
+    setCurrentPage(0); // Reset to first page when filters change
   };
 
   return (
@@ -150,82 +171,43 @@ export default function Dogs() {
       </div>
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Search and filter panel */}
-        <div className="bg-white shadow-sm rounded-lg p-6 mb-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="md:col-span-2">
-              <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-1">Search Dogs</label>
-              <SearchInput 
-                value={searchQuery}
-                onChange={setSearchQuery}
-                placeholder="Search by name, registration number..."
-                className="w-full"
-              />
-            </div>
-            
-            <div>
-              <label htmlFor="breed-group" className="block text-sm font-medium text-gray-700 mb-1">Filter by Breed Group</label>
-              <select
-                id="breed-group"
-                value={selectedBreedGroup}
-                onChange={(e) => {
-                  setSelectedBreedGroup(e.target.value);
-                  setSelectedBreed(''); // Reset breed when changing group
-                }}
-                className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm rounded-md"
-              >
-                <option value="">All Breed Groups</option>
-                {breedsData?.breeds?.items?.map((breed: Breed) => (
-                  <option key={breed.id} value={breed.id}>{breed.name}</option>
-                ))}
-              </select>
-            </div>
-            
-            {selectedBreedGroup && (
-              <div>
-                <label htmlFor="breed" className="block text-sm font-medium text-gray-700 mb-1">Filter by Breed</label>
-                <select
-                  id="breed"
-                  value={selectedBreed}
-                  onChange={(e) => setSelectedBreed(e.target.value)}
-                  className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm rounded-md"
+          {/* Advanced search component */}
+        <AdvancedDogSearch
+          filters={searchFilters}
+          onFiltersChange={handleFiltersChange}
+          breeds={breeds}
+          breedGroups={breedGroups}
+          loading={loading}
+        />
+        
+        {/* Results count */}
+        {!loading && !error && data?.dogs?.totalCount > 0 && (
+          <div className="mb-6 bg-white p-4 rounded-lg shadow-sm text-sm text-gray-600">
+            <div className="flex justify-between items-center">
+              <span>Showing {currentPage * pageSize + 1}-{Math.min((currentPage + 1) * pageSize, data.dogs.totalCount)} of {data.dogs.totalCount} dogs</span>
+              {(Object.keys(searchFilters).some(key => {
+                const v = searchFilters[key as keyof DogSearchFilters];
+                // Skip specific default values
+                if (key === 'sortField' && v === DogSortField.NAME) return false;
+                if (key === 'sortDirection' && v === SortDirection.ASC) return false;
+                
+                // Check if value is non-empty
+                if (v === '' || v === null) return false;
+                if (Array.isArray(v) && v.length === 0) return false;
+                
+                // Value is not default, so it's an active filter
+                return true;
+              })) && (
+                <button 
+                  onClick={() => setSearchFilters(initialFilters)}
+                  className="text-green-600 hover:text-green-800 text-sm font-medium"
                 >
-                  <option value="">All Breeds in {selectedBreedGroup}</option>
-                  {breedCategories
-                    .filter((breed: {id: string, name: string, group: string}) => breed.group === selectedBreedGroup)
-                    .map((breed: {id: string, name: string, group: string}) => (
-                      <option key={breed.id} value={breed.id}>{breed.name}</option>
-                    ))
-                  }
-                </select>
-              </div>
-            )}
-            
-            <div>
-              <label htmlFor="sort" className="block text-sm font-medium text-gray-700 mb-1">Sort by</label>
-              <div className="mt-1 flex flex-wrap gap-2">
-                <button
-                  onClick={() => toggleSort(DogSortField.NAME)}
-                  className={`px-3 py-1 text-sm rounded-md ${sortField === DogSortField.NAME ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}
-                >
-                  Name {sortField === DogSortField.NAME && (sortDirection === SortDirection.ASC ? '↑' : '↓')}
+                  Clear all filters
                 </button>
-                <button
-                  onClick={() => toggleSort(DogSortField.DATE_OF_BIRTH)}
-                  className={`px-3 py-1 text-sm rounded-md ${sortField === DogSortField.DATE_OF_BIRTH ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}
-                >
-                  Age {sortField === DogSortField.DATE_OF_BIRTH && (sortDirection === SortDirection.ASC ? '↑' : '↓')}
-                </button>
-              </div>
+              )}
             </div>
           </div>
-          
-          {data?.dogs?.totalCount > 0 && (
-            <div className="mt-4 pt-4 border-t border-gray-200 text-sm text-gray-600">
-              Showing {currentPage * pageSize + 1}-{Math.min((currentPage + 1) * pageSize, data.dogs.totalCount)} of {data.dogs.totalCount} dogs
-            </div>
-          )}
-        </div>
+        )}
         
         {/* Loading state */}
         {loading && (
@@ -260,14 +242,12 @@ export default function Dogs() {
                 </svg>
                 <p className="text-xl text-gray-500 font-medium">No dogs found matching your criteria</p>
                 <p className="text-gray-500 mt-2">Try adjusting your search or filters</p>
-                {selectedBreedGroup && (
-                  <button 
-                    onClick={() => setSelectedBreedGroup('')}
-                    className="mt-4 inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
-                  >
-                    Clear breed group filter
-                  </button>
-                )}
+                <button 
+                  onClick={() => setSearchFilters(initialFilters)}
+                  className="mt-4 inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+                >
+                  Reset all filters
+                </button>
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">

@@ -49,7 +49,6 @@ export default function DogRegistrationForm({
     gender: 'male',
     dateOfBirth: new Date(),
     color: '',
-    registrationNumber: '',
     microchipNumber: '',
     ownerId: userId,
     ...initialData
@@ -343,28 +342,8 @@ export default function DogRegistrationForm({
         <div>
           <h3 className="text-lg font-medium leading-6 text-gray-900 mb-4">Registration Information</h3>
           <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
-            {/* Registration Number */}
-            <div className="sm:col-span-3">
-              <label htmlFor="registrationNumber" className="block text-sm font-medium text-gray-700">
-                Registration Number
-              </label>
-              <div className="mt-1">
-                <input
-                  type="text"
-                  id="registrationNumber"
-                  name="registrationNumber"
-                  value={formData.registrationNumber}
-                  onChange={handleChange}
-                  className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
-                />
-              </div>
-              <p className="mt-1 text-xs text-gray-500">
-                Official registration number from kennel club or registry
-              </p>
-            </div>
-
             {/* Microchip Number */}
-            <div className="sm:col-span-3">
+            <div className="sm:col-span-6">
               <label htmlFor="microchipNumber" className="block text-sm font-medium text-gray-700">
                 Microchip Number
               </label>
