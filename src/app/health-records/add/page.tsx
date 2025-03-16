@@ -7,6 +7,7 @@ import { CREATE_HEALTH_RECORD } from '@/graphql/queries/healthRecordQueries';
 import { HealthRecordType, DogOption, CreateHealthRecordInput } from '@/types/healthRecord';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import { useAuth } from '@/contexts/AuthContext';
+import { UserRole } from '@/utils/permissionUtils';
 
 // Component that uses searchParams wrapped in Suspense
 function AddHealthRecordContent() {
@@ -129,7 +130,7 @@ function AddHealthRecordContent() {
   };
 
   return (
-    <ProtectedRoute allowedRoles={['ADMIN', 'OWNER', 'BREEDER', 'VET']}>
+    <ProtectedRoute allowedRoles={[UserRole.ADMIN, UserRole.OWNER]}>
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Add Health Record</h1>

@@ -2,14 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { hasPermission } from '@/utils/permissionUtils';
+import { hasPermission, UserRole } from '@/utils/permissionUtils';
 import { HealthRecordFormData } from '@/utils/formHandlers';
 
 type HealthRecordFormProps = {
   dogId: string;
   initialData?: Partial<HealthRecordFormData>;
   onSubmit: (formData: HealthRecordFormData) => Promise<void>;
-  userRole: string;
+  userRole: UserRole;
   userId: string;
   dogOwnerId: string;
 };

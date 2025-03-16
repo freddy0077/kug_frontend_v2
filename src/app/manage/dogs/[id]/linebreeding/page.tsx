@@ -6,7 +6,7 @@ import { useQuery } from '@apollo/client';
 import Link from 'next/link';
 import { GET_DOG, GET_DOGS } from '@/graphql/queries/dogQueries';
 import LinebreedingAnalysis from '@/components/pedigree/LinebreedingAnalysis';
-import { hasPermission } from '@/utils/permissionUtils';
+import { hasPermission, UserRole } from '@/utils/permissionUtils';
 
 export default function LinebreedingAnalysisPage() {
   const params = useParams();
@@ -14,7 +14,7 @@ export default function LinebreedingAnalysisPage() {
   const dogId = params.id as string;
   
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userRole, setUserRole] = useState('');
+  const [userRole, setUserRole] = useState<UserRole>(UserRole.VIEWER);
   const [userId, setUserId] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -40,7 +40,7 @@ export default function LinebreedingAnalysisPage() {
     const uid = localStorage.getItem('userId') || '';
     
     setIsAuthenticated(authStatus);
-    setUserRole(role);
+    setUserRole(role as UserRole);
     setUserId(uid);
     
     // Redirect if not authenticated

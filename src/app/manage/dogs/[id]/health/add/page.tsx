@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import HealthRecordForm from '@/components/health/HealthRecordForm';
 import { HealthRecordFormData, submitHealthRecordForm } from '@/utils/formHandlers';
+import { UserRole } from '@/utils/permissionUtils';
 
 export default function AddHealthRecordPage() {
   const params = useParams();
@@ -12,7 +13,7 @@ export default function AddHealthRecordPage() {
   const dogId = params.id as string;
   
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userRole, setUserRole] = useState('');
+  const [userRole, setUserRole] = useState<UserRole>(UserRole.VIEWER);
   const [userId, setUserId] = useState('');
   const [dogOwnerId, setDogOwnerId] = useState('');
   const [dogName, setDogName] = useState('');
@@ -26,7 +27,7 @@ export default function AddHealthRecordPage() {
     const uid = localStorage.getItem('userId') || '';
     
     setIsAuthenticated(authStatus);
-    setUserRole(role);
+    setUserRole(role as UserRole);
     setUserId(uid);
     
     // Redirect if not authenticated

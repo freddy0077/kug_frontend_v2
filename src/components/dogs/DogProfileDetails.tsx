@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { format } from 'date-fns';
 import Link from 'next/link';
-import { hasPermission } from '@/utils/permissionUtils';
+import { hasPermission, UserRole } from '@/utils/permissionUtils';
 
 type DogDetailsProps = {
   dog: {
@@ -31,7 +31,7 @@ type DogDetailsProps = {
     weight?: number;
     notes?: string;
   };
-  userRole: string;
+  userRole: UserRole;
   userId: string;
 };
 

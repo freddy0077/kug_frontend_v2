@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { UserRole } from '@/utils/permissionUtils';
 import Link from 'next/link';
 import { format } from 'date-fns';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
@@ -86,7 +87,7 @@ export default function UserDashboard() {
   }
 
   return (
-    <ProtectedRoute allowedRoles={['ADMIN', 'OWNER', 'BREEDER', 'HANDLER', 'CLUB']}>
+    <ProtectedRoute allowedRoles={[UserRole.ADMIN, UserRole.OWNER, UserRole.HANDLER, UserRole.CLUB]}>
       <div className="bg-gray-100 min-h-screen py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Dashboard Header */}

@@ -300,7 +300,7 @@ export default function Navbar() {
                   </Link>
                   
                   {/* Admin Section */}
-                  {user?.role === 'ADMIN' && (
+                  {user?.role === UserRole.ADMIN && (
                     <>
                       <hr className="my-1 border-gray-700" />
                       <div className="px-4 py-1 text-xs font-semibold text-gray-400">Admin</div>

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { UserRole } from '@/utils/permissionUtils';
 import Link from 'next/link';
 import { format } from 'date-fns';
 import { useQuery } from '@apollo/client';
@@ -175,7 +176,7 @@ export default function PlannedMatings() {
   }
 
   return (
-    <ProtectedRoute allowedRoles={['BREEDER', 'ADMIN']}>
+    <ProtectedRoute allowedRoles={[UserRole.ADMIN]}>
       <div className="bg-gray-100 min-h-screen py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Page Header */}

@@ -8,6 +8,7 @@ import { GET_USERS } from '@/graphql/queries/userQueries';
 import { DEACTIVATE_USER_MUTATION } from '@/graphql/mutations/userMutations';
 import { useAuth } from '@/contexts/AuthContext';
 import { format } from 'date-fns';
+import { UserRole } from '@/utils/permissionUtils';
 
 export default function UserManagement() {
   const router = useRouter();
@@ -53,10 +54,10 @@ export default function UserManagement() {
 
   // Calculate role counts for the stats section
   const roleCounts = {
-    OWNER: data?.users?.items?.filter((user: any) => user.role === 'OWNER').length || 0,
-    BREEDER: data?.users?.items?.filter((user: any) => user.role === 'BREEDER').length || 0,
-    HANDLER: data?.users?.items?.filter((user: any) => user.role === 'HANDLER').length || 0,
-    CLUB: data?.users?.items?.filter((user: any) => user.role === 'CLUB').length || 0,
+    OWNER: data?.users?.items?.filter((user: any) => user.role === UserRole.OWNER).length || 0,
+    ADMIN: data?.users?.items?.filter((user: any) => user.role === UserRole.ADMIN).length || 0,
+    HANDLER: data?.users?.items?.filter((user: any) => user.role === UserRole.HANDLER).length || 0,
+    CLUB: data?.users?.items?.filter((user: any) => user.role === UserRole.CLUB).length || 0,
   };
 
   // Handle filter changes
@@ -139,9 +140,9 @@ export default function UserManagement() {
               <p className="text-2xl font-bold text-green-700">{roleCounts.OWNER}</p>
               <p className="text-sm text-green-600">Owners</p>
             </div>
-            <div className="bg-blue-50 p-4 rounded-lg">
-              <p className="text-2xl font-bold text-blue-700">{roleCounts.BREEDER}</p>
-              <p className="text-sm text-blue-600">Breeders</p>
+            <div className="bg-red-50 p-4 rounded-lg">
+              <p className="text-2xl font-bold text-red-700">{roleCounts.ADMIN}</p>
+              <p className="text-sm text-red-600">Administrators</p>
             </div>
             <div className="bg-purple-50 p-4 rounded-lg">
               <p className="text-2xl font-bold text-purple-700">{roleCounts.HANDLER}</p>
@@ -247,11 +248,11 @@ export default function UserManagement() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                          ${user.role === 'ADMIN' ? 'bg-red-100 text-red-800' : 
-                           user.role === 'OWNER' ? 'bg-green-100 text-green-800' :
-                           user.role === 'BREEDER' ? 'bg-blue-100 text-blue-800' :
-                           user.role === 'HANDLER' ? 'bg-purple-100 text-purple-800' :
-                           'bg-yellow-100 text-yellow-800'}`}>
+                          ${user.role === UserRole.ADMIN ? 'bg-red-100 text-red-800' : 
+                           user.role === UserRole.OWNER ? 'bg-green-100 text-green-800' :
+                           user.role === UserRole.HANDLER ? 'bg-purple-100 text-purple-800' :
+                           user.role === UserRole.CLUB ? 'bg-yellow-100 text-yellow-800' :
+                           'bg-gray-100 text-gray-800'}`}>
                           {user.role}
                         </span>
                       </td>

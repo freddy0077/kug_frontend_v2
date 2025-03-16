@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { format } from 'date-fns';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
+import { UserRole } from '@/utils/permissionUtils';
 import { useOwnerships } from '@/hooks/useOwnerships';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -124,7 +125,7 @@ export default function OwnershipRecordsPage() {
   });
 
   return (
-    <ProtectedRoute allowedRoles={['ADMIN', 'OWNER', 'BREEDER']}>
+    <ProtectedRoute allowedRoles={[UserRole.ADMIN, UserRole.OWNER]}>
       <div className="container mx-auto p-4">
         <h1 className="text-2xl font-bold mb-4">Ownership Records</h1>
 

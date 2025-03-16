@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { hasPermission } from '@/utils/permissionUtils';
+import { hasPermission, UserRole } from '@/utils/permissionUtils';
 
 interface DogPhoto {
   id: string;
@@ -15,7 +15,7 @@ interface DogPhoto {
 interface PhotoGalleryProps {
   dogId: string;
   photos: DogPhoto[];
-  userRole: string;
+  userRole: UserRole;
   userId: string;
   ownerId: string;
   onSetPrimary: (photoId: string) => void;

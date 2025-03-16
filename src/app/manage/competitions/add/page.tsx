@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { UserRole } from '@/utils/permissionUtils';
 
 interface CompetitionResultFormData {
   dogId: string;
@@ -39,7 +40,7 @@ const categories = [
 export default function AddCompetitionResult() {
   const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userRole, setUserRole] = useState('');
+  const [userRole, setUserRole] = useState<UserRole>(UserRole.VIEWER);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [dogs, setDogs] = useState(dogSampleData);
@@ -64,7 +65,7 @@ export default function AddCompetitionResult() {
     const role = localStorage.getItem('userRole') || '';
     
     setIsAuthenticated(authStatus);
-    setUserRole(role);
+    setUserRole(role as UserRole);
     setIsLoading(false);
     
     // Redirect to login if not authenticated
@@ -75,10 +76,10 @@ export default function AddCompetitionResult() {
     
     // Check if user has permission to add competition results
     // Only owners, handlers, clubs, and admins can add competition results
-    const hasPermission = role === 'admin' || 
-                          role === 'owner' || 
-                          role === 'handler' ||
-                          role === 'club';
+    const hasPermission = role === UserRole.ADMIN || 
+                          role === UserRole.OWNER || 
+                          role === UserRole.HANDLER ||
+                          role === UserRole.CLUB;
                           
     if (authStatus && !hasPermission) {
       // Redirect to dashboard if authenticated but doesn't have permission

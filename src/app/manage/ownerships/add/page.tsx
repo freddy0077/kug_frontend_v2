@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { UserRole } from '@/utils/permissionUtils';
 
 interface OwnershipFormData {
   dogId: string;
@@ -38,7 +39,7 @@ const ownerSampleData = [
 export default function AddOwnership() {
   const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userRole, setUserRole] = useState('');
+  const [userRole, setUserRole] = useState<UserRole>(UserRole.VIEWER);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [dogs, setDogs] = useState(dogSampleData);
@@ -66,7 +67,7 @@ export default function AddOwnership() {
     const role = localStorage.getItem('userRole') || '';
     
     setIsAuthenticated(authStatus);
-    setUserRole(role);
+    setUserRole(role as UserRole);
     setIsLoading(false);
     
     // Redirect to login if not authenticated
@@ -76,11 +77,10 @@ export default function AddOwnership() {
     }
     
     // Check if user has permission to add ownership records
-    // Only owners, breeders, clubs, and admins can add ownership records
-    const hasPermission = role === 'admin' || 
-                          role === 'owner' || 
-                          role === 'breeder' ||
-                          role === 'club';
+    // Only owners, clubs, and admins can add ownership records
+    const hasPermission = role === UserRole.ADMIN || 
+                          role === UserRole.OWNER || 
+                          role === UserRole.CLUB;
                           
     if (authStatus && !hasPermission) {
       // Redirect to dashboard if authenticated but doesn't have permission
@@ -89,7 +89,7 @@ export default function AddOwnership() {
     }
 
     // If user is an owner, pre-fill the previous owner information
-    if (role === 'owner') {
+    if (role === UserRole.OWNER) {
       const userId = localStorage.getItem('userId') || '';
       const userName = localStorage.getItem('userName') || '';
       

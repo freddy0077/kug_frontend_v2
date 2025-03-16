@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { format } from 'date-fns';
-import { hasPermission } from '@/utils/permissionUtils';
+import { hasPermission, UserRole } from '@/utils/permissionUtils';
 
 type DogProfileHeaderProps = {
   dog: {
@@ -21,7 +21,7 @@ type DogProfileHeaderProps = {
     ownerName?: string;
     profileImageUrl?: string;
   };
-  userRole: string;
+  userRole: UserRole;
   userId: string;
 };
 

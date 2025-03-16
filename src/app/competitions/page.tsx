@@ -12,6 +12,7 @@ import CompetitionResultList, { CompetitionResult } from '@/components/competiti
 import CompetitionFilters, { competitionCategories } from '@/components/competitions/CompetitionFilters';
 import { useAuth } from '@/contexts/AuthContext';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
+import { UserRole } from '@/utils/permissionUtils';
 
 // Define filter options interface
 interface FilterOptions {
@@ -110,11 +111,11 @@ export default function CompetitionsPage() {
   });
 
   return (
-    <ProtectedRoute allowedRoles={['USER', 'ADMIN', 'BREEDER', 'JUDGE', 'OWNER', 'HANDLER', 'CLUB']}>
+    <ProtectedRoute allowedRoles={[UserRole.ADMIN, UserRole.OWNER, UserRole.HANDLER, UserRole.CLUB, UserRole.VIEWER]}>
       <main className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold text-gray-900">Competition Results</h1>
-          {(user?.role === 'ADMIN' || user?.role === 'JUDGE' || user?.role === 'BREEDER' || user?.role === 'OWNER') && (
+          {(user?.role === UserRole.ADMIN || user?.role === UserRole.HANDLER || user?.role === UserRole.OWNER) && (
             <Link 
               href="/manage/competitions/add"
               className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition flex items-center"

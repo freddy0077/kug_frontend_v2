@@ -6,6 +6,7 @@ import { useMutation } from '@apollo/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { CREATE_BREEDING_PROGRAM } from '@/graphql/mutations/breedingProgramMutations';
+import { UserRole } from '@/utils/permissionUtils';
 
 export default function AddBreedingProgram() {
   const router = useRouter();
@@ -136,7 +137,7 @@ export default function AddBreedingProgram() {
   };
 
   return (
-    <ProtectedRoute allowedRoles={['BREEDER', 'ADMIN']}>
+    <ProtectedRoute allowedRoles={[UserRole.ADMIN]}>
       <div className="bg-gray-100 min-h-screen py-8">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="bg-white rounded-lg shadow-md p-6">

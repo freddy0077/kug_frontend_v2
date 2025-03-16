@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import HealthRecordForm from '@/components/health/HealthRecordForm';
 import { HealthRecordFormData, submitHealthRecordForm } from '@/utils/formHandlers';
-import { hasPermission } from '@/utils/permissionUtils';
+import { hasPermission, UserRole } from '@/utils/permissionUtils';
 
 export default function EditHealthRecordPage() {
   const params = useParams();
@@ -14,7 +14,7 @@ export default function EditHealthRecordPage() {
   const recordId = params.recordId as string;
   
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userRole, setUserRole] = useState('');
+  const [userRole, setUserRole] = useState<UserRole>(UserRole.VIEWER);
   const [userId, setUserId] = useState('');
   const [dogOwnerId, setDogOwnerId] = useState('');
   const [dogName, setDogName] = useState('');
@@ -30,7 +30,7 @@ export default function EditHealthRecordPage() {
     const uid = localStorage.getItem('userId') || '';
     
     setIsAuthenticated(authStatus);
-    setUserRole(role);
+    setUserRole(role as UserRole);
     setUserId(uid);
     
     // Redirect if not authenticated
@@ -57,7 +57,7 @@ export default function EditHealthRecordPage() {
         setDogOwnerId(mockDogData.ownerId);
         
         // Check if user has permission to edit this dog's health records
-        if (!hasPermission(role, 'health-record', 'edit', mockDogData.ownerId, uid)) {
+        if (!hasPermission(role as UserRole, 'health-record', 'edit', mockDogData.ownerId, uid)) {
           setError('You do not have permission to edit this dog\'s health records');
           setIsLoading(false);
           return;

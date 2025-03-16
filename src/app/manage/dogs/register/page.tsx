@@ -3,14 +3,14 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { hasPermission } from '@/utils/permissionUtils';
+import { hasPermission, UserRole } from '@/utils/permissionUtils';
 import { submitDogForm, DogFormData } from '@/utils/formHandlers';
 import DogRegistrationForm from '@/components/dogs/DogRegistrationForm';
 
 export default function RegisterDog() {
   const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userRole, setUserRole] = useState('');
+  const [userRole, setUserRole] = useState<UserRole>(UserRole.VIEWER);
   const [userId, setUserId] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [submitMessage, setSubmitMessage] = useState({ type: '', message: '' });
@@ -22,14 +22,14 @@ export default function RegisterDog() {
     const uid = localStorage.getItem('userId') || '';
     
     setIsAuthenticated(authStatus);
-    setUserRole(role);
+    setUserRole(role as UserRole);
     setUserId(uid);
     setIsLoading(false);
     
     // Redirect if not authenticated or doesn't have permission
     if (!authStatus) {
       router.push('/auth/login');
-    } else if (!hasPermission(role, 'dog', 'create')) {
+    } else if (!hasPermission(role as UserRole, 'dog', 'create')) {
       router.push('/user/dashboard');
     }
   }, [router]);

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { hasPermission } from '@/utils/permissionUtils';
+import { hasPermission, UserRole } from '@/utils/permissionUtils';
 
 type Photo = {
   id: string;
@@ -14,7 +14,7 @@ type Photo = {
 
 type PhotoManagerProps = {
   dogId: string;
-  userRole: string;
+  userRole: UserRole;
   userId: string;
   ownerId: string;
   initialPhotos?: Photo[];

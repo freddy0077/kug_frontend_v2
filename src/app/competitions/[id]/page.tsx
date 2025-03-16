@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
+import { UserRole } from '@/utils/permissionUtils';
 import toast from 'react-hot-toast';
 
 // Import our component modules
@@ -27,7 +28,7 @@ export default function CompetitionDetailsPage() {
   const [dogInfo, setDogInfo] = useState<DogInfo | null>(null);
   const [relatedCompetitions, setRelatedCompetitions] = useState<CompetitionResult[]>([]);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userRole, setUserRole] = useState('');
+  const [userRole, setUserRole] = useState<UserRole>(UserRole.VIEWER);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -37,7 +38,7 @@ export default function CompetitionDetailsPage() {
     const role = localStorage.getItem('userRole') || '';
     
     setIsAuthenticated(authStatus);
-    setUserRole(role);
+    setUserRole(role as UserRole);
     
     // Redirect to login if not authenticated
     if (!authStatus) {
@@ -46,10 +47,10 @@ export default function CompetitionDetailsPage() {
     }
     
     // Check if user has permission to view competition results
-    const hasPermission = role === 'admin' || 
-                          role === 'owner' || 
-                          role === 'handler' || 
-                          role === 'club';
+    const hasPermission = role === UserRole.ADMIN || 
+                          role === UserRole.OWNER || 
+                          role === UserRole.HANDLER || 
+                          role === UserRole.CLUB;
                           
     if (authStatus && !hasPermission) {
       // Redirect to dashboard if authenticated but doesn't have permission

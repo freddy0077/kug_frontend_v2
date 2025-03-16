@@ -1,6 +1,6 @@
 // Test file for role-based permissions and navigation
 
-import { hasPermission, getPermittedActions, Entity, Permission } from '../utils/permissionUtils';
+import { hasPermission, getPermittedActions, Entity, Permission, UserRole } from '../utils/permissionUtils';
 
 /**
  * Test suite for permission utilities
@@ -13,7 +13,7 @@ const runPermissionTests = () => {
   // Test function to check if expected result matches actual result
   const testPermission = (
     testName: string,
-    userRole: string,
+    userRole: UserRole,
     entity: any,
     action: any,
     ownerId: string | undefined,
@@ -38,7 +38,7 @@ const runPermissionTests = () => {
   // Tests for Admin role
   testPermission(
     'Admin can view any user',
-    'admin',
+    UserRole.ADMIN,
     'user',
     'view',
     'user-123',
@@ -48,7 +48,7 @@ const runPermissionTests = () => {
 
   testPermission(
     'Admin can create users',
-    'admin',
+    UserRole.ADMIN,
     'user',
     'create',
     undefined,
@@ -58,7 +58,7 @@ const runPermissionTests = () => {
 
   testPermission(
     'Admin can edit any user',
-    'admin',
+    UserRole.ADMIN,
     'user',
     'edit',
     'user-123',
@@ -68,7 +68,7 @@ const runPermissionTests = () => {
 
   testPermission(
     'Admin can delete users',
-    'admin',
+    UserRole.ADMIN,
     'user',
     'delete',
     'user-123',
@@ -79,7 +79,7 @@ const runPermissionTests = () => {
   // Tests for Owner role
   testPermission(
     'Owner can view own dog',
-    'owner',
+    UserRole.OWNER,
     'dog',
     'view',
     'owner-123',
@@ -89,7 +89,7 @@ const runPermissionTests = () => {
 
   testPermission(
     'Owner can create dog',
-    'owner',
+    UserRole.OWNER,
     'dog',
     'create',
     undefined,
@@ -99,7 +99,7 @@ const runPermissionTests = () => {
 
   testPermission(
     'Owner can edit own dog',
-    'owner',
+    UserRole.OWNER,
     'dog',
     'edit',
     'owner-123',
@@ -109,7 +109,7 @@ const runPermissionTests = () => {
 
   testPermission(
     'Owner cannot edit another owner\'s dog',
-    'owner',
+    UserRole.OWNER,
     'dog',
     'edit',
     'owner-456',
@@ -119,7 +119,7 @@ const runPermissionTests = () => {
 
   testPermission(
     'Owner can delete own dog',
-    'owner',
+    UserRole.OWNER,
     'dog',
     'delete',
     'owner-123',
@@ -129,7 +129,7 @@ const runPermissionTests = () => {
 
   testPermission(
     'Owner cannot delete another owner\'s dog',
-    'owner',
+    UserRole.OWNER,
     'dog',
     'delete',
     'owner-456',
@@ -140,7 +140,7 @@ const runPermissionTests = () => {
   // Tests for Breeder role
   testPermission(
     'Breeder can view breeding program',
-    'breeder',
+    UserRole.OWNER,
     'breeding-program',
     'view',
     'breeder-123',
@@ -150,7 +150,7 @@ const runPermissionTests = () => {
 
   testPermission(
     'Breeder can create breeding program',
-    'breeder',
+    UserRole.OWNER,
     'breeding-program',
     'create',
     undefined,
@@ -160,7 +160,7 @@ const runPermissionTests = () => {
 
   testPermission(
     'Breeder can edit own breeding program',
-    'breeder',
+    UserRole.OWNER,
     'breeding-program',
     'edit',
     'breeder-123',
@@ -170,7 +170,7 @@ const runPermissionTests = () => {
 
   testPermission(
     'Breeder cannot edit another breeder\'s breeding program',
-    'breeder',
+    UserRole.OWNER,
     'breeding-program',
     'edit',
     'breeder-456',
@@ -181,7 +181,7 @@ const runPermissionTests = () => {
   // Tests for Handler role
   testPermission(
     'Handler can view competition',
-    'handler',
+    UserRole.HANDLER,
     'competition',
     'view',
     'handler-123',
@@ -191,7 +191,7 @@ const runPermissionTests = () => {
 
   testPermission(
     'Handler can create competition result',
-    'handler',
+    UserRole.HANDLER,
     'competition',
     'create',
     undefined,
@@ -201,7 +201,7 @@ const runPermissionTests = () => {
 
   testPermission(
     'Handler can edit own competition result',
-    'handler',
+    UserRole.HANDLER,
     'competition',
     'edit',
     'handler-123',
@@ -212,7 +212,7 @@ const runPermissionTests = () => {
   // Tests for Club role
   testPermission(
     'Club can view club event',
-    'club',
+    UserRole.CLUB,
     'club-event',
     'view',
     'club-123',
@@ -222,7 +222,7 @@ const runPermissionTests = () => {
 
   testPermission(
     'Club can create club event',
-    'club',
+    UserRole.CLUB,
     'club-event',
     'create',
     undefined,
@@ -232,7 +232,7 @@ const runPermissionTests = () => {
 
   testPermission(
     'Club can edit own club event',
-    'club',
+    UserRole.CLUB,
     'club-event',
     'edit',
     'club-123',
@@ -242,7 +242,7 @@ const runPermissionTests = () => {
 
   testPermission(
     'Club cannot edit another club\'s event',
-    'club',
+    UserRole.CLUB,
     'club-event',
     'edit',
     'club-456',
@@ -253,7 +253,7 @@ const runPermissionTests = () => {
   // Test getPermittedActions function
   const testActionsList = (
     testName: string,
-    userRole: string,
+    userRole: UserRole,
     entity: Entity,
     ownerId: string | undefined,
     userId: string | undefined,
@@ -283,7 +283,7 @@ const runPermissionTests = () => {
   // Test permitted actions for different roles
   testActionsList(
     'Admin actions for user entity',
-    'admin',
+    UserRole.ADMIN,
     'user',
     'user-123',
     'admin-456',
@@ -292,7 +292,7 @@ const runPermissionTests = () => {
 
   testActionsList(
     'Owner actions for own dog',
-    'owner',
+    UserRole.OWNER,
     'dog',
     'owner-123',
     'owner-123',
@@ -301,7 +301,7 @@ const runPermissionTests = () => {
 
   testActionsList(
     'Owner actions for other\'s dog',
-    'owner',
+    UserRole.OWNER,
     'dog',
     'owner-456',
     'owner-123',
@@ -310,7 +310,7 @@ const runPermissionTests = () => {
 
   testActionsList(
     'Breeder actions for own breeding program',
-    'breeder',
+    UserRole.OWNER,
     'breeding-program',
     'breeder-123',
     'breeder-123',
@@ -319,7 +319,7 @@ const runPermissionTests = () => {
 
   testActionsList(
     'Handler actions for competition',
-    'handler',
+    UserRole.HANDLER,
     'competition',
     undefined,
     'handler-123',
@@ -328,7 +328,7 @@ const runPermissionTests = () => {
 
   testActionsList(
     'Club actions for own club event',
-    'club',
+    UserRole.CLUB,
     'club-event',
     'club-123',
     'club-123',

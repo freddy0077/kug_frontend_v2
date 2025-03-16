@@ -4,11 +4,12 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { format } from 'date-fns';
+import { UserRole } from '@/utils/permissionUtils';
 
 export default function ClubEvents() {
   const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userRole, setUserRole] = useState('');
+  const [userRole, setUserRole] = useState<UserRole>(UserRole.VIEWER);
   const [isLoading, setIsLoading] = useState(true);
 
   // Sample club events data
@@ -61,13 +62,13 @@ export default function ClubEvents() {
     const role = localStorage.getItem('userRole') || '';
     
     setIsAuthenticated(authStatus);
-    setUserRole(role);
+    setUserRole(role as UserRole);
     setIsLoading(false);
     
     // Redirect if not authenticated or not a club/admin
     if (!authStatus) {
       router.push('/auth/login');
-    } else if (role !== 'club' && role !== 'admin') {
+    } else if (role !== UserRole.CLUB && role !== UserRole.ADMIN) {
       router.push('/user/dashboard');
     }
   }, [router]);
@@ -80,7 +81,7 @@ export default function ClubEvents() {
     );
   }
   
-  if (!isAuthenticated || (userRole !== 'club' && userRole !== 'admin')) {
+  if (!isAuthenticated || (userRole !== UserRole.CLUB && userRole !== UserRole.ADMIN)) {
     return null; // We already redirect in the useEffect, this is just a safeguard
   }
 

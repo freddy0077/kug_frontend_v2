@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { UserRole } from '@/utils/permissionUtils';
 
 interface HealthRecordFormData {
   dogId: string;
@@ -25,7 +26,7 @@ const dogSampleData = [
 export default function AddHealthRecord() {
   const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userRole, setUserRole] = useState('');
+  const [userRole, setUserRole] = useState<UserRole>(UserRole.VIEWER);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [dogs, setDogs] = useState(dogSampleData);
@@ -48,7 +49,7 @@ export default function AddHealthRecord() {
     const role = localStorage.getItem('userRole') || '';
     
     setIsAuthenticated(authStatus);
-    setUserRole(role);
+    setUserRole(role as UserRole);
     setIsLoading(false);
     
     // Redirect to login if not authenticated
@@ -59,10 +60,9 @@ export default function AddHealthRecord() {
     
     // Check if user has permission to add health records
     // Only owners, breeders, handlers, and admins can add health records
-    const hasPermission = role === 'admin' || 
-                         role === 'owner' || 
-                         role === 'breeder' ||
-                         role === 'handler';
+    const hasPermission = role === UserRole.ADMIN || 
+                         role === UserRole.OWNER || 
+                         role === UserRole.HANDLER;
                           
     if (authStatus && !hasPermission) {
       // Redirect to dashboard if authenticated but doesn't have permission

@@ -8,6 +8,7 @@ import { useQuery } from '@apollo/client';
 
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import { GET_SINGLE_OWNERSHIP } from '@/graphql/ownerships';
+import { UserRole } from '@/utils/permissionUtils';
 import { useOwnerships } from '@/hooks/useOwnerships';
 
 export default function OwnershipDetailsPage() {
@@ -51,7 +52,7 @@ export default function OwnershipDetailsPage() {
   }
 
   return (
-    <ProtectedRoute allowedRoles={['ADMIN', 'OWNER', 'BREEDER', 'CLUB']}>
+    <ProtectedRoute allowedRoles={[UserRole.ADMIN, UserRole.OWNER, UserRole.CLUB]}>
       <div className="container mx-auto p-4">
         <div className="bg-white shadow-md rounded-lg overflow-hidden">
           {/* Header */}

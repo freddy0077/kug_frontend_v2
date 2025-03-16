@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
+import { UserRole } from '@/utils/permissionUtils';
 
 // Define management card interfaces
 interface ManagementCard {
@@ -19,14 +20,14 @@ export default function ManageDashboard() {
   const router = useRouter();
   const { user, loading } = useAuth();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userRole, setUserRole] = useState('');
+  const [userRole, setUserRole] = useState<UserRole>(UserRole.VIEWER);
   const [userName, setUserName] = useState('');
   const [userEmail, setUserEmail] = useState('');
 
   React.useEffect(() => {
     if (user) {
       setIsAuthenticated(true);
-      setUserRole(user.role);
+      setUserRole(user.role as UserRole);
       setUserName(user.fullName);
       setUserEmail(user.email);
     }
@@ -111,14 +112,14 @@ export default function ManageDashboard() {
                   Welcome, {userName}
                 </h1>
                 <p className="mt-4 text-lg text-green-100">
-                  {userRole === 'breeder' && 'Manage your breeding program and dog records'}
-                  {userRole === 'owner' && 'Manage your dog profiles and records'}
-                  {userRole === 'handler' && 'Track competition results and training records'}
-                  {userRole === 'club' && 'Manage club events and member registrations'}
-                  {!userRole && 'Manage your dog profiles, health records, competition results, and ownership information'}
+                  {userRole === UserRole.OWNER && 'Manage your dog profiles and records'}
+                  {userRole === UserRole.HANDLER && 'Track competition results and training records'}
+                  {userRole === UserRole.CLUB && 'Manage club events and member registrations'}
+                  {userRole === UserRole.ADMIN && 'Administrate the entire system'}
+                  {userRole === UserRole.VIEWER && 'View dog profiles, health records, competition results, and ownership information'}
                 </p>
                 <div className="mt-4 inline-block bg-green-800 px-3 py-1 rounded-full text-sm text-white">
-                  {userRole.charAt(0).toUpperCase() + userRole.slice(1)} Account
+                  {userRole} Account
                 </div>
               </div>
             </div>
@@ -142,7 +143,7 @@ export default function ManageDashboard() {
           {managementCards
             .filter(card => {
               // Show all cards for admin
-              if (userRole === 'admin') return true;
+              if (userRole === UserRole.ADMIN) return true;
               
               // Role-based filtering
               switch (card.title) {

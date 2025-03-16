@@ -1,6 +1,6 @@
 // Form submission utility functions for role-specific features
 
-import { hasPermission } from './permissionUtils';
+import { hasPermission, UserRole } from './permissionUtils';
 
 // Types for different forms
 export type UserFormData = {
@@ -104,7 +104,7 @@ export type FormSubmissionResponse = {
  */
 export const submitUserForm = async (
   formData: UserFormData,
-  userRole: string,
+  userRole: UserRole,
   userId: string
 ): Promise<FormSubmissionResponse> => {
   // Check permissions
@@ -149,7 +149,7 @@ export const submitUserForm = async (
  */
 export const submitDogForm = async (
   formData: DogFormData,
-  userRole: string,
+  userRole: UserRole,
   userId: string
 ): Promise<FormSubmissionResponse> => {
   // Check permissions
@@ -205,7 +205,7 @@ export const submitDogForm = async (
  */
 export const submitHealthRecordForm = async (
   formData: HealthRecordFormData,
-  userRole: string,
+  userRole: UserRole,
   userId: string,
   dogOwnerId: string
 ): Promise<FormSubmissionResponse> => {
@@ -269,7 +269,7 @@ export const submitHealthRecordForm = async (
  */
 export const submitCompetitionResultForm = async (
   formData: CompetitionResultFormData,
-  userRole: string,
+  userRole: UserRole,
   userId: string,
   dogOwnerId: string
 ): Promise<FormSubmissionResponse> => {
@@ -315,7 +315,7 @@ export const submitCompetitionResultForm = async (
  */
 export const submitOwnershipForm = async (
   formData: OwnershipFormData,
-  userRole: string,
+  userRole: UserRole,
   userId: string
 ): Promise<FormSubmissionResponse> => {
   // Check permissions
@@ -361,7 +361,7 @@ export const submitOwnershipForm = async (
  */
 export const submitBreedingProgramForm = async (
   formData: BreedingProgramFormData,
-  userRole: string,
+  userRole: UserRole,
   userId: string
 ): Promise<FormSubmissionResponse> => {
   // Check permissions
@@ -407,7 +407,7 @@ export const submitBreedingProgramForm = async (
  */
 export const submitClubEventForm = async (
   formData: ClubEventFormData,
-  userRole: string,
+  userRole: UserRole,
   userId: string
 ): Promise<FormSubmissionResponse> => {
   // Check permissions

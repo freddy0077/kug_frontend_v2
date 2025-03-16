@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { gql, useQuery } from '@apollo/client';
-import { hasPermission } from '@/utils/permissionUtils';
+import { hasPermission, UserRole } from '@/utils/permissionUtils';
 
 // Types for pedigree data
 export type PedigreeNode = {
@@ -55,7 +55,7 @@ type PedigreeChartProps = {
   dogId: string;
   generations?: number; // Number of generations to display (1-3)
   orientation?: 'horizontal' | 'vertical';
-  userRole: string;
+  userRole: UserRole;
   userId: string;
   onEditParents?: (dog: PedigreeNode) => void;
 };
@@ -467,7 +467,7 @@ function renderPedigreeChart(
   data: PedigreeData, 
   generations: number,
   orientation: 'horizontal' | 'vertical',
-  userRole: string,
+  userRole: UserRole,
   userId: string,
   onEditParents?: (dog: PedigreeNode) => void
 ) {
@@ -482,7 +482,7 @@ function renderPedigreeChart(
 function renderHorizontalPedigree(
   data: PedigreeData, 
   generations: number,
-  userRole: string,
+  userRole: UserRole,
   userId: string,
   onEditParents?: (dog: PedigreeNode) => void
 ) {
@@ -573,7 +573,7 @@ function renderHorizontalPedigree(
 function renderVerticalPedigree(
   data: PedigreeData, 
   generations: number,
-  userRole: string,
+  userRole: UserRole,
   userId: string,
   onEditParents?: (dog: PedigreeNode) => void
 ) {
@@ -663,7 +663,7 @@ function renderVerticalPedigree(
 function renderDogCard(
   dog: PedigreeNode | undefined | null, 
   type: 'primary' | 'male' | 'female',
-  userRole: string,
+  userRole: UserRole,
   userId: string,
   onEditParents?: (dog: PedigreeNode) => void
 ) {

@@ -6,7 +6,7 @@ import { useQuery } from '@apollo/client';
 import Link from 'next/link';
 import BreedingRecordForm from '@/components/pedigree/BreedingRecordForm';
 import { GET_DOG } from '@/graphql/queries/dogQueries';
-import { hasPermission } from '@/utils/permissionUtils';
+import { hasPermission, UserRole } from '@/utils/permissionUtils';
 
 export default function NewBreedingRecordPage() {
   const params = useParams();
@@ -14,7 +14,7 @@ export default function NewBreedingRecordPage() {
   const dogId = params.id as string;
   
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userRole, setUserRole] = useState('');
+  const [userRole, setUserRole] = useState<UserRole>(UserRole.VIEWER);
   const [userId, setUserId] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -32,7 +32,7 @@ export default function NewBreedingRecordPage() {
     const uid = localStorage.getItem('userId') || '';
     
     setIsAuthenticated(authStatus);
-    setUserRole(role);
+    setUserRole(role as UserRole);
     setUserId(uid);
     
     // Redirect if not authenticated

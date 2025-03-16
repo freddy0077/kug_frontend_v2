@@ -1,17 +1,18 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
+import { UserRole } from '@/utils/permissionUtils';
 
 interface CompetitionActionsProps {
   competitionId: number;
-  userRole: string;
+  userRole: UserRole;
 }
 
 const CompetitionActions: React.FC<CompetitionActionsProps> = ({ competitionId, userRole }) => {
   const router = useRouter();
   
   // Only show actions for admin or owner roles
-  if (userRole !== 'admin' && userRole !== 'owner') {
+  if (userRole !== UserRole.ADMIN && userRole !== UserRole.OWNER) {
     return null;
   }
   
@@ -29,7 +30,7 @@ const CompetitionActions: React.FC<CompetitionActionsProps> = ({ competitionId, 
       >
         Edit Competition
       </button>
-      {userRole === 'admin' && (
+      {userRole === UserRole.ADMIN && (
         <button 
           onClick={handleDelete}
           className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"

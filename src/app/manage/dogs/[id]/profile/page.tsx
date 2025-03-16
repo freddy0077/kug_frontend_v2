@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import DogProfileHeader from '@/components/dogs/DogProfileHeader';
 import PhotoManager from '@/components/dogs/PhotoManager';
-import { hasPermission } from '@/utils/permissionUtils';
+import { hasPermission, UserRole } from '@/utils/permissionUtils';
 
 export default function DogProfilePage() {
   const params = useParams();
@@ -13,7 +13,7 @@ export default function DogProfilePage() {
   const dogId = params.id as string;
   
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userRole, setUserRole] = useState('');
+  const [userRole, setUserRole] = useState<UserRole>(UserRole.VIEWER);
   const [userId, setUserId] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -26,7 +26,7 @@ export default function DogProfilePage() {
     const uid = localStorage.getItem('userId') || '';
     
     setIsAuthenticated(authStatus);
-    setUserRole(role);
+    setUserRole(role as UserRole);
     setUserId(uid);
     
     // Redirect if not authenticated

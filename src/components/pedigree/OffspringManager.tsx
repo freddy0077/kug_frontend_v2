@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { getOffspring } from '@/utils/lineageUtils';
 import { PedigreeNode } from '@/components/pedigree/PedigreeChart';
-import { hasPermission } from '@/utils/permissionUtils';
+import { hasPermission, UserRole } from '@/utils/permissionUtils';
 import Link from 'next/link';
 import { format } from 'date-fns';
 
@@ -11,7 +11,7 @@ type OffspringManagerProps = {
   dogId: string;
   dogName: string;
   dogGender: 'male' | 'female';
-  userRole: string;
+  userRole: UserRole;
   userId: string;
   ownerId: string;
 };

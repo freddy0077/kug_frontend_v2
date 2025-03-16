@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Entity, Permission, checkPermission } from '@/utils/permissionUtils';
+import { Entity, Permission, checkPermission, UserRole } from '@/utils/permissionUtils';
 
 /**
  * Component to conditionally render content based on user permissions
@@ -15,7 +15,7 @@ import { Entity, Permission, checkPermission } from '@/utils/permissionUtils';
  */
 export const PermissionGate: React.FC<{
   children: React.ReactNode;
-  userRole: string;
+  userRole: UserRole;
   entity: Entity;
   action: Permission;
   ownerId?: string;

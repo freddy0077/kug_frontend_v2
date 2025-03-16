@@ -6,6 +6,7 @@ import { useQuery } from '@apollo/client';
 import { GET_DOG_PEDIGREE } from '@/graphql/queries/pedigreeQueries';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import Link from 'next/link';
+import { UserRole } from '@/utils/permissionUtils';
 
 interface Dog {
   id: string;
@@ -141,7 +142,7 @@ export default function DogPedigreePage() {
   };
 
   return (
-    <ProtectedRoute allowedRoles={['ADMIN', 'OWNER', 'BREEDER', 'HANDLER']}>
+    <ProtectedRoute allowedRoles={[UserRole.ADMIN, UserRole.OWNER, UserRole.HANDLER]}>
       <div className="bg-gray-100 min-h-screen py-6 px-4">
         <div className="max-w-7xl mx-auto">
           {/* Header */}

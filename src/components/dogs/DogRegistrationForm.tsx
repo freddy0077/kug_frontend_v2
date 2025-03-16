@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { DogFormData } from '@/utils/formHandlers';
+import { UserRole } from '@/utils/permissionUtils';
 
 // Mock data for breeds
 const BREEDS = [
@@ -27,7 +28,7 @@ const DOG_COLORS = [
 
 type DogRegistrationFormProps = {
   onSubmit?: (formData: DogFormData) => void;
-  userRole: string;
+  userRole: UserRole;
   userId: string;
   initialData?: Partial<DogFormData>;
   onSuccess?: (dogId: string) => void;

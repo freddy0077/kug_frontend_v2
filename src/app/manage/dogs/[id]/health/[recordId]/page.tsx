@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { hasPermission } from '@/utils/permissionUtils';
+import { hasPermission, UserRole } from '@/utils/permissionUtils';
 
 // Define the health record type using correct field names as per memory
 interface HealthRecord {
@@ -28,7 +28,7 @@ export default function HealthRecordDetailPage() {
   const recordId = params.recordId as string;
   
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userRole, setUserRole] = useState('');
+  const [userRole, setUserRole] = useState<UserRole>(UserRole.VIEWER);
   const [userId, setUserId] = useState('');
   const [dogOwnerId, setDogOwnerId] = useState('');
   const [dogName, setDogName] = useState('');
@@ -45,7 +45,7 @@ export default function HealthRecordDetailPage() {
     const uid = localStorage.getItem('userId') || '';
     
     setIsAuthenticated(authStatus);
-    setUserRole(role);
+    setUserRole(role as UserRole);
     setUserId(uid);
     
     // Redirect if not authenticated
@@ -72,15 +72,15 @@ export default function HealthRecordDetailPage() {
         setDogOwnerId(mockDogData.ownerId);
         
         // Check if user has permission to view this dog's health records
-        if (!hasPermission(role, 'health-record', 'view', mockDogData.ownerId, uid)) {
+        if (!hasPermission(userRole, 'health-record', 'view', mockDogData.ownerId, uid)) {
           setError('You do not have permission to view this dog\'s health records');
           setIsLoading(false);
           return;
         }
         
         // Check if user can edit or delete health records
-        const canEdit = hasPermission(role, 'health-record', 'edit', mockDogData.ownerId, uid);
-        const canDelete = hasPermission(role, 'health-record', 'delete', mockDogData.ownerId, uid);
+        const canEdit = hasPermission(userRole, 'health-record', 'edit', mockDogData.ownerId, uid);
+        const canDelete = hasPermission(userRole, 'health-record', 'delete', mockDogData.ownerId, uid);
         setCanEditRecord(canEdit);
         setCanDeleteRecord(canDelete);
         

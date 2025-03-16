@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import PedigreeChartV2 from '@/components/pedigree/PedigreeChartV2';
 import { PedigreeChartOptions } from '@/types/pedigree';
-import { hasPermission } from '@/utils/permissionUtils';
+import { hasPermission, UserRole } from '@/utils/permissionUtils';
 
 export default function DogPedigreePage() {
   const params = useParams();
@@ -13,7 +13,7 @@ export default function DogPedigreePage() {
   const dogId = params.id as string;
   
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userRole, setUserRole] = useState('');
+  const [userRole, setUserRole] = useState<UserRole>(UserRole.VIEWER);
   const [userId, setUserId] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [dogName, setDogName] = useState('');
@@ -37,7 +37,7 @@ export default function DogPedigreePage() {
     const uid = localStorage.getItem('userId') || '';
     
     setIsAuthenticated(authStatus);
-    setUserRole(role);
+    setUserRole(role as UserRole);
     setUserId(uid);
     
     // Redirect if not authenticated
@@ -66,7 +66,7 @@ export default function DogPedigreePage() {
         };
         
         // Check if user has permission to view this dog's pedigree
-        if (!hasPermission(role, 'dog', 'view', mockDogData.ownerId, uid)) {
+        if (!hasPermission(userRole, 'dog', 'view', mockDogData.ownerId, uid)) {
           setError('You do not have permission to view this dog\'s pedigree');
           setIsLoading(false);
           return;

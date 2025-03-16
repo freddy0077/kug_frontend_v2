@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import BreedingRecorder from '@/components/breeding/BreedingRecorder';
-import { hasPermission } from '@/utils/permissionUtils';
+import { hasPermission, UserRole } from '@/utils/permissionUtils';
 
 export default function AddBreedingPage() {
   const params = useParams();
@@ -12,7 +12,7 @@ export default function AddBreedingPage() {
   const dogId = params.id as string;
   
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userRole, setUserRole] = useState('');
+  const [userRole, setUserRole] = useState<UserRole>(UserRole.VIEWER); // Initialize with a default role
   const [userId, setUserId] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [dogName, setDogName] = useState('');
@@ -27,7 +27,7 @@ export default function AddBreedingPage() {
     const uid = localStorage.getItem('userId') || '';
     
     setIsAuthenticated(authStatus);
-    setUserRole(role);
+    setUserRole(role as UserRole);
     setUserId(uid);
     
     // Redirect if not authenticated
@@ -56,7 +56,7 @@ export default function AddBreedingPage() {
         };
         
         // Check if user has permission to create breeding records for this dog
-        if (!hasPermission(role, 'dog', 'create', mockDogData.ownerId, uid)) {
+        if (!hasPermission(userRole, 'dog', 'create', mockDogData.ownerId, uid)) {
           setError('You do not have permission to add breeding records for this dog');
           setIsLoading(false);
           return;

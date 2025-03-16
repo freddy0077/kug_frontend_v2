@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { UserRole } from '@/utils/permissionUtils';
 
 interface DogFormData {
   name: string;
@@ -27,7 +28,7 @@ interface DogFormData {
 export default function AddDog() {
   const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userRole, setUserRole] = useState('');
+  const [userRole, setUserRole] = useState<UserRole>(UserRole.VIEWER);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
@@ -58,7 +59,7 @@ export default function AddDog() {
     const role = localStorage.getItem('userRole') || '';
     
     setIsAuthenticated(authStatus);
-    setUserRole(role);
+    setUserRole(role as UserRole);
     setIsLoading(false);
     
     // Redirect to login if not authenticated
@@ -68,10 +69,9 @@ export default function AddDog() {
     }
     
     // Check if user has permission to add dogs
-    // Only breeders, owners, and admins can add dogs
-    const hasPermission = role === 'admin' || 
-                         role === 'breeder' || 
-                         role === 'owner';
+    // Only owners and admins can add dogs
+    const hasPermission = role === UserRole.ADMIN || 
+                         role === UserRole.OWNER;
                           
     if (authStatus && !hasPermission) {
       // Redirect to dashboard if authenticated but doesn't have permission
@@ -84,13 +84,13 @@ export default function AddDog() {
       const userId = localStorage.getItem('userId') || '';
       const userName = localStorage.getItem('userName') || '';
       
-      if (role === 'breeder') {
+      if (role === UserRole.ADMIN) {
         setFormData(prev => ({
           ...prev,
           breederId: userId,
           breederName: userName,
         }));
-      } else if (role === 'owner') {
+      } else if (role === UserRole.OWNER) {
         setFormData(prev => ({
           ...prev,
           ownerId: userId,
@@ -335,16 +335,10 @@ export default function AddDog() {
                         id="breederName"
                         value={formData.breederName}
                         onChange={handleInputChange}
-                        disabled={userRole === 'breeder'}
-                        className={`mt-1 block w-full rounded-md ${
-                          userRole === 'breeder' 
-                            ? 'bg-gray-100 border-gray-300' 
-                            : 'border-gray-300'
-                        } shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm`}
+                        disabled={false} /* Removed 'breeder' check as this role was removed */
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm"
                       />
-                      {userRole === 'breeder' && (
-                        <p className="mt-1 text-xs text-gray-500">Auto-filled with your information as the breeder</p>
-                      )}
+                      {/* Removed breeder role check as this role was removed */}
                     </div>
                     <div>
                       <label htmlFor="ownerName" className="block text-sm font-medium text-gray-700">
@@ -356,14 +350,14 @@ export default function AddDog() {
                         id="ownerName"
                         value={formData.ownerName}
                         onChange={handleInputChange}
-                        disabled={userRole === 'owner'}
+                        disabled={userRole === UserRole.OWNER}
                         className={`mt-1 block w-full rounded-md ${
-                          userRole === 'owner' 
+                          userRole === UserRole.OWNER 
                             ? 'bg-gray-100 border-gray-300' 
                             : 'border-gray-300'
                         } shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm`}
                       />
-                      {userRole === 'owner' && (
+                      {userRole === UserRole.OWNER && (
                         <p className="mt-1 text-xs text-gray-500">Auto-filled with your information as the owner</p>
                       )}
                     </div>

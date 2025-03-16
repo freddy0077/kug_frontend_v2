@@ -8,12 +8,12 @@ import {
   calculateGeneticInfluence
 } from '@/utils/lineageUtils';
 import { format } from 'date-fns';
-import { hasPermission } from '@/utils/permissionUtils';
+import { hasPermission, UserRole } from '@/utils/permissionUtils';
 
 type LineageAnalysisProps = {
   dogId: string;
   dogName: string;
-  userRole: string;
+  userRole: UserRole;
   userId: string;
   ownerId: string;
 };

@@ -3,11 +3,12 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { UserRole } from '@/utils/permissionUtils';
 
 export default function UserProfile() {
   const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userRole, setUserRole] = useState('');
+  const [userRole, setUserRole] = useState<UserRole>(UserRole.VIEWER);
   const [userName, setUserName] = useState('');
   const [userEmail, setUserEmail] = useState('');
   const [isEditing, setIsEditing] = useState(false);
@@ -32,7 +33,7 @@ export default function UserProfile() {
     const email = localStorage.getItem('userEmail') || '';
     
     setIsAuthenticated(authStatus);
-    setUserRole(role);
+    setUserRole(role as UserRole);
     setUserName(name);
     setUserEmail(email);
     setIsLoading(false);
@@ -41,7 +42,7 @@ export default function UserProfile() {
     setFormData({
       name: name,
       email: email,
-      role: role,
+      role: role as UserRole,
       password: '',
       confirmPassword: '',
       phoneNumber: localStorage.getItem('userPhone') || '',
@@ -102,7 +103,7 @@ export default function UserProfile() {
   // Different permission sets based on user role
   const getRolePermissions = () => {
     switch(userRole) {
-      case 'owner':
+      case UserRole.OWNER:
         return [
           'View and manage owned dogs',
           'Access dog health records',
@@ -110,7 +111,7 @@ export default function UserProfile() {
           'Request ownership transfers',
           'Communicate with breeders'
         ];
-      case 'breeder':
+      case UserRole.ADMIN:
         return [
           'Register new litters',
           'Manage breeding programs',
@@ -118,7 +119,7 @@ export default function UserProfile() {
           'View health records',
           'Access lineage and pedigree data'
         ];
-      case 'handler':
+      case UserRole.HANDLER:
         return [
           'Register for competitions',
           'Record competition results',
@@ -126,7 +127,7 @@ export default function UserProfile() {
           'Access training records',
           'Communicate with owners'
         ];
-      case 'club':
+      case UserRole.CLUB:
         return [
           'Manage kennel club events',
           'Issue registration certificates',

@@ -1,11 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { hasPermission } from '@/utils/permissionUtils';
+import { hasPermission, UserRole } from '@/utils/permissionUtils';
 import { DogFormData } from '@/utils/formHandlers';
 
 type ImportDogRegistrationsProps = {
-  userRole: string;
+  userRole: UserRole;
   userId: string;
   onImportComplete: (importedDogs: DogFormData[]) => void;
 };

@@ -641,7 +641,7 @@ export default function Pedigrees() {
                       dogId={pedigreeData.dogPedigree?.id || ''}
                       generations={generationsToShow}
                       orientation="horizontal"
-                      userRole={user?.role || ''}
+                      userRole={user?.role as UserRole || UserRole.VIEWER}
                       userId={user?.id || ''}
                       onEditParents={(dog) => {
                         // Find the current parents for this dog

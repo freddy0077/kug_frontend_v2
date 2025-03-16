@@ -14,12 +14,13 @@ import {
 import { GET_DOG_HEALTH_RECORDS, GET_HEALTH_RECORD } from '@/graphql/queries/healthRecordQueries';
 import { HealthRecordFormData } from '@/utils/formHandlers';
 import { HealthRecordType } from '@/types/healthRecord';
+import { UserRole } from '@/utils/permissionUtils';
 
 interface HealthRecordFormContainerProps {
   dogId: string;
   recordId?: string;
   initialData?: any;
-  userRole: string;
+  userRole: UserRole;
   userId: string;
   dogOwnerId: string;
 }

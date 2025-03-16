@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { hasPermission } from '@/utils/permissionUtils';
+import { hasPermission, UserRole } from '@/utils/permissionUtils';
 import { PedigreeChartOptions } from '@/types/pedigree';
 import PedigreePageHeader from './PedigreePageHeader';
 import DogSearchPanel from './DogSearchPanel';
@@ -18,7 +18,7 @@ const PedigreeCreateContainer: React.FC = () => {
   const router = useRouter();
   
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userRole, setUserRole] = useState('');
+  const [userRole, setUserRole] = useState<UserRole>(UserRole.VIEWER);
   const [userId, setUserId] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -42,7 +42,8 @@ const PedigreeCreateContainer: React.FC = () => {
   useEffect(() => {
     // Check authentication status from localStorage
     const authStatus = localStorage.getItem('isAuthenticated') === 'true';
-    const role = localStorage.getItem('userRole') || '';
+    const roleString = localStorage.getItem('userRole') || '';
+    const role = roleString as UserRole;
     const uid = localStorage.getItem('userId') || '';
     
     setIsAuthenticated(authStatus);

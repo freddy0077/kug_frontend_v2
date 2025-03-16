@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { hasPermission } from '@/utils/permissionUtils';
+import { hasPermission, UserRole } from '@/utils/permissionUtils';
 import HealthStatistics from '@/components/health/HealthStatistics';
 
 // Define the health record type using correct field names as per memory
@@ -27,7 +27,7 @@ export default function DogHealthRecordsPage() {
   const dogId = params.id as string;
   
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userRole, setUserRole] = useState('');
+  const [userRole, setUserRole] = useState<UserRole>(UserRole.VIEWER);
   const [userId, setUserId] = useState('');
   const [dogOwnerId, setDogOwnerId] = useState('');
   const [dogName, setDogName] = useState('');
@@ -43,7 +43,7 @@ export default function DogHealthRecordsPage() {
     const uid = localStorage.getItem('userId') || '';
     
     setIsAuthenticated(authStatus);
-    setUserRole(role);
+    setUserRole(role as UserRole);
     setUserId(uid);
     
     // Redirect if not authenticated
@@ -70,14 +70,14 @@ export default function DogHealthRecordsPage() {
         setDogOwnerId(mockDogData.ownerId);
         
         // Check if user has permission to view this dog's health records
-        if (!hasPermission(role, 'health-record', 'view', mockDogData.ownerId, uid)) {
+        if (!hasPermission(userRole, 'health-record', 'view', mockDogData.ownerId, uid)) {
           setError('You do not have permission to view this dog\'s health records');
           setIsLoading(false);
           return;
         }
         
         // Check if user can add health records
-        const canAdd = hasPermission(role, 'health-record', 'create', mockDogData.ownerId, uid);
+        const canAdd = hasPermission(userRole, 'health-record', 'create', mockDogData.ownerId, uid);
         setCanAddRecord(canAdd);
         
         // Mock health records with correct field names
