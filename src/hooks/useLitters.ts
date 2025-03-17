@@ -144,6 +144,25 @@ export const useCreateLitter = (): MutationTuple<
       if (data?.createLitter) {
         // You can update specific queries in the cache if needed
       }
+    },
+    // Variables will be provided when the mutation is called
+    onError: (error) => {
+      console.error('Error creating litter:', error);
+    },
+    // Process variables before sending to API
+    context: {
+      // Handle empty UUID fields
+      processVariables: ({ input, ...rest }: { input: LitterInput }) => {
+        // Create a clean copy of the input
+        const cleanInput = { ...input };
+        
+        // Remove empty breedingRecordId (PostgreSQL can't handle empty string for UUID)
+        if (cleanInput.breedingRecordId === '') {
+          delete cleanInput.breedingRecordId;
+        }
+        
+        return { input: cleanInput, ...rest };
+      }
     }
   });
 };

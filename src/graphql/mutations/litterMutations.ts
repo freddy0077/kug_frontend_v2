@@ -29,7 +29,6 @@ export const CREATE_LITTER = gql`
         name
         gender
         color
-        markings
         microchipNumber
       }
       notes
