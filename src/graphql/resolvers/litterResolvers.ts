@@ -1,4 +1,13 @@
-import { ApolloError } from 'apollo-server-micro';
+// Custom error class to match apollo-server-micro's ApolloError signature
+class ApolloError extends Error {
+  constructor(message: string, code?: string) {
+    super(message);
+    this.name = this.constructor.name;
+    this.message = message;
+    if (code) this.extensions = { code };
+  }
+  extensions: { code?: string } = {};
+}
 import { 
   Litter,
   LitterInput,
@@ -7,7 +16,7 @@ import {
   Dog,
   DogRole,
   RegisterLitterPuppiesResponse
-} from '../types';
+} from '@/graphql/types';
 import { formatISO } from 'date-fns';
 import { validateRequiredFields, validateDateFormat } from '../../utils/validators';
 import { checkOwnership } from '../../utils/authHelpers';

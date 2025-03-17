@@ -1,13 +1,15 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { useLitter, useUpdateLitter } from '@/hooks/useLitters';
-import { UpdateLitterInput } from '@/graphql/mutations/litterMutations';
+import { UPDATE_LITTER, UpdateLitterInput } from '@/graphql/mutations/litterMutations';
+import { useMutation } from '@apollo/client';
 import { UserRole } from '@/utils/permissionUtils';
 
+// Props interface for the LitterEditForm component
 interface LitterEditFormProps {
   litterId: string;
   userRole: UserRole;
@@ -15,12 +17,8 @@ interface LitterEditFormProps {
   onSuccess?: () => void;
 }
 
-const LitterEditForm: React.FC<LitterEditFormProps> = ({
-  litterId,
-  userRole,
-  userId,
-  onSuccess
-}) => {
+// LitterEditForm component for editing litter details
+export default function LitterEditForm({ litterId, userRole, userId, onSuccess }: LitterEditFormProps) {
   const router = useRouter();
   
   // Form state
@@ -38,30 +36,29 @@ const LitterEditForm: React.FC<LitterEditFormProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   // Get litter details using custom hook
-  const { litter, loading: litterLoading, error: litterError } = useLitter(litterId);
+  const { data, loading: litterLoading, error: litterError } = useLitter(litterId);
   
   // Set form data when litter data is loaded
   useEffect(() => {
-    if (litter) {
+    if (data?.litter) {
       // Format date for form input (YYYY-MM-DD)
-      const whelpingDate = litter.whelpingDate 
-        ? new Date(litter.whelpingDate).toISOString().split('T')[0]
+      const whelpingDate = data.litter.whelpingDate 
+        ? new Date(data.litter.whelpingDate).toISOString().split('T')[0]
         : '';
           
-        setFormData({
-          litterName: data.litter.litterName || '',
-          registrationNumber: data.litter.registrationNumber || '',
-          whelpingDate,
-          totalPuppies: data.litter.totalPuppies || 0,
-          malePuppies: data.litter.malePuppies || 0,
-          femalePuppies: data.litter.femalePuppies || 0,
-          notes: data.litter.notes || ''
-        });
-      }
+      setFormData({
+        litterName: data.litter.litterName || '',
+        registrationNumber: data.litter.registrationNumber || '',
+        whelpingDate,
+        totalPuppies: data.litter.totalPuppies || 0,
+        malePuppies: data.litter.malePuppies || 0,
+        femalePuppies: data.litter.femalePuppies || 0,
+        notes: data.litter.notes || ''
+      });
     }
-  });
+  }, [data]);
   
-  // Update litter mutation
+  // Update litter mutation using the imported UPDATE_LITTER query
   const [updateLitter, { loading: updateLoading }] = useMutation(UPDATE_LITTER, {
     onCompleted: (data) => {
       if (data?.updateLitter?.id) {
@@ -216,6 +213,7 @@ const LitterEditForm: React.FC<LitterEditFormProps> = ({
   };
   
   // If user doesn't have appropriate role, show error
+  // Check user permissions to edit litters - only ADMIN and OWNER can edit litters
   if (userRole !== UserRole.ADMIN && userRole !== UserRole.OWNER) {
     return (
       <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-4">
@@ -264,7 +262,7 @@ const LitterEditForm: React.FC<LitterEditFormProps> = ({
     );
   }
   
-  const litter = litterData?.litter;
+  const litter = data?.litter;
   
   if (!litter) {
     return (
@@ -596,6 +594,4 @@ const LitterEditForm: React.FC<LitterEditFormProps> = ({
       </form>
     </div>
   );
-};
-
-export default LitterEditForm;
+}

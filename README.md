@@ -10,6 +10,7 @@ Detailed GraphQL API specifications for backend implementation are available in 
 - [Competitions API](/docs/api/competitions.md) - Competition results and event information
 - [Health Records API](/docs/api/health-records.md) - Dog health information and records
 - [Pedigree API](/docs/api/pedigree.md) - Lineage and breeding information
+- [Litters API](/docs/api/litters.md) - Litter registration and puppy management
 - [Users API](/docs/api/users.md) - User management and authentication
 - [Ownerships API](/docs/api/ownerships.md) - Dog ownership and transfer management
 - [Events API](/docs/api/events.md) - Club and general events system

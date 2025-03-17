@@ -1,4 +1,13 @@
-import { ApolloError } from 'apollo-server-micro';
+// Custom error class to match apollo-server-micro's ApolloError signature
+class ApolloError extends Error {
+  constructor(message: string, code?: string) {
+    super(message);
+    this.name = this.constructor.name;
+    this.message = message;
+    if (code) this.extensions = { code };
+  }
+  extensions: { code?: string } = {};
+}
 import { parse, isValid } from 'date-fns';
 
 /**

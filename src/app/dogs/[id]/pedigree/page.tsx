@@ -2,11 +2,59 @@
 
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import { useQuery } from '@apollo/client';
-import { GET_DOG_PEDIGREE } from '@/graphql/queries/pedigreeQueries';
+import { useQuery, gql } from '@apollo/client';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import Link from 'next/link';
 import { UserRole } from '@/utils/permissionUtils';
+
+// Define the query directly in this file to avoid import issues
+const GET_DOG_PEDIGREE = gql`
+  query getDogPedigree($dogId: ID!, $generations: Int = 3) {
+    dogPedigree(dogId: $dogId, generations: $generations) {
+      id
+      name
+      registrationNumber
+      breed
+      breedObj {
+        id
+        name
+        group
+        origin
+        temperament
+      }
+      gender
+      dateOfBirth
+      color
+      titles
+      mainImageUrl
+      coefficient
+      sire {
+        id
+        name
+        registrationNumber
+        breed
+        gender
+        dateOfBirth
+        color
+        titles
+        mainImageUrl
+        coefficient
+      }
+      dam {
+        id
+        name
+        registrationNumber
+        breed
+        gender
+        dateOfBirth
+        color
+        titles
+        mainImageUrl
+        coefficient
+      }
+    }
+  }
+`;
 
 interface Dog {
   id: string;

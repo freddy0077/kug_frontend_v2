@@ -1,7 +1,7 @@
-import { gql } from '@apollo/client';
+import { gql, DocumentNode } from '@apollo/client';
 
 // Query to get a dog's pedigree with specified number of generations
-export const GET_DOG_PEDIGREE = gql`
+export const GET_DOG_PEDIGREE: DocumentNode = gql`
   query getDogPedigree($dogId: ID!, $generations: Int = 3) {
     dogPedigree(dogId: $dogId, generations: $generations) {
       id
@@ -136,7 +136,7 @@ export const GET_DOG_PEDIGREE = gql`
 `;
 
 // Query to get breeding records for a dog (as sire, dam, or both)
-export const GET_BREEDING_RECORDS = gql`
+export const GET_BREEDING_RECORDS: DocumentNode = gql`
   query getBreedingRecords(
     $dogId: ID!
     $role: BreedingRole = BOTH
@@ -193,7 +193,7 @@ export enum BreedingRole {
 }
 
 // Query to analyze linebreeding for a potential breeding pair
-export const GET_LINEBREEDING_ANALYSIS = gql`
+export const GET_LINEBREEDING_ANALYSIS: DocumentNode = gql`
   query getLinebreedingAnalysis($sireId: ID!, $damId: ID!, $generations: Int = 6) {
     linebreedingAnalysis(sireId: $sireId, damId: $damId, generations: $generations) {
       inbreedingCoefficient
@@ -213,7 +213,7 @@ export const GET_LINEBREEDING_ANALYSIS = gql`
 `;
 
 // Mutation to create a pedigree
-export const CREATE_PEDIGREE = gql`
+export const CREATE_PEDIGREE: DocumentNode = gql`
   mutation CreatePedigree($input: CreatePedigreeInput!) {
     createPedigree(input: $input) {
       id
@@ -247,7 +247,7 @@ export const CREATE_PEDIGREE = gql`
 `;
 
 // Mutation to create a new breeding record
-export const CREATE_BREEDING_RECORD = gql`
+export const CREATE_BREEDING_RECORD: DocumentNode = gql`
   mutation CreateBreedingRecord($input: CreateBreedingRecordInput!) {
     createBreedingRecord(input: $input) {
       id

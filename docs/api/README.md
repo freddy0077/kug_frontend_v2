@@ -10,11 +10,12 @@ The GraphQL API is organized into the following domains:
 2. [Competitions API](./competitions.md) - APIs for competition results and events
 3. [Health Records API](./health-records.md) - APIs for managing dog health information
 4. [Pedigree API](./pedigree.md) - APIs for lineage and breeding information
-5. [Users API](./users.md) - APIs for user management and authentication
-6. [Ownerships API](./ownerships.md) - APIs for dog ownership and transfer management
-7. [Events API](./events.md) - APIs for club and general events system
-8. [Breeding Programs API](./breeding-programs.md) - APIs for breeding program planning and management
-9. [Logs API](./logs.md) - APIs for system logs and audit trail (admin-only)
+5. [Litters API](./litters.md) - APIs for litter registration and puppy management
+6. [Users API](./users.md) - APIs for user management and authentication
+7. [Ownerships API](./ownerships.md) - APIs for dog ownership and transfer management
+8. [Events API](./events.md) - APIs for club and general events system
+9. [Breeding Programs API](./breeding-programs.md) - APIs for breeding program planning and management
+10. [Logs API](./logs.md) - APIs for system logs and audit trail (admin-only)
 
 ## Getting Started
 
