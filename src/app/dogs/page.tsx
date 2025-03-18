@@ -52,7 +52,7 @@ export default function Dogs() {
     titles: [],
     hasOffspring: null,
     isNeutered: null,
-    sortField: DogSortField.DATE_OF_BIRTH,
+    sortField: DogSortField.CREATED_AT,
     sortDirection: SortDirection.DESC
   };
   

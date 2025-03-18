@@ -98,7 +98,8 @@ declare module '@/graphql/queries/dogQueries' {
     NAME = 'NAME',
     BREED = 'BREED',
     DATE_OF_BIRTH = 'DATE_OF_BIRTH',
-    REGISTRATION_NUMBER = 'REGISTRATION_NUMBER'
+    REGISTRATION_NUMBER = 'REGISTRATION_NUMBER',
+    CREATED_AT = 'CREATED_AT'
   }
   
   export enum SortDirection {
