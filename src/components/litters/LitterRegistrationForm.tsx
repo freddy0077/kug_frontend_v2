@@ -7,7 +7,7 @@ import toast from 'react-hot-toast';
 import { useQuery } from '@apollo/client';
 import { useCreateLitter } from '@/hooks/useLitters';
 import type { LitterInput } from '@/graphql/mutations/litterMutations';
-import { GET_DOGS } from '@/graphql/queries/dogQueries';
+import { GET_DOGS, DogSortField, SortDirection } from '@/graphql/queries/dogQueries';
 import { GET_BREEDING_RECORDS } from '@/graphql/queries/pedigreeQueries';
 import { UserRole } from '@/utils/permissionUtils';
 import DogSearchSelect from '@/components/common/DogSearchSelect';
@@ -74,7 +74,11 @@ const LitterRegistrationForm: React.FC<LitterRegistrationFormProps> = ({
   
   // Fetch dogs for sire/dam selection
   const { loading: dogsLoading, data: dogsData } = useQuery(GET_DOGS, {
-    variables: { limit: 100 }
+    variables: { 
+      limit: 100,
+      sortBy: DogSortField.DATE_OF_BIRTH,
+      sortDirection: SortDirection.DESC
+    }
   });
   
   // If a breeding ID is provided, fetch that breeding record

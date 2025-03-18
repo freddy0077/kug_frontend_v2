@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useQuery } from '@apollo/client';
-import { GET_DOG_PEDIGREE, GET_DOGS } from '@/graphql/queries/dogQueries';
+import { GET_DOG_PEDIGREE, GET_DOGS, DogSortField, SortDirection } from '@/graphql/queries/dogQueries';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import { useAuth } from '@/contexts/AuthContext';
 import { UserRole } from '@/utils/permissionUtils';
@@ -54,6 +54,8 @@ export default function Pedigrees() {
       searchTerm: debouncedSearchTerm,
       limit: 20,
       offset: 0,
+      sortBy: DogSortField.DATE_OF_BIRTH,
+      sortDirection: SortDirection.DESC,
     },
     fetchPolicy: 'network-only',
     onError: (error) => {
@@ -81,6 +83,9 @@ export default function Pedigrees() {
     },
     skip: !selectedDogId,
   });
+
+  // State for export certificate checkbox
+  const [isExportCertificate, setIsExportCertificate] = useState(false);
 
   // Handle dog selection
   const handleDogSelection = (dogId: string) => {
@@ -318,6 +323,9 @@ export default function Pedigrees() {
       return;
     }
     
+    // Debug log to verify checkbox state
+    console.log('Export certificate selected:', isExportCertificate);
+    
     try {
       const dog = pedigreeData.dogPedigree;
       
@@ -360,7 +368,10 @@ export default function Pedigrees() {
         // Style options
         primaryColor: '#0066b3', // Blue color from the FCI certificate
         secondaryColor: '#e6f2ff', // Light blue background
-        fontFamily: 'Arial, sans-serif'
+        fontFamily: 'Arial, sans-serif',
+        
+        // Export certificate option
+        isExportCertificate: isExportCertificate
       });
       
       // Success notification
@@ -623,6 +634,18 @@ export default function Pedigrees() {
                             </svg>
                             Add Parents
                           </button>
+                          <div className="flex items-center mr-3 text-sm">
+                            <input
+                              type="checkbox"
+                              id="exportCertificate"
+                              checked={isExportCertificate}
+                              onChange={(e) => setIsExportCertificate(e.target.checked)}
+                              className="form-checkbox h-4 w-4 text-green-600 rounded border-gray-300 focus:ring-green-500"
+                            />
+                            <label htmlFor="exportCertificate" className="ml-2 text-gray-700">
+                              Export Certificate
+                            </label>
+                          </div>
                           <button
                             onClick={handleExportPedigreePDF}
                             className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors text-sm flex items-center"

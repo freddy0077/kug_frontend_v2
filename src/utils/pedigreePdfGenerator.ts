@@ -38,6 +38,9 @@ export interface PedigreeCertificateOptions {
   // Style options
   primaryColor?: string;
   secondaryColor?: string;
+  
+  // Certificate type options
+  isExportCertificate?: boolean;
 }
 
 /**
@@ -79,6 +82,9 @@ function extractFourthGeneration(dog: DogNode): FourthGeneration {
 export const generatePedigreeCertificate = async (
   options: PedigreeCertificateOptions
 ): Promise<Blob> => {
+  // Debug logging
+  console.log('PDF Generator options:', options);
+  console.log('isExportCertificate flag:', options.isExportCertificate);
   // Create a container to hold the certificate HTML
   const container = document.createElement('div');
   container.style.width = '1122px'; // A4 Landscape width at 96 DPI
@@ -159,7 +165,9 @@ export const generatePedigreeCertificate = async (
         <div style="width: 33%; position: relative;">
           <div style="text-align: left;">
             <div style="font-size: 12px;">info@kennelunionofghana.com</div>
-            <div style="font-size: 14px; color: #d50032; font-weight: bold; margin-top: 5px;">EXPORT PEDIGREE</div>
+            <div style="font-size: 14px; font-weight: bold; margin-top: 5px; height: 20px;">
+              ${options.isExportCertificate === true ? '<span style="color: #d50032;">EXPORT PEDIGREE</span>' : ''}
+            </div>
           </div>
           
           <!-- FCI Logo with Contract Partner -->
@@ -178,7 +186,7 @@ export const generatePedigreeCertificate = async (
           <div style="font-size: 12px;">www.kennelunionofghana.com</div>
           <!-- Kennel Union Logo -->
           <img src="${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/kug_kogo.png" style="position: absolute; left: 30px; top: -10px; width: 80px; height: 80px;" alt="KUG Logo" />
-          <div style="font-size: 14px; font-weight: bold; margin-top: 25px;">EX ${dog.registrationNumber || '0000001'}</div>
+          <div style="font-size: 14px; font-weight: bold; margin-top: 25px;">${options.isExportCertificate === true ? 'EX ' : ''}${dog.registrationNumber || '0000001'}</div>
         </div>
       </div>
       
@@ -391,15 +399,9 @@ export const generatePedigreeCertificate = async (
  */
 export const downloadPedigreeCertificate = async (options: PedigreeCertificateOptions): Promise<void> => {
   try {
-    // Extract pedigree data for the PDF generation
-    const pdfOptions = {
-      dog: options.dog,
-      certificateDate: options.certificateDate,
-      fontFamily: options.fontFamily,
-      breederName: options.breederName || 'Unknown' // Use provided breeder name or default to "Unknown"
-    };
-    
-    const blob = await generatePedigreeCertificate(pdfOptions);
+    // Pass all options to the PDF generator
+    // This ensures that options like isExportCertificate are properly forwarded
+    const blob = await generatePedigreeCertificate(options);
     
     // Create a download link
     const link = document.createElement('a');

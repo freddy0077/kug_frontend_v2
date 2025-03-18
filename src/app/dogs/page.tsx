@@ -52,8 +52,8 @@ export default function Dogs() {
     titles: [],
     hasOffspring: null,
     isNeutered: null,
-    sortField: DogSortField.NAME,
-    sortDirection: SortDirection.ASC
+    sortField: DogSortField.DATE_OF_BIRTH,
+    sortDirection: SortDirection.DESC
   };
   
   // State for filtering and pagination

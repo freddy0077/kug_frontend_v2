@@ -11,7 +11,7 @@ import {
   UpdateBreedingRecordInput
 } from '@/graphql/mutations/pedigreeMutations';
 import { GET_BREEDING_RECORDS } from '@/graphql/queries/pedigreeQueries';
-import { GET_DOGS } from '@/graphql/queries/dogQueries';
+import { GET_DOGS, DogSortField, SortDirection } from '@/graphql/queries/dogQueries';
 
 interface BreedingRecordFormProps {
   breedingId?: string;
@@ -42,7 +42,11 @@ const BreedingRecordForm: React.FC<BreedingRecordFormProps> = ({
 
   // Fetch dogs for sire/dam selection
   const { loading: dogsLoading, data: dogsData } = useQuery(GET_DOGS, {
-    variables: { limit: 100 }  // Adjust limit as needed
+    variables: { 
+      limit: 100,  // Adjust limit as needed
+      sortBy: DogSortField.DATE_OF_BIRTH,
+      sortDirection: SortDirection.DESC
+    }
   });
 
   // For edit mode, fetch the existing breeding record
