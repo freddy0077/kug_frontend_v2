@@ -31,7 +31,7 @@ type FormInputs = {
 const initialFormState: FormInputs = {
   name: '',
   breed: '',
-  gender: 'Male',
+  gender: 'male',
   color: '',
   dateOfBirth: '',
   isNeutered: false,
@@ -281,9 +281,9 @@ const DogFormWithOwner: React.FC<DogFormProps> = ({ onSuccess }) => {
           
           {/* Owner Selection */}
           <div>
-            <label htmlFor="ownerId" className="block text-sm font-medium text-gray-700 mb-1">
+            {/* <label htmlFor="ownerId" className="block text-sm font-medium text-gray-700 mb-1">
               Owner <span className="text-red-500">*</span>
-            </label>
+            </label> */}
             {/* <select
               name="ownerId"
               id="ownerId"
