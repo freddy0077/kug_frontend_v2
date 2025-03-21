@@ -56,6 +56,7 @@ export default function Navbar() {
       submenu: [
         { href: '/admin/users', label: 'User Management', roles: [UserRole.ADMIN] },
         { href: '/admin/roles', label: 'Role Management', roles: [UserRole.ADMIN] },
+        { href: '/admin/dog-approvals', label: 'Dog Approvals', roles: [UserRole.ADMIN] },
         // { href: '/admin/settings', label: 'System Settings', roles: [UserRole.ADMIN] },
         // { href: '/admin/logs', label: 'System Logs', roles: [UserRole.ADMIN] },
       ]

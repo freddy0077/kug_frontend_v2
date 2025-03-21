@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@apollo/client": "^3.13.3",
+    "@material-tailwind/react": "^2.1.10",
     "clsx": "^2.1.1",
     "date-fns": "^2.30.0",
     "graphql": "^16.10.0",
@@ -24,10 +25,15 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.2.0",
+    "@types/jest": "^29.5.14",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "jest": "^29.7.0",
     "tailwindcss": "^4",
+    "ts-jest": "^29.2.6",
     "typescript": "^5"
   }
 }

@@ -5,6 +5,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { format } from 'date-fns';
 import { hasPermission, UserRole } from '@/utils/permissionUtils';
+import ApprovalStatusBadge from '../common/ApprovalStatusBadge';
+import { ApprovalStatus } from '@/types/enums';
 
 type DogProfileHeaderProps = {
   dog: {
@@ -20,6 +22,13 @@ type DogProfileHeaderProps = {
     ownerId: string;
     ownerName?: string;
     profileImageUrl?: string;
+    approvalStatus?: ApprovalStatus;
+    approvalDate?: string;
+    approvalNotes?: string;
+    approvedBy?: {
+      id: string;
+      fullName: string;
+    };
   };
   userRole: UserRole;
   userId: string;
@@ -111,6 +120,19 @@ export default function DogProfileHeader({
                 <span className="text-red-500 ml-2">(Deceased)</span>
               )}
             </p>
+            
+            {/* Approval Status */}
+            {dog.approvalStatus && (
+              <div className="mt-2 flex items-center">
+                <span className="text-sm text-gray-500 mr-2">Status:</span>
+                <ApprovalStatusBadge 
+                  status={dog.approvalStatus}
+                  approvalDate={dog.approvalDate}
+                  approvedBy={dog.approvedBy}
+                  notes={dog.approvalNotes}
+                />
+              </div>
+            )}
           </div>
         </div>
         

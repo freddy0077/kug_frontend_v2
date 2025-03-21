@@ -1,4 +1,5 @@
 import { gql } from '@apollo/client';
+import { ApprovalStatus } from '@/types/enums';
 
 // Query to get paginated list of dogs with filtering options
 export const GET_DOGS = gql`
@@ -10,6 +11,7 @@ export const GET_DOGS = gql`
     $breedId: ID
     $gender: String
     $ownerId: ID
+    $approvalStatus: ApprovalStatus
     $sortBy: DogSortField
     $sortDirection: SortDirection
   ) {
@@ -21,6 +23,7 @@ export const GET_DOGS = gql`
       breedId: $breedId
       gender: $gender
       ownerId: $ownerId
+      approvalStatus: $approvalStatus
       sortBy: $sortBy
       sortDirection: $sortDirection
     ) {
@@ -42,6 +45,13 @@ export const GET_DOGS = gql`
         titles
         biography
         mainImageUrl
+        approvalStatus
+        approvalDate
+        approvalNotes
+        approvedBy {
+          id
+          fullName
+        }
         breedObj {
           id
           name
@@ -138,6 +148,13 @@ export const GET_DOG_BY_ID = gql`
         name
         contactEmail
         contactPhone
+      }
+      approvalStatus
+      approvalDate
+      approvalNotes
+      approvedBy {
+        id
+        fullName
       }
       healthRecords {
         id
@@ -469,6 +486,13 @@ export const SEARCH_DOGS = gql`
         dateOfBirth
         registrationNumber
         mainImageUrl
+        approvalStatus
+        approvalDate
+        approvalNotes
+        approvedBy {
+          id
+          fullName
+        }
         breedObj {
           id
           name

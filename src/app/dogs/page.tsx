@@ -4,6 +4,9 @@ import { useState, useEffect } from 'react';
 import { useQuery } from '@apollo/client';
 import { GET_DOGS, DogSortField, SortDirection } from '@/graphql/queries/dogQueries';
 import { GET_BREEDS } from '@/graphql/queries/breedQueries';
+import { useAuth } from '@/contexts/AuthContext';
+import { UserRole } from '@/types/enums';
+import { ApprovalStatus } from '@/types/enums';
 
 // Define breed interface based on the API response structure
 interface Breed {
@@ -40,6 +43,8 @@ interface DogSearchFilters {
 
 export default function Dogs() {
   const pageSize = 10;
+  const { user } = useAuth();
+  const isAdmin = user?.role === UserRole.ADMIN;
   
   // Initialize search filters
   const initialFilters: DogSearchFilters = {
@@ -253,7 +258,10 @@ export default function Dogs() {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {data?.dogs?.items?.map((dog: any) => (
                   <div key={dog.id} className="transform transition-transform duration-200 hover:-translate-y-1">
-                    <DogCard dog={dog} />
+                    <DogCard 
+                      dog={dog} 
+                      showApprovalStatus={isAdmin} 
+                    />
                   </div>
                 ))}
               </div>

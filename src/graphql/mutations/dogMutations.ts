@@ -1,4 +1,5 @@
 import { gql } from '@apollo/client';
+import { ApprovalStatus } from '@/types/enums';
 
 // Create a new dog
 export const CREATE_DOG_MUTATION = gql`
@@ -108,3 +109,37 @@ export interface DogImageInput {
   caption?: string;
   isPrimary?: boolean;
 }
+
+// Approve a dog
+export const APPROVE_DOG_MUTATION = gql`
+  mutation ApproveDog($id: ID!, $notes: String) {
+    approveDog(id: $id, notes: $notes) {
+      id
+      name
+      approvalStatus
+      approvalDate
+      approvalNotes
+      approvedBy {
+        id
+        fullName
+      }
+    }
+  }
+`;
+
+// Decline a dog
+export const DECLINE_DOG_MUTATION = gql`
+  mutation DeclineDog($id: ID!, $notes: String) {
+    declineDog(id: $id, notes: $notes) {
+      id
+      name
+      approvalStatus
+      approvalDate
+      approvalNotes
+      approvedBy {
+        id
+        fullName
+      }
+    }
+  }
+`;

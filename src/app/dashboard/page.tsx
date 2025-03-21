@@ -16,6 +16,7 @@ import {
 import Image from 'next/image';
 import { format } from 'date-fns';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
+import DogApprovalWidget from '@/components/admin/DogApprovalWidget';
 
 // Helper function to format dates
 const formatDate = (dateString: string) => {
@@ -157,6 +158,11 @@ export default function Dashboard() {
             </Link>
           </div>
         </div>
+        
+        {/* Dog Approval Widget - Only visible to admins */}
+        {user?.role === 'ADMIN' && (
+          <DogApprovalWidget />
+        )}
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Gender Distribution Chart */}

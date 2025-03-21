@@ -3,6 +3,8 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { format } from 'date-fns';
+import ApprovalStatusBadge from '../common/ApprovalStatusBadge';
+import { ApprovalStatus } from '@/types/enums';
 
 export interface DogCardProps {
   dog: {
@@ -24,10 +26,18 @@ export interface DogCardProps {
       id?: string;
       name?: string;
     };
+    approvalStatus?: ApprovalStatus;
+    approvalDate?: string;
+    approvalNotes?: string;
+    approvedBy?: {
+      id: string;
+      fullName: string;
+    };
   };
+  showApprovalStatus?: boolean;
 }
 
-const DogCard: React.FC<DogCardProps> = ({ dog }) => {
+const DogCard: React.FC<DogCardProps> = ({ dog, showApprovalStatus = true }) => {
   // Calculate age
   const calculateAge = (dateOfBirth: string) => {
     try {
@@ -112,10 +122,20 @@ const DogCard: React.FC<DogCardProps> = ({ dog }) => {
               )}
               
               {/* Gender badge over image */}
-              <div className="absolute top-0 right-0 m-2">
+              <div className="absolute top-0 right-0 m-2 flex flex-col gap-1 items-end">
                 <span className={`px-2 py-0.5 text-xs font-medium rounded-sm ${dog.gender.toLowerCase() === 'male' ? 'bg-blue-100 text-blue-800' : 'bg-pink-100 text-pink-800'}`}>
                   {dog.gender}
                 </span>
+                
+                {/* Approval status badge */}
+                {showApprovalStatus && dog.approvalStatus && (
+                  <ApprovalStatusBadge 
+                    status={dog.approvalStatus}
+                    approvalDate={dog.approvalDate}
+                    approvedBy={dog.approvedBy}
+                    notes={dog.approvalNotes}
+                  />
+                )}
               </div>
 
               {/* Age badge */}
