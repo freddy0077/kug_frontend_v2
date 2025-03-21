@@ -1,2 +1,4 @@
 echo "Running build before commit..."
+echo "Clearing Next.js cache first..."
+rm -rf .next
 npm run build
