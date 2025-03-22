@@ -102,8 +102,9 @@ export default function LitterDetailPage() {
     );
   }
   
-  // Format date for display
+  // Format dates for display
   const whelpingDate = litter.whelpingDate ? formatDate(litter.whelpingDate) : 'Not specified';
+  const registrationDate = litter.registrationDate ? formatDate(litter.registrationDate) : 'Not specified';
   
   return (
     <div className="bg-gray-100 min-h-screen py-8">
@@ -414,10 +415,10 @@ export default function LitterDetailPage() {
                           </div>
                           
                           <dl className="grid grid-cols-1 gap-x-4 gap-y-2 mt-2">
-                            {puppy.dateOfBirth && (
+                            {litter.whelpingDate && (
                               <div>
                                 <dt className="text-xs font-medium text-gray-500">Date of Birth</dt>
-                                <dd className="text-sm text-gray-900">{formatDate(puppy.dateOfBirth)}</dd>
+                                <dd className="text-sm text-gray-900">{formatDate(litter.whelpingDate)}</dd>
                               </div>
                             )}
                             {puppy.color && (
