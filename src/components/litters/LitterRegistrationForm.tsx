@@ -21,6 +21,14 @@ interface LitterRegistrationFormProps {
   onSuccess?: (litterId: string) => void;
 }
 
+// Helper function to display field error message
+const FieldError = ({ error }: { error?: string }) => {
+  if (!error) return null;
+  return <p className="mt-1 text-sm text-red-600">{error}</p>;
+};
+
+type FormErrorType = Record<string, string>;
+
 const LitterRegistrationForm: React.FC<LitterRegistrationFormProps> = ({
   breedingId,
   initialSireId,
@@ -41,15 +49,18 @@ const LitterRegistrationForm: React.FC<LitterRegistrationFormProps> = ({
     isCollapsed?: boolean;
   }
 
-  // Define registration types
-  type RegistrationType = 'basic' | 'detailed';
+  // Define registration types - now only using detailed registration
+  type RegistrationType = 'detailed';
 
-  // Form state
-  const [registrationType, setRegistrationType] = useState<RegistrationType>('basic');
+  // Form state - always detailed registration
+  const [registrationType] = useState<RegistrationType>('detailed');
   
   // Form step tracking
   const [currentStep, setCurrentStep] = useState(1);
-  const totalSteps = registrationType === 'detailed' ? 4 : 3;
+  const totalSteps = 4; // Always 4 steps for detailed registration
+  
+  // State for info popup
+  const [showInfoPopup, setShowInfoPopup] = useState(true);
   
   const [formData, setFormData] = useState<Omit<LitterInput, 'sireId' | 'damId'> & {
     sireId: string;
@@ -68,8 +79,10 @@ const LitterRegistrationForm: React.FC<LitterRegistrationFormProps> = ({
     puppyDetails: []
   });
   
-  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const [formErrors, setFormErrors] = useState<FormErrorType>({});
+  const [formErrorSummary, setFormErrorSummary] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [registrationSuccess, setRegistrationSuccess] = useState(false);
   const [hasBreedingRecord, setHasBreedingRecord] = useState(!!breedingId);
   
   // Fetch dogs for sire/dam selection
@@ -114,58 +127,71 @@ const LitterRegistrationForm: React.FC<LitterRegistrationFormProps> = ({
   const maleDogs = dogsData?.dogs?.items.filter((dog: any) => dog.gender === 'male') || [];
   const femaleDogs = dogsData?.dogs?.items.filter((dog: any) => dog.gender === 'female') || [];
   
-  // Handle registration type change
-  const handleRegistrationTypeChange = (type: RegistrationType) => {
-    setRegistrationType(type);
-    
-    // If switching to detailed registration, ensure we have puppy details
-    if (type === 'detailed') {
-      // Create puppies array directly here rather than using formData values which might have timing issues
-      let totalToCreate = formData.totalPuppies;
-      let maleToCreate = formData.malePuppies;
-      
-      // If no puppies are set, add one default puppy
-      if (totalToCreate === 0) {
-        totalToCreate = 1;
-        maleToCreate = 1;
-      }
-      
-      // Create the puppy details array directly
-      const newPuppyDetails: PuppyDetail[] = [];
-      
-      // Add male puppies
-      for (let i = 0; i < maleToCreate; i++) {
-        newPuppyDetails.push({
-          name: '',
-          gender: 'male',
-          color: '',
-          markings: '',
-          microchipNumber: ''
-        });
-      }
-      
-      // Add female puppies
-      for (let i = 0; i < (totalToCreate - maleToCreate); i++) {
-        newPuppyDetails.push({
-          name: '',
-          gender: 'female',
-          color: '',
-          markings: '',
-          microchipNumber: ''
-        });
-      }
-      
-      // Update both counts and puppy details at once to ensure consistency
-      setFormData(prev => ({
-        ...prev,
-        totalPuppies: totalToCreate,
-        malePuppies: maleToCreate,
-        femalePuppies: totalToCreate - maleToCreate,
-        puppyDetails: newPuppyDetails
-      }));
-      
-      console.log('Setting puppy details:', newPuppyDetails);
+  // Initialize component and handle state changes
+  useEffect(() => {
+    // If we have a breeding ID but no breeding data yet, wait
+    if (breedingId && breedingLoading) {
+      return;
     }
+    
+    // Initialize with first step
+    setCurrentStep(1);
+    
+    // Initialize puppy details when component mounts or when relevant data changes
+    initializePuppyDetails();
+    
+    // If a breeding record or sire/dam IDs were provided, we can skip to step 2
+    if (breedingId || (initialSireId && initialDamId)) {
+      setHasBreedingRecord(true);
+      updateStep(2);
+    }
+  }, [breedingId, initialSireId, initialDamId, breedingLoading, breedingData]);
+  
+  // Initialize puppy details for detailed registration
+  const initializePuppyDetails = () => {
+    // Create puppies array directly here rather than using formData values which might have timing issues
+    let totalToCreate = formData.totalPuppies;
+    let maleToCreate = formData.malePuppies;
+    
+    // If no puppies are set, add one default puppy
+    if (totalToCreate === 0) {
+      totalToCreate = 1;
+      maleToCreate = 1;
+    }
+    
+    // Create the puppy details array directly
+    const newPuppyDetails: PuppyDetail[] = [];
+    
+    // Add male puppies
+    for (let i = 0; i < maleToCreate; i++) {
+      newPuppyDetails.push({
+        name: '',
+        gender: 'male',
+        color: '',
+        markings: '',
+        microchipNumber: ''
+      });
+    }
+    
+    // Add female puppies
+    for (let i = 0; i < (totalToCreate - maleToCreate); i++) {
+      newPuppyDetails.push({
+        name: '',
+        gender: 'female',
+        color: '',
+        markings: '',
+        microchipNumber: ''
+      });
+    }
+    
+    // Update both counts and puppy details at once to ensure consistency
+    setFormData(prev => ({
+      ...prev,
+      totalPuppies: totalToCreate,
+      malePuppies: maleToCreate,
+      femalePuppies: totalToCreate - maleToCreate,
+      puppyDetails: newPuppyDetails
+    }));
   };
 
   // Generate initial puppy details based on counts
@@ -418,6 +444,15 @@ const LitterRegistrationForm: React.FC<LitterRegistrationFormProps> = ({
   
   // Handle puppy detail changes
   const handlePuppyDetailChange = (index: number, field: keyof PuppyDetail, value: string) => {
+    // Clear any error for this specific field when user makes changes
+    if (formErrors[`puppy${index}_${field}`]) {
+      setFormErrors(prev => {
+        const updated = {...prev};
+        delete updated[`puppy${index}_${field}`];
+        return updated;
+      });
+    }
+    
     setFormData(prev => {
       const updatedPuppyDetails = [...(prev.puppyDetails || [])];
       updatedPuppyDetails[index] = {
@@ -434,21 +469,30 @@ const LitterRegistrationForm: React.FC<LitterRegistrationFormProps> = ({
   // Validate form
   const validateForm = () => {
     const errors: Record<string, string> = {};
+    let isValid = true;
+    
+    // Validate basic fields
+    if (!formData.litterName?.trim()) {
+      errors.litterName = 'Litter name is required';
+      isValid = false;
+    } else if (formData.litterName.length > 50) {
+      errors.litterName = 'Litter name must be 50 characters or less';
+      isValid = false;
+    }
     
     if (!formData.sireId) {
-      errors.sireId = 'Sire is required';
+      errors.sireId = 'Sire (Father) is required';
+      isValid = false;
     }
     
     if (!formData.damId) {
-      errors.damId = 'Dam is required';
-    }
-    
-    if (!formData.litterName.trim()) {
-      errors.litterName = 'Litter name is required';
+      errors.damId = 'Dam (Mother) is required';
+      isValid = false;
     }
     
     if (!formData.whelpingDate) {
       errors.whelpingDate = 'Whelping date is required';
+      isValid = false;
     } else {
       // Ensure whelping date is not in the future
       const today = new Date();
@@ -457,6 +501,7 @@ const LitterRegistrationForm: React.FC<LitterRegistrationFormProps> = ({
       
       if (whelpingDate > today) {
         errors.whelpingDate = 'Whelping date cannot be in the future';
+        isValid = false;
       }
     }
     
@@ -476,7 +521,15 @@ const LitterRegistrationForm: React.FC<LitterRegistrationFormProps> = ({
     if (registrationType === 'detailed' && formData.puppyDetails) {
       formData.puppyDetails.forEach((puppy, index) => {
         if (!puppy.name.trim()) {
-          errors[`puppyName${index}`] = `Name for puppy #${index + 1} is required`;
+          errors[`puppy${index}_name`] = `Name for puppy #${index + 1} is required`;
+        }
+        
+        if (!puppy.color.trim()) {
+          errors[`puppy${index}_color`] = `Color for puppy #${index + 1} is required`;
+        }
+        
+        if (puppy.microchipNumber && puppy.microchipNumber.length < 8) {
+          errors[`puppy${index}_microchipNumber`] = `Microchip number must be at least 8 characters`;
         }
       });
     }
@@ -493,9 +546,27 @@ const LitterRegistrationForm: React.FC<LitterRegistrationFormProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Clear any existing form error summary
+    setFormErrorSummary('');
+    
+    // Validate the form
     if (!validateForm()) {
+      // Scroll to the top to show the error summary
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      
+      // Create a more descriptive error message
+      const errorList = Object.values(formErrors);
+      const errorCount = errorList.length;
+      
+      // Show a summary of the errors at the top of the form
+      setFormErrorSummary(
+        `Please correct the ${errorCount} ${errorCount === 1 ? 'error' : 'errors'} below before submitting: ${errorList.slice(0, 3).join('; ')}${errorCount > 3 ? '...' : ''}`
+      );
       return;
     }
+    
+    // Show helpful feedback that we're starting the submission process
+    toast.success('Submitting litter registration...');
     
     setIsSubmitting(true);
     
@@ -518,9 +589,36 @@ const LitterRegistrationForm: React.FC<LitterRegistrationFormProps> = ({
         variables: { input }
       });
       
+      const response = await createLitter({
+        variables: { input }
+      });
+      
+      const litterId = response?.data?.createLitter?.id || '';
+      
+      // Show success notification with more information
       toast.success('Litter registered successfully!');
+      
+      setRegistrationSuccess(true);
+      
+      // Display a success message with more details
+      setFormErrorSummary('');
+      setFormErrors({});
+      
+      // Trigger any success callbacks if provided
+      if (onSuccess && litterId) {
+        onSuccess(litterId);
+      }
+      
+      // Reset form or redirect after short delay
+      setTimeout(() => {
+        // Redirect to litters list or the new litter detail page if we have an ID
+        window.location.href = litterId ? `/litters/${litterId}` : '/litters';
+      }, 2000);
     } catch (error: any) {
-      toast.error(`An error occurred: ${error.message}`);
+      const errorMessage = error.message || 'An unknown error occurred';
+      toast.error(`Registration failed: ${errorMessage}`);
+      setFormErrorSummary(`Failed to register litter: ${errorMessage}`);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
       setIsSubmitting(false);
     }
   };
@@ -553,6 +651,38 @@ const LitterRegistrationForm: React.FC<LitterRegistrationFormProps> = ({
           Fill in the details below to register a new litter of puppies.
         </p>
         
+        {/* Form Error Summary */}
+        {formErrorSummary && (
+          <div className="mt-4 p-4 bg-red-50 border-l-4 border-red-500 rounded-md">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <svg className="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <p className="text-sm text-red-700">{formErrorSummary}</p>
+              </div>
+            </div>
+          </div>
+        )}
+        
+        {/* Success Message */}
+        {registrationSuccess && (
+          <div className="mt-4 p-4 bg-green-50 border-l-4 border-green-500 rounded-md">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <svg className="h-5 w-5 text-green-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <p className="text-sm text-green-700">Litter registered successfully! Redirecting to litters list...</p>
+              </div>
+            </div>
+          </div>
+        )}
+        
         {/* Progress indicator */}
         <div className="mt-4">
           <div className="relative pt-1">
@@ -575,47 +705,196 @@ const LitterRegistrationForm: React.FC<LitterRegistrationFormProps> = ({
           </div>
           <div className="flex justify-between mb-2">
             <span className="text-xs text-gray-500">Basic Info</span>
-            {registrationType === 'detailed' ? (
-              <>
-                <span className="text-xs text-gray-500">Puppy Count</span>
-                <span className="text-xs text-gray-500">Parents</span>
-                <span className="text-xs text-gray-500">Puppy Details</span>
-              </>
-            ) : (
-              <>
-                <span className="text-xs text-gray-500">Parents</span>
-                <span className="text-xs text-gray-500">Review</span>
-              </>
-            )}
+            <span className="text-xs text-gray-500">Puppy Count</span>
+            <span className="text-xs text-gray-500">Parents</span>
+            <span className="text-xs text-gray-500">Puppy Details</span>
           </div>
         </div>
       </div>
       
-      <form onSubmit={handleSubmit} className="p-6 space-y-6">
-        {/* Registration Type Selector */}
-        <div className="mb-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Registration Type</h3>
-          <div className="flex space-x-4">
-            <div
-              onClick={() => handleRegistrationTypeChange('basic')}
-              className={`cursor-pointer p-4 rounded-lg border ${registrationType === 'basic' ? 'border-blue-500 bg-blue-50' : 'border-gray-300'} flex-1`}
-            >
-              <div className="flex items-center">
-                <div className={`h-4 w-4 rounded-full ${registrationType === 'basic' ? 'bg-blue-500' : 'bg-gray-300'} mr-2`}></div>
-                <h4 className="font-medium">Basic Registration</h4>
+              {/* Info Popup */}
+        {showInfoPopup && (
+          <div className="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+            <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+              {/* Background overlay with blur effect */}
+              <div 
+                className="fixed inset-0 bg-gray-900 bg-opacity-50 backdrop-blur-sm transition-opacity" 
+                aria-hidden="true" 
+                onClick={() => setShowInfoPopup(false)}
+              ></div>
+              
+              {/* Modal positioning */}
+              <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+              
+              {/* Modal container with animation */}
+              <div 
+                className="inline-block align-bottom bg-white dark:bg-gray-800 rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all duration-300 ease-in-out sm:my-8 sm:align-middle sm:max-w-lg sm:w-full animate-modal-appear"
+                style={{
+                  animation: 'modalAppear 0.3s ease-out',
+                  boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'
+                }}
+              >
+                {/* Header with gradient */}
+                <div className="relative bg-gradient-to-r from-blue-500 to-indigo-600 py-6 px-6 rounded-t-2xl">
+                  <h3 className="text-xl font-bold text-white" id="modal-title">
+                    About Litter Registration
+                  </h3>
+                  <button 
+                    type="button" 
+                    className="absolute top-3 right-3 text-white hover:text-gray-200 transition-colors"
+                    onClick={() => setShowInfoPopup(false)}
+                  >
+                    <svg className="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+                
+                {/* Content area */}
+                <div className="px-6 py-4 max-h-[70vh] overflow-y-auto">
+                  <div className="space-y-6">
+                    <p className="text-gray-700 dark:text-gray-300">
+                      Litter registration is an important step in documenting the breeding history and genealogy of your dogs. 
+                      This detailed registration process provides numerous benefits:
+                    </p>
+                    
+                    {/* Cards for sections */}
+                    <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 border border-blue-100 dark:border-blue-700">
+                      <h4 className="font-semibold text-blue-800 dark:text-blue-300 flex items-center">
+                        <svg className="h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                        </svg>
+                        Key Benefits
+                      </h4>
+                      <ul className="mt-2 space-y-2">
+                        <li className="flex items-start">
+                          <span className="flex-shrink-0 h-5 w-5 text-blue-500">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                            </svg>
+                          </span>
+                          <span className="ml-2 text-gray-700 dark:text-gray-300">
+                            <strong>Pedigree Documentation:</strong> Establishes formal records of lineage
+                          </span>
+                        </li>
+                        <li className="flex items-start">
+                          <span className="flex-shrink-0 h-5 w-5 text-blue-500">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                            </svg>
+                          </span>
+                          <span className="ml-2 text-gray-700 dark:text-gray-300">
+                            <strong>Health Tracking:</strong> Allows for monitoring of inherited traits and conditions
+                          </span>
+                        </li>
+                        <li className="flex items-start">
+                          <span className="flex-shrink-0 h-5 w-5 text-blue-500">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                            </svg>
+                          </span>
+                          <span className="ml-2 text-gray-700 dark:text-gray-300">
+                            <strong>Breeder Credibility:</strong> Demonstrates commitment to responsible breeding
+                          </span>
+                        </li>
+                        <li className="flex items-start">
+                          <span className="flex-shrink-0 h-5 w-5 text-blue-500">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                            </svg>
+                          </span>
+                          <span className="ml-2 text-gray-700 dark:text-gray-300">
+                            <strong>Simplified Puppy Registration:</strong> Makes individual puppy registration easier
+                          </span>
+                        </li>
+                      </ul>
+                    </div>
+                    
+                    <div className="bg-green-50 dark:bg-green-900/20 rounded-xl p-4 border border-green-100 dark:border-green-700">
+                      <h4 className="font-semibold text-green-800 dark:text-green-300 flex items-center">
+                        <svg className="h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M5 2a1 1 0 011 1v1h1a1 1 0 010 2H6v1a1 1 0 01-2 0V6H3a1 1 0 010-2h1V3a1 1 0 011-1zm0 10a1 1 0 011 1v1h1a1 1 0 110 2H6v1a1 1 0 11-2 0v-1H3a1 1 0 110-2h1v-1a1 1 0 011-1zm7-10a1 1 0 01.707.293l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L13.586 9H10a1 1 0 110-2h3.586l-2.293-2.293A1 1 0 0112 2z" clipRule="evenodd" />
+                        </svg>
+                        Required Information
+                      </h4>
+                      <div className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-2">
+                        <div className="bg-white dark:bg-gray-700 p-2 rounded-lg shadow-sm">
+                          <div className="font-medium text-green-700 dark:text-green-300">Parents</div>
+                          <div className="text-sm text-gray-600 dark:text-gray-300">Verified sire and dam of the litter</div>
+                        </div>
+                        <div className="bg-white dark:bg-gray-700 p-2 rounded-lg shadow-sm">
+                          <div className="font-medium text-green-700 dark:text-green-300">Whelping Date</div>
+                          <div className="text-sm text-gray-600 dark:text-gray-300">The date the puppies were born</div>
+                        </div>
+                        <div className="bg-white dark:bg-gray-700 p-2 rounded-lg shadow-sm">
+                          <div className="font-medium text-green-700 dark:text-green-300">Litter Size</div>
+                          <div className="text-sm text-gray-600 dark:text-gray-300">Number of puppies and gender breakdown</div>
+                        </div>
+                        <div className="bg-white dark:bg-gray-700 p-2 rounded-lg shadow-sm">
+                          <div className="font-medium text-green-700 dark:text-green-300">Puppy Details</div>
+                          <div className="text-sm text-gray-600 dark:text-gray-300">Names, colors, markings, microchips</div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="bg-amber-50 dark:bg-amber-900/20 rounded-xl p-4 border border-amber-100 dark:border-amber-700">
+                      <h4 className="font-semibold text-amber-800 dark:text-amber-300 flex items-center">
+                        <svg className="h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+                        </svg>
+                        Timeline Tips
+                      </h4>
+                      <p className="mt-2 text-gray-700 dark:text-gray-300">
+                        For best results, register your litter within 4-8 weeks of birth, but you can register 
+                        at any time. Early registration ensures all records are properly linked from birth.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Footer */}
+                <div className="px-6 py-4 bg-gray-50 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 rounded-b-2xl">
+                  <button 
+                    type="button" 
+                    className="w-full flex justify-center items-center py-2.5 px-4 bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-medium rounded-xl shadow-md hover:from-blue-600 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200"
+                    onClick={() => setShowInfoPopup(false)}
+                  >
+                    <span>Got it</span>
+                    <svg className="ml-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                  </button>
+                </div>
               </div>
-              <p className="mt-2 text-sm text-gray-600">Just register the litter with basic puppy count information.</p>
             </div>
-            
-            <div
-              onClick={() => handleRegistrationTypeChange('detailed')}
-              className={`cursor-pointer p-4 rounded-lg border ${registrationType === 'detailed' ? 'border-blue-500 bg-blue-50' : 'border-gray-300'} flex-1`}
-            >
-              <div className="flex items-center">
-                <div className={`h-4 w-4 rounded-full ${registrationType === 'detailed' ? 'bg-blue-500' : 'bg-gray-300'} mr-2`}></div>
-                <h4 className="font-medium">Detailed Registration</h4>
-              </div>
-              <p className="mt-2 text-sm text-gray-600">Register individual puppies with names and details.</p>
+          </div>
+        )}
+
+<form onSubmit={handleSubmit} className="p-6 space-y-6">
+        {/* Litter Registration Information */}
+        <div className="mb-6 bg-blue-50 p-4 rounded-lg border border-blue-200">
+          <div className="flex items-start">
+            <div className="flex-shrink-0 pt-0.5">
+              <svg className="h-5 w-5 text-blue-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="ml-3 flex-1">
+              <h3 className="text-lg font-medium text-blue-800 mb-2">Detailed Litter Registration</h3>
+              <p className="text-sm text-blue-700 mb-2">
+                This form allows you to register all puppies in a litter with their individual details including names, colors, markings, and microchip numbers.
+                Complete registration provides better record-keeping and streamlines the eventual registration of individual puppies.
+              </p>
+              <button 
+                type="button" 
+                className="text-blue-600 hover:text-blue-800 font-medium text-sm flex items-center"
+                onClick={() => setShowInfoPopup(true)}
+              >
+                <svg className="h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Learn more about litter registration
+              </button>
             </div>
           </div>
         </div>
@@ -680,7 +959,7 @@ const LitterRegistrationForm: React.FC<LitterRegistrationFormProps> = ({
                 onChange={handleChange}
                 className={`mt-1 block w-full rounded-md shadow-sm ${
                   formErrors.litterName 
-                    ? 'border-red-300 focus:border-red-500 focus:ring-red-500' 
+                    ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-500' 
                     : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'
                 }`}
                 placeholder="e.g. Litter A or Spring 2025"
@@ -725,7 +1004,7 @@ const LitterRegistrationForm: React.FC<LitterRegistrationFormProps> = ({
                 onChange={handleChange}
                 className={`mt-1 block w-full rounded-md shadow-sm ${
                   formErrors.whelpingDate 
-                    ? 'border-red-300 focus:border-red-500 focus:ring-red-500' 
+                    ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-500' 
                     : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'
                 }`}
               />
@@ -853,11 +1132,11 @@ const LitterRegistrationForm: React.FC<LitterRegistrationFormProps> = ({
                           id={`puppy-name-${index}`}
                           value={puppy.name}
                           onChange={(e) => handlePuppyDetailChange(index, 'name', e.target.value)}
-                          className={`mt-1 block w-full rounded-md shadow-sm ${formErrors[`puppyName${index}`] ? 'border-red-300' : 'border-gray-300'} focus:border-blue-500 focus:ring-blue-500`}
+                          className={`mt-1 block w-full rounded-md shadow-sm ${formErrors[`puppy${index}_name`] ? 'border-red-300 bg-red-50' : 'border-gray-300'} focus:border-blue-500 focus:ring-blue-500`}
                           placeholder={`${puppy.gender === 'male' ? 'Male' : 'Female'} puppy name`}
                         />
-                        {formErrors[`puppyName${index}`] && (
-                          <p className="mt-1 text-sm text-red-600">{formErrors[`puppyName${index}`]}</p>
+                        {formErrors[`puppy${index}_name`] && (
+                          <p className="mt-1 text-sm text-red-600">{formErrors[`puppy${index}_name`]}</p>
                         )}
                       </div>
                       
@@ -871,9 +1150,12 @@ const LitterRegistrationForm: React.FC<LitterRegistrationFormProps> = ({
                           id={`puppy-color-${index}`}
                           value={puppy.color || ''}
                           onChange={(e) => handlePuppyDetailChange(index, 'color', e.target.value)}
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                          className={`mt-1 block w-full rounded-md shadow-sm ${formErrors[`puppy${index}_color`] ? 'border-red-300 bg-red-50' : 'border-gray-300'} focus:border-blue-500 focus:ring-blue-500`}
                           placeholder="E.g., Black, Brown, Brindle"
                         />
+                        {formErrors[`puppy${index}_color`] && (
+                          <p className="mt-1 text-sm text-red-600">{formErrors[`puppy${index}_color`]}</p>
+                        )}
                       </div>
                       
                       {/* Markings */}
@@ -886,9 +1168,12 @@ const LitterRegistrationForm: React.FC<LitterRegistrationFormProps> = ({
                           id={`puppy-markings-${index}`}
                           value={puppy.markings || ''}
                           onChange={(e) => handlePuppyDetailChange(index, 'markings', e.target.value)}
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                          className={`mt-1 block w-full rounded-md shadow-sm ${formErrors[`puppy${index}_markings`] ? 'border-red-300 bg-red-50' : 'border-gray-300'} focus:border-blue-500 focus:ring-blue-500`}
                           placeholder="E.g., White chest, Tan points"
                         />
+                        {formErrors[`puppy${index}_markings`] && (
+                          <p className="mt-1 text-sm text-red-600">{formErrors[`puppy${index}_markings`]}</p>
+                        )}
                       </div>
                       
                       {/* Microchip Number */}
@@ -901,9 +1186,12 @@ const LitterRegistrationForm: React.FC<LitterRegistrationFormProps> = ({
                           id={`puppy-microchip-${index}`}
                           value={puppy.microchipNumber || ''}
                           onChange={(e) => handlePuppyDetailChange(index, 'microchipNumber', e.target.value)}
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                          className={`mt-1 block w-full rounded-md shadow-sm ${formErrors[`puppy${index}_microchipNumber`] ? 'border-red-300 bg-red-50' : 'border-gray-300'} focus:border-blue-500 focus:ring-blue-500`}
                           placeholder="Microchip identification number if available"
                         />
+                        {formErrors[`puppy${index}_microchipNumber`] && (
+                          <p className="mt-1 text-sm text-red-600">{formErrors[`puppy${index}_microchipNumber`]}</p>
+                        )}
                       </div>
                     </div>
                   )}
@@ -1020,7 +1308,7 @@ const LitterRegistrationForm: React.FC<LitterRegistrationFormProps> = ({
             rows={4}
             value={formData.notes || ''}
             onChange={handleChange}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            className={`mt-1 block w-full rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 ${formErrors.notes ? 'border-red-300 bg-red-50' : 'border-gray-300'}`}
             placeholder="Any additional information about this litter..."
           />
           <p className="mt-1 text-xs text-gray-500">
@@ -1038,10 +1326,16 @@ const LitterRegistrationForm: React.FC<LitterRegistrationFormProps> = ({
           </Link>
           <button
             type="submit"
-            disabled={isSubmitting}
-            className={`inline-flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${isSubmitting ? 'opacity-75 cursor-not-allowed' : ''}`}
+            disabled={isSubmitting || registrationSuccess}
+            className={`inline-flex items-center justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${isSubmitting || registrationSuccess ? 'opacity-75 cursor-not-allowed bg-blue-500' : 'bg-blue-600 hover:bg-blue-700'}`}
           >
-            {isSubmitting ? 'Registering...' : 'Register Litter'}
+            {isSubmitting && (
+              <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            )}
+            {registrationSuccess ? 'Registration Complete' : (isSubmitting ? 'Registering...' : 'Register Litter')}
           </button>
         </div>
       </form>
