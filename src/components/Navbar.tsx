@@ -25,63 +25,105 @@ export default function Navbar() {
 
   // Menu items with role-based access control
   const menuItems: MenuItem[] = [
+    // Public menu items (available to all users)
+    { href: '/', label: 'Home', roles: [] },
+    { href: '/dogs', label: 'Dogs', roles: [] },
+    
     // Dynamic dashboard link based on user role
     { 
       href: '#', // This will be overridden in filterMenuItems
       label: 'Dashboard', 
-      roles: [UserRole.ADMIN, UserRole.OWNER, UserRole.HANDLER, UserRole.CLUB, UserRole.VIEWER] // Available to authenticated users
+      roles: [UserRole.ADMIN, UserRole.OWNER, UserRole.HANDLER, UserRole.CLUB, UserRole.VIEWER]
     },
-    { href: '/', label: 'Home', roles: [] }, // Available to all
-    { href: '/dogs', label: 'Dogs', roles: [] }, // Available to all
-    { href: '/litters', label: 'Litters', roles: [UserRole.ADMIN, UserRole.OWNER] }, // Only for admin and owners
-    // Dog Records submenu grouping
+    
+    // Admin sections
     { 
       href: '#',
-      label: 'Dog Records', 
-      roles: [UserRole.ADMIN],
-      submenu: [
-        { href: '/pedigrees', label: 'Pedigrees', roles: [UserRole.ADMIN] },
-        { href: '/breeds', label: 'Breeds', roles: [UserRole.ADMIN] },
-        // { href: '/health-records', label: 'Health Records', roles: [UserRole.ADMIN] },
-        { href: '/competitions', label: 'Competitions', roles: [UserRole.ADMIN, UserRole.OWNER, UserRole.HANDLER, UserRole.CLUB] },
-        // { href: '/ownerships', label: 'Ownerships', roles: [UserRole.ADMIN, UserRole.OWNER] },
-      ]
-    },
-   
-    // Admin menu grouping
-    { 
-      href: '#',
-      label: 'Admin', 
+      label: 'Admin Panel', 
       roles: [UserRole.ADMIN],
       submenu: [
         { href: '/admin/users', label: 'User Management', roles: [UserRole.ADMIN] },
         { href: '/admin/roles', label: 'Role Management', roles: [UserRole.ADMIN] },
         { href: '/admin/dog-approvals', label: 'Dog Approvals', roles: [UserRole.ADMIN] },
-        // { href: '/admin/settings', label: 'System Settings', roles: [UserRole.ADMIN] },
-        // { href: '/admin/logs', label: 'System Logs', roles: [UserRole.ADMIN] },
+        { href: '/admin/logs', label: 'System Logs', roles: [UserRole.ADMIN] },
       ]
     },
-    // Owner specific menu grouping for breeding
-    // { 
-    //   href: '#',
-    //   label: 'Breeding', 
-    //   roles: [UserRole.OWNER],
-    //   submenu: [
-    //     { href: '/breeding-programs', label: 'Breeding Programs', roles: [UserRole.ADMIN, UserRole.OWNER] },
-    //     { href: '/breeding/matings', label: 'Planned Matings', roles: [UserRole.ADMIN, UserRole.OWNER] },
-    //   ]
-    // },
-    // Club specific menu grouping
-    // { 
-    //   href: '#',
-    //   label: 'Club', 
-    //   roles: [UserRole.CLUB],
-    //   submenu: [
-    //     { href: '/club-events', label: 'Club Events', roles: [UserRole.CLUB] },
-    //     { href: '/club/members', label: 'Club Members', roles: [UserRole.CLUB] },
-    //   ]
-    // },
-    // { href: '/about', label: 'About', roles: [] } // Available to all
+    
+    // Dog Records and Registry
+    { 
+      href: '#',
+      label: 'Dog Registry', 
+      roles: [UserRole.ADMIN, UserRole.OWNER],
+      submenu: [
+        { href: '/pedigrees', label: 'Pedigrees', roles: [UserRole.ADMIN, UserRole.OWNER] },
+        { href: '/breeds', label: 'Breeds', roles: [UserRole.ADMIN, UserRole.OWNER] },
+        { href: '/dogs/new', label: 'Register New Dog', roles: [UserRole.ADMIN, UserRole.OWNER] },
+      ]
+    },
+    
+    // Litter Management (for breeders/owners)
+    { 
+      href: '/litters', 
+      label: 'Litters', 
+      roles: [UserRole.ADMIN, UserRole.OWNER],
+      submenu: [
+        { href: '/litters', label: 'View All Litters', roles: [UserRole.ADMIN, UserRole.OWNER] },
+        { href: '/litters/new', label: 'Register New Litter', roles: [UserRole.ADMIN, UserRole.OWNER] },
+      ]
+    },
+    
+    // Health & Competition Records
+    { 
+      href: '#',
+      label: 'Records', 
+      roles: [UserRole.ADMIN, UserRole.OWNER, UserRole.HANDLER, UserRole.CLUB],
+      submenu: [
+        { href: '/health-records', label: 'Health Records', roles: [UserRole.ADMIN, UserRole.OWNER] },
+        { href: '/competitions', label: 'Competitions', roles: [UserRole.ADMIN, UserRole.OWNER, UserRole.HANDLER, UserRole.CLUB] },
+        { href: '/ownerships', label: 'Ownership Records', roles: [UserRole.ADMIN, UserRole.OWNER] },
+      ]
+    },
+    
+    // Club specific menu (uncomment when needed)
+    { 
+      href: '#',
+      label: 'Club Management', 
+      roles: [UserRole.CLUB],
+      submenu: [
+        { href: '/club-events', label: 'Club Events', roles: [UserRole.CLUB] },
+      ]
+    },
+    
+    // Breeding Management
+    { 
+      href: '#',
+      label: 'Breeding', 
+      roles: [UserRole.OWNER],
+      submenu: [
+        { href: '/breeding-programs', label: 'Breeding Programs', roles: [UserRole.ADMIN, UserRole.OWNER] },
+        { href: '/breeding-programs/planned-matings', label: 'Planned Matings', roles: [UserRole.ADMIN, UserRole.OWNER] },
+      ]
+    },
+    
+    // Tools Section
+    { 
+      href: '#',
+      label: 'Tools', 
+      roles: [UserRole.ADMIN, UserRole.OWNER, UserRole.HANDLER],
+      submenu: [
+        { href: '/tools/genetic-calculator', label: 'Genetic Calculator', roles: [UserRole.ADMIN, UserRole.OWNER, UserRole.HANDLER] },
+      ]
+    },
+    
+    // Resources Section
+    { 
+      href: '#',
+      label: 'Resources', 
+      roles: [],
+      submenu: [
+        { href: '/resources/breeding-standards', label: 'Breeding Standards', roles: [UserRole.ADMIN, UserRole.OWNER, UserRole.HANDLER, UserRole.CLUB, UserRole.VIEWER] },
+      ]
+    },
   ];
 
   // Dashboard link depends on user role

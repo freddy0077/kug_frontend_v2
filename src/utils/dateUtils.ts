@@ -30,6 +30,22 @@ export const formatDate = (
 };
 
 /**
+ * Format a date string to a standard format (Month Day, Year)
+ * This is an alias for formatDate with specific options
+ * @param dateString - The date string to format
+ * @returns Formatted date string in "Month Day, Year" format
+ */
+export const formatDateStr = (
+  dateString?: string | null
+): string => {
+  return formatDate(dateString, {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
+};
+
+/**
  * Check if a date is in the past
  * @param dateString - The date string to check
  * @returns Boolean indicating if the date is in the past
