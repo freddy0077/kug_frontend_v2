@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useMutation } from '@apollo/client';
@@ -8,6 +8,8 @@ import { REGISTER_MUTATION } from '@/graphql/mutations/userMutations';
 import { useAuth } from '@/contexts/AuthContext';
 import { SITE_NAME, SITE_DESCRIPTION } from '@/config/site';
 import { UserRole } from '@/utils/permissionUtils';
+import ReCAPTCHA from 'react-google-recaptcha';
+import { RECAPTCHA_SITE_KEY, validateRecaptchaToken } from '@/config/recaptcha';
 
 export default function Register() {
   const router = useRouter();
@@ -23,6 +25,8 @@ export default function Register() {
     userRole: UserRole.OWNER, // Using the proper UserRole enum
     acceptTerms: false
   });
+  const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
+  const recaptchaRef = useRef<ReCAPTCHA>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -51,6 +55,13 @@ export default function Register() {
       setIsLoading(false);
       return;
     }
+    
+    // Validate reCAPTCHA
+    if (!validateRecaptchaToken(recaptchaToken)) {
+      setError('Please complete the reCAPTCHA verification');
+      setIsLoading(false);
+      return;
+    }
 
     try {
       // Call the register mutation with GraphQL
@@ -61,7 +72,8 @@ export default function Register() {
             password: formData.password,
             firstName: formData.firstName,
             lastName: formData.lastName,
-            role: formData.userRole
+            role: formData.userRole,
+            recaptchaToken: recaptchaToken
           }
         }
       });
@@ -269,6 +281,15 @@ export default function Register() {
                   Privacy Policy
                 </Link>
               </label>
+            </div>
+
+            <div className="mb-6">
+              <ReCAPTCHA
+                ref={recaptchaRef}
+                sitekey={RECAPTCHA_SITE_KEY}
+                onChange={(token) => setRecaptchaToken(token)}
+                className="transform scale-90 origin-left"
+              />
             </div>
 
             <button

@@ -1,11 +1,13 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, Suspense, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { ApolloError } from '@apollo/client';
 import { SITE_NAME, SITE_DESCRIPTION } from '@/config/site';
+import ReCAPTCHA from 'react-google-recaptcha';
+import { RECAPTCHA_SITE_KEY, validateRecaptchaToken } from '@/config/recaptcha';
 
 // Component that uses searchParams wrapped in Suspense
 function LoginContent() {
@@ -17,6 +19,8 @@ function LoginContent() {
     password: '',
     rememberMe: false
   });
+  const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
+  const recaptchaRef = useRef<ReCAPTCHA>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [redirectPath, setRedirectPath] = useState('/dashboard');
@@ -47,9 +51,16 @@ function LoginContent() {
     setIsLoading(true);
     setError('');
 
+    // Validate reCAPTCHA
+    if (!validateRecaptchaToken(recaptchaToken)) {
+      setError('Please complete the reCAPTCHA verification');
+      setIsLoading(false);
+      return;
+    }
+
     try {
-      // Call the login method from our Auth context
-      const user = await login(formData.email, formData.password);
+      // Call the login method from our Auth context with the reCAPTCHA token
+      const user = await login(formData.email, formData.password, recaptchaToken);
       
       // Check if we have a redirect path from the URL
       if (redirectPath && redirectPath !== '/dashboard') {
@@ -162,6 +173,15 @@ function LoginContent() {
               <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
                 Remember me
               </label>
+            </div>
+
+            <div className="mb-6">
+              <ReCAPTCHA
+                ref={recaptchaRef}
+                sitekey={RECAPTCHA_SITE_KEY}
+                onChange={(token) => setRecaptchaToken(token)}
+                className="transform scale-90 origin-left"
+              />
             </div>
 
             <button

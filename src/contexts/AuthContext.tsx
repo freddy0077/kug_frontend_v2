@@ -21,7 +21,7 @@ interface AuthContextType {
   loading: boolean;
   error: ApolloError | Error | null;
   isAuthenticated: boolean;
-  login: (email: string, password: string) => Promise<User | null>;
+  login: (email: string, password: string, recaptchaToken: string | null) => Promise<User | null>;
   logout: () => void;
   refreshUser: () => Promise<void>;
 }
@@ -99,13 +99,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     initializeAuth();
   }, []);
 
-  const login = async (email: string, password: string): Promise<User | null> => {
+  const login = async (email: string, password: string, recaptchaToken: string | null): Promise<User | null> => {
     try {
       setLoading(true);
       setError(null);
       
       const { data } = await loginMutation({
-        variables: { email, password }
+        variables: { email, password, recaptchaToken }
       });
       
       if (data?.login) {

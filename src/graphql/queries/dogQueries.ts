@@ -1,6 +1,19 @@
 import { gql } from '@apollo/client';
 import { ApprovalStatus } from '@/types/enums';
 
+// Query to get minimal dog information for selectors and dropdowns
+export const GET_DOGS_MINIMAL = gql`
+  query GetDogsMinimal {
+    dogs: userDogs {
+      id
+      name
+      breed
+      registrationNumber
+      mainImageUrl
+    }
+  }
+`;
+
 // Query to get paginated list of dogs with filtering options
 export const GET_DOGS = gql`
   query GetDogs(
@@ -75,6 +88,8 @@ export const GET_DOGS = gql`
     }
   }
 `;
+
+
 
 // Query to get a single dog by ID
 export const GET_DOG_BY_ID = gql`
@@ -175,6 +190,8 @@ export const GET_DOG_BY_ID = gql`
     }
   }
 `;
+
+
 
 // Alias GET_DOG_BY_ID as GET_DOG for backward compatibility
 export const GET_DOG = GET_DOG_BY_ID;
@@ -424,6 +441,8 @@ export const GET_DOG_PEDIGREE = gql`
   }
 `;
 
+
+
 // Query to get dogs owned by the current user
 export const GET_USER_DOGS = gql`
   query GetUserDogs {
@@ -443,6 +462,8 @@ export const GET_USER_DOGS = gql`
     }
   }
 `;
+
+
 
 // Define enums to match GraphQL schema
 export enum DogSortField {
@@ -502,6 +523,8 @@ export const SEARCH_DOGS = gql`
   }
 `;
 
+
+
 // Mutation to link a dog to its parents
 export const LINK_DOG_TO_PARENTS = gql`
   mutation linkDogToParents($dogId: ID!, $sireId: ID, $damId: ID) {
@@ -525,3 +548,5 @@ export const LINK_DOG_TO_PARENTS = gql`
     }
   }
 `;
+
+
