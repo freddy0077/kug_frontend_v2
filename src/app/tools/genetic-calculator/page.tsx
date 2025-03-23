@@ -1,9 +1,17 @@
 'use client';
 
 import { useState } from 'react';
+import React, { Fragment } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { UserRole } from '@/utils/permissionUtils';
+import dynamic from 'next/dynamic';
+
+// Dynamically import the advanced calculator to avoid Material UI import issues
+const AdvancedGeneticCalculator = dynamic(
+  () => import('./AdvancedGeneticCalculator'),
+  { ssr: false }
+);
 
 export default function GeneticCalculator() {
   const { user } = useAuth();
@@ -11,6 +19,7 @@ export default function GeneticCalculator() {
   const [gene2, setGene2] = useState<string>('');
   const [results, setResults] = useState<{[key: string]: number} | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'basic' | 'advanced'>('basic');
 
   // Common coat color genes in dogs
   const geneOptions = [
@@ -47,6 +56,7 @@ export default function GeneticCalculator() {
   const calculatePunnettSquare = () => {
     try {
       setError(null);
+      console.log('Calculating probabilities for:', gene1, gene2);
       
       // Basic validation
       if (!gene1 || !gene2) {
@@ -57,6 +67,7 @@ export default function GeneticCalculator() {
 
       const alleles1 = parseGenotype(gene1);
       const alleles2 = parseGenotype(gene2);
+      console.log('Parsed alleles:', alleles1, alleles2);
       
       // More validation
       if (alleles1.length === 0 || alleles2.length === 0) {
@@ -74,6 +85,7 @@ export default function GeneticCalculator() {
       // Generate all possible combinations
       const combinations: {[key: string]: number} = {};
       const totalCombinations = Math.pow(2, alleles1.length);
+      console.log('Expecting combinations:', totalCombinations);
       
       for (let i = 0; i < alleles1.length; i += 2) {
         if (i + 1 < alleles1.length) {
@@ -88,6 +100,8 @@ export default function GeneticCalculator() {
             gene1Allele2 + gene2Allele1,
             gene1Allele2 + gene2Allele2
           ];
+          
+          console.log('Offspring combinations for locus', i/2, ':', offspring);
           
           offspring.forEach(combo => {
             // Sort alleles within each combo (e.g. "Bb" instead of "bB")
@@ -112,8 +126,15 @@ export default function GeneticCalculator() {
         result[combo] = (count / total) * 100;
       });
       
+      console.log('Calculated results:', result);
       setResults(result);
+      
+      // Display alert for testing
+      if (Object.keys(result).length === 0) {
+        alert('No results calculated. Please check the console for details.');
+      }
     } catch (err) {
+      console.error('Error calculating genetic probabilities:', err);
       setError('Error calculating genetic probabilities. Please check your inputs and try again.');
       setResults(null);
     }
@@ -123,120 +144,146 @@ export default function GeneticCalculator() {
     <ProtectedRoute allowedRoles={[UserRole.OWNER, UserRole.ADMIN, UserRole.HANDLER]}>
       <div className="bg-gray-100 min-h-screen py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-            <h1 className="text-2xl font-bold text-gray-900 mb-4">Genetic Calculator</h1>
-            <p className="text-gray-600 mb-6">
-              Calculate the probability of offspring genotypes based on parent genotypes. 
-              Enter the genotypes for both parents and click Calculate to view the results.
-            </p>
-            
-            {/* Input section */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-              <div>
-                <label htmlFor="gene1" className="block text-sm font-medium text-gray-700 mb-2">
-                  Parent 1 Genotype
-                </label>
-                <input
-                  type="text"
-                  id="gene1"
-                  placeholder="e.g., Bb Ee"
-                  className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md p-2"
-                  value={gene1}
-                  onChange={(e) => setGene1(e.target.value)}
-                />
-                <p className="mt-1 text-xs text-gray-500">
-                  Format example: Bb Ee (for heterozygous black and extension)
-                </p>
+          
+          {/* Tab Navigation */}
+          <div className="mb-6 bg-white rounded-lg shadow-md overflow-hidden border-b">
+            <nav className="flex">
+              <button
+                onClick={() => setActiveTab('basic')}
+                className={`px-6 py-4 text-sm font-medium ${activeTab === 'basic' 
+                  ? 'text-blue-600 border-b-2 border-blue-600' 
+                  : 'text-gray-500 hover:text-gray-700'}`}
+              >
+                Basic Genetic Calculator
+              </button>
+              <button
+                onClick={() => setActiveTab('advanced')}
+                className={`px-6 py-4 text-sm font-medium ${activeTab === 'advanced' 
+                  ? 'text-blue-600 border-b-2 border-blue-600' 
+                  : 'text-gray-500 hover:text-gray-700'}`}
+              >
+                Advanced Genetic Calculator
+              </button>
+            </nav>
+          </div>
+          
+          {/* Tab Content */}
+          {activeTab === 'basic' ? (
+            <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+              <h1 className="text-2xl font-bold text-gray-900 mb-4">Genetic Calculator</h1>
+              <p className="text-gray-600 mb-6">
+                Calculate the probability of offspring genotypes based on parent genotypes. 
+                Enter the genotypes for both parents and click Calculate to view the results.
+              </p>
+              
+              {/* Input section */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div>
+                  <label htmlFor="gene1" className="block text-sm font-medium text-gray-700 mb-2">
+                    Parent 1 Genotype
+                  </label>
+                  <input
+                    type="text"
+                    id="gene1"
+                    placeholder="e.g., Bb Ee"
+                    className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md p-2"
+                    value={gene1}
+                    onChange={(e) => setGene1(e.target.value)}
+                  />
+                  <p className="mt-1 text-xs text-gray-500">
+                    Format example: Bb Ee (for heterozygous black and extension)
+                  </p>
+                </div>
+                
+                <div>
+                  <label htmlFor="gene2" className="block text-sm font-medium text-gray-700 mb-2">
+                    Parent 2 Genotype
+                  </label>
+                  <input
+                    type="text"
+                    id="gene2"
+                    placeholder="e.g., Bb ee"
+                    className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md p-2"
+                    value={gene2}
+                    onChange={(e) => setGene2(e.target.value)}
+                  />
+                  <p className="mt-1 text-xs text-gray-500">
+                    Format example: Bb ee (for heterozygous black and homozygous recessive extension)
+                  </p>
+                </div>
               </div>
               
-              <div>
-                <label htmlFor="gene2" className="block text-sm font-medium text-gray-700 mb-2">
-                  Parent 2 Genotype
-                </label>
-                <input
-                  type="text"
-                  id="gene2"
-                  placeholder="e.g., Bb ee"
-                  className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md p-2"
-                  value={gene2}
-                  onChange={(e) => setGene2(e.target.value)}
-                />
-                <p className="mt-1 text-xs text-gray-500">
-                  Format example: Bb ee (for heterozygous black and homozygous recessive extension)
-                </p>
+              <div className="flex justify-center mb-8">
+                <button
+                  type="button"
+                  onClick={calculatePunnettSquare}
+                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                >
+                  Calculate Probabilities
+                </button>
               </div>
-            </div>
-            
-            <div className="flex justify-center mb-8">
-              <button
-                type="button"
-                onClick={calculatePunnettSquare}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              >
-                Calculate Probabilities
-              </button>
-            </div>
-            
-            {/* Common gene reference section */}
-            <div className="mb-8">
-              <h2 className="text-lg font-medium text-gray-900 mb-3">Common Dog Genetic Markers Reference</h2>
-              <div className="bg-gray-50 p-4 rounded-md border border-gray-200">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-                  {geneOptions.map((gene) => (
-                    <div key={gene.value} className="text-sm">
-                      <span className="font-semibold">{gene.value}</span>: {gene.label.split(' - ')[1]}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-            
-            {/* Error message */}
-            {error && (
-              <div className="bg-red-50 border-l-4 border-red-400 p-4 mb-6">
-                <div className="flex">
-                  <div className="flex-shrink-0">
-                    <svg className="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                  <div className="ml-3">
-                    <p className="text-sm text-red-700">
-                      {error}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
-            
-            {/* Results section */}
-            {results && Object.keys(results).length > 0 && (
-              <div>
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">Offspring Probability Results</h2>
-                <div className="bg-gray-50 rounded-lg border border-gray-200 p-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {Object.entries(results).map(([genotype, probability]) => (
-                      <div key={genotype} className="bg-white rounded-lg shadow-sm p-4 border border-gray-100">
-                        <div className="text-lg font-medium text-gray-900 mb-1">{genotype}</div>
-                        <div className="text-blue-600 font-semibold">{probability.toFixed(2)}%</div>
+              
+              {/* Common gene reference section */}
+              <div className="mb-8">
+                <h2 className="text-lg font-medium text-gray-900 mb-3">Common Dog Genetic Markers Reference</h2>
+                <div className="bg-gray-50 p-4 rounded-md border border-gray-200">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                    {geneOptions.map((gene) => (
+                      <div key={gene.value} className="text-sm">
+                        <span className="font-semibold">{gene.value}</span>: {gene.label.split(' - ')[1]}
                       </div>
                     ))}
                   </div>
                 </div>
-                
-                <div className="mt-6 bg-blue-50 p-4 rounded-md border border-blue-100">
-                  <h3 className="text-md font-medium text-blue-800 mb-2">Understanding the Results</h3>
-                  <p className="text-sm text-blue-700">
-                    These results show the probability of each possible genotype in the offspring.
-                    Remember that genotype (genetic makeup) doesn't always directly correspond to phenotype (visible traits),
-                    as some traits are dominant, recessive, or influenced by multiple genes.
-                  </p>
-                </div>
               </div>
-            )}
-          </div>
-          
-          {/* Additional information */}
+              
+              {/* Error message */}
+              {error && (
+                <div className="bg-red-50 border-l-4 border-red-400 p-4 mb-6">
+                  <div className="flex">
+                    <div className="flex-shrink-0">
+                      <svg className="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <div className="ml-3">
+                      <p className="text-sm text-red-700">
+                        {error}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              {/* Results section */}
+              {results && Object.keys(results).length > 0 && (
+                <div>
+                  <h2 className="text-xl font-semibold text-gray-900 mb-4">Offspring Probability Results</h2>
+                  <div className="bg-gray-50 rounded-lg border border-gray-200 p-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {Object.entries(results).map(([genotype, probability]) => (
+                        <div key={genotype} className="bg-white rounded-lg shadow-sm p-4 border border-gray-100">
+                          <div className="text-lg font-medium text-gray-900 mb-1">{genotype}</div>
+                          <div className="text-blue-600 font-semibold">{probability.toFixed(2)}%</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <div className="mt-6 bg-blue-50 p-4 rounded-md border border-blue-100">
+                    <h3 className="text-md font-medium text-blue-800 mb-2">Understanding the Results</h3>
+                    <p className="text-sm text-blue-700">
+                      These results show the probability of each possible genotype in the offspring.
+                      Remember that genotype (genetic makeup) doesn't always directly correspond to phenotype (visible traits),
+                      as some traits are dominant, recessive, or influenced by multiple genes.
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <AdvancedGeneticCalculator />
+          )}
           <div className="bg-white rounded-lg shadow-md p-6">
             <h2 className="text-xl font-bold text-gray-900 mb-4">How to Use This Calculator</h2>
             

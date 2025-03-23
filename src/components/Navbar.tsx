@@ -95,25 +95,25 @@ export default function Navbar() {
     },
     
     // Breeding Management
-    { 
-      href: '#',
-      label: 'Breeding', 
-      roles: [UserRole.OWNER],
-      submenu: [
-        { href: '/breeding-programs', label: 'Breeding Programs', roles: [UserRole.ADMIN, UserRole.OWNER] },
-        { href: '/breeding-programs/planned-matings', label: 'Planned Matings', roles: [UserRole.ADMIN, UserRole.OWNER] },
-      ]
-    },
+    // { 
+    //   href: '#',
+    //   label: 'Breeding', 
+    //   roles: [UserRole.OWNER],
+    //   submenu: [
+    //     { href: '/breeding-programs', label: 'Breeding Programs', roles: [UserRole.ADMIN, UserRole.OWNER] },
+    //     { href: '/breeding-programs/planned-matings', label: 'Planned Matings', roles: [UserRole.ADMIN, UserRole.OWNER] },
+    //   ]
+    // },
     
     // Tools Section
-    { 
-      href: '#',
-      label: 'Tools', 
-      roles: [UserRole.ADMIN, UserRole.OWNER, UserRole.HANDLER],
-      submenu: [
-        { href: '/tools/genetic-calculator', label: 'Genetic Calculator', roles: [UserRole.ADMIN, UserRole.OWNER, UserRole.HANDLER] },
-      ]
-    },
+    // { 
+    //   href: '#',
+    //   label: 'Tools', 
+    //   roles: [UserRole.ADMIN, UserRole.OWNER, UserRole.HANDLER],
+    //   submenu: [
+    //     { href: '/tools/genetic-calculator', label: 'Genetic Calculator', roles: [UserRole.ADMIN, UserRole.OWNER, UserRole.HANDLER] },
+    //   ]
+    // },
     
     // Resources Section
     { 
