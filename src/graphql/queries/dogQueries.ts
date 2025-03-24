@@ -213,6 +213,7 @@ export const GET_DOG_PEDIGREE = gql`
       gender
       dateOfBirth
       registrationNumber
+      microchipNumber
       color
       mainImageUrl
       sire {
@@ -229,6 +230,7 @@ export const GET_DOG_PEDIGREE = gql`
         gender
         dateOfBirth
         registrationNumber
+        microchipNumber
         color
         mainImageUrl
         sire {
@@ -245,6 +247,7 @@ export const GET_DOG_PEDIGREE = gql`
           gender
           dateOfBirth
           registrationNumber
+          microchipNumber
           color
           mainImageUrl
           sire {
@@ -259,6 +262,7 @@ export const GET_DOG_PEDIGREE = gql`
             gender
             dateOfBirth
             registrationNumber
+            microchipNumber
             color
             mainImageUrl
           }
@@ -274,6 +278,7 @@ export const GET_DOG_PEDIGREE = gql`
             gender
             dateOfBirth
             registrationNumber
+            microchipNumber
             color
             mainImageUrl
           }
@@ -292,6 +297,7 @@ export const GET_DOG_PEDIGREE = gql`
           gender
           dateOfBirth
           registrationNumber
+          microchipNumber
           color
           mainImageUrl
           sire {
@@ -306,6 +312,7 @@ export const GET_DOG_PEDIGREE = gql`
             gender
             dateOfBirth
             registrationNumber
+            microchipNumber
             color
             mainImageUrl
           }
@@ -321,6 +328,7 @@ export const GET_DOG_PEDIGREE = gql`
             gender
             dateOfBirth
             registrationNumber
+            microchipNumber
             color
             mainImageUrl
           }
@@ -340,6 +348,7 @@ export const GET_DOG_PEDIGREE = gql`
         gender
         dateOfBirth
         registrationNumber
+        microchipNumber
         color
         mainImageUrl
         sire {
@@ -356,6 +365,7 @@ export const GET_DOG_PEDIGREE = gql`
           gender
           dateOfBirth
           registrationNumber
+          microchipNumber
           color
           mainImageUrl
           sire {
@@ -370,6 +380,7 @@ export const GET_DOG_PEDIGREE = gql`
             gender
             dateOfBirth
             registrationNumber
+            microchipNumber
             color
             mainImageUrl
           }
@@ -385,6 +396,7 @@ export const GET_DOG_PEDIGREE = gql`
             gender
             dateOfBirth
             registrationNumber
+            microchipNumber
             color
             mainImageUrl
           }
@@ -403,6 +415,7 @@ export const GET_DOG_PEDIGREE = gql`
           gender
           dateOfBirth
           registrationNumber
+          microchipNumber
           color
           mainImageUrl
           sire {
@@ -417,6 +430,7 @@ export const GET_DOG_PEDIGREE = gql`
             gender
             dateOfBirth
             registrationNumber
+            microchipNumber
             color
             mainImageUrl
           }
@@ -432,6 +446,7 @@ export const GET_DOG_PEDIGREE = gql`
             gender
             dateOfBirth
             registrationNumber
+            microchipNumber
             color
             mainImageUrl
           }

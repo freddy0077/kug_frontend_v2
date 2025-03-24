@@ -57,7 +57,7 @@ export default function Navbar() {
       submenu: [
         { href: '/pedigrees', label: 'Pedigrees', roles: [UserRole.ADMIN, UserRole.OWNER] },
         { href: '/breeds', label: 'Breeds', roles: [UserRole.ADMIN, UserRole.OWNER] },
-        { href: '/dogs/new', label: 'Register New Dog', roles: [UserRole.ADMIN, UserRole.OWNER] },
+        { href: '/dogs/new', label: 'Register New Dog', roles: [] },  // Empty roles array = accessible to any logged-in user
       ]
     },
     
@@ -121,7 +121,30 @@ export default function Navbar() {
       label: 'Resources', 
       roles: [],
       submenu: [
+        // Education & Standards
         { href: '/resources/breeding-standards', label: 'Breeding Standards', roles: [] },
+        { href: '/resources/health-guidelines', label: 'Health Guidelines', roles: [] },
+        { href: '/resources/competition-rules', label: 'Competition Rules', roles: [] },
+        
+        // Tools
+        // { href: '/tools/genetic-calculator', label: 'Genetic Calculator', roles: [] },
+        // { href: '/tools/pedigree-analysis', label: 'Pedigree Analysis', roles: [] },
+        // { href: '/tools/inbreeding-calculator', label: 'Inbreeding Calculator', roles: [] },
+        
+        // Registries & Databases
+        // { href: '/breeds', label: 'Breed Database', roles: [] },
+        // { href: '/pedigrees', label: 'Pedigree Database', roles: [] },
+        // { href: '/health-records', label: 'Health Records Database', roles: [] },
+        
+        // Community
+        // { href: '/events', label: 'Events Calendar', roles: [] },
+        // { href: '/club-events', label: 'Club Events', roles: [] },
+        // { href: '/competitions', label: 'Competitions', roles: [] },
+        
+        // Documentation
+        // { href: '/docs/api-documentation', label: 'API Documentation', roles: [] },
+        { href: '/docs/user-guides', label: 'User Guides', roles: [] },
+        { href: '/docs/faqs', label: 'FAQs', roles: [] },
       ]
     },
   ];

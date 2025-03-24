@@ -86,6 +86,11 @@ export default function Pedigrees() {
 
   // State for export certificate checkbox
   const [isExportCertificate, setIsExportCertificate] = useState(false);
+  const [isFciCertificate, setIsFciCertificate] = useState(false);
+  const [newOwnerName, setNewOwnerName] = useState('');
+  const [newOwnerAddress, setNewOwnerAddress] = useState('');
+  const [isNewOwnerModalOpen, setIsNewOwnerModalOpen] = useState(false);
+  const [selectedDogForCertificate, setSelectedDogForCertificate] = useState<any>(null);
 
   // Handle dog selection
   const handleDogSelection = (dogId: string) => {
@@ -317,7 +322,7 @@ export default function Pedigrees() {
   };
 
   // Function to handle exporting pedigree as PDF
-  const handleExportPedigreePDF = async () => {
+  const handleExportPedigreePDF = () => {
     if (!pedigreeData || !pedigreeData.dogPedigree) {
       toast.error('No pedigree data available for export');
       return;
@@ -325,9 +330,28 @@ export default function Pedigrees() {
     
     // Debug log to verify checkbox state
     console.log('Export certificate selected:', isExportCertificate);
+    console.log('FCI certificate selected:', isFciCertificate);
+    
+    // Store the selected dog for certificate generation
+    setSelectedDogForCertificate(pedigreeData.dogPedigree);
+    
+    // Clear previous values
+    setNewOwnerName('');
+    setNewOwnerAddress('');
+    
+    // Open the modal
+    setIsNewOwnerModalOpen(true);
+  };
+  
+  // Function to handle final certificate generation after modal
+  const generateFinalCertificate = async () => {
+    if (!selectedDogForCertificate) {
+      toast.error('No dog selected for certificate generation');
+      return;
+    }
     
     try {
-      const dog = pedigreeData.dogPedigree;
+      const dog = selectedDogForCertificate;
       
       // Extract fourth generation
       // The extractFourthGeneration function returns an object with all 4th generation dogs
@@ -370,9 +394,17 @@ export default function Pedigrees() {
         secondaryColor: '#e6f2ff', // Light blue background
         fontFamily: 'Arial, sans-serif',
         
-        // Export certificate option
-        isExportCertificate: isExportCertificate
+        // Certificate type options
+        isExportCertificate: isExportCertificate,
+        isFciCertificate: isFciCertificate,
+        
+        // New owner information
+        newOwnerName: newOwnerName,
+        newOwnerAddress: newOwnerAddress
       });
+      
+      // Close the modal
+      setIsNewOwnerModalOpen(false);
       
       // Success notification
       toast.dismiss();
@@ -382,6 +414,74 @@ export default function Pedigrees() {
       toast.dismiss();
       toast.error('Failed to generate pedigree certificate. Please try again.');
     }
+  };
+
+  // New Owner Modal
+  const renderNewOwnerModal = () => {
+    if (!isNewOwnerModalOpen) return null;
+    
+    return (
+      <div className="fixed inset-0 z-50 overflow-auto bg-black bg-opacity-50 flex items-center justify-center p-4">
+        <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-auto p-6">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-semibold text-gray-900">Transfer of Ownership Information</h3>
+            <button 
+              onClick={() => setIsNewOwnerModalOpen(false)}
+              className="text-gray-500 hover:text-gray-700"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          
+          <div className="space-y-4">
+            <div>
+              <label htmlFor="modalNewOwnerName" className="block text-sm font-medium text-gray-700 mb-1">
+                New Owner Name
+              </label>
+              <input
+                type="text"
+                id="modalNewOwnerName"
+                value={newOwnerName}
+                onChange={(e) => setNewOwnerName(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                placeholder="Enter new owner's name"
+              />
+            </div>
+            
+            <div>
+              <label htmlFor="modalNewOwnerAddress" className="block text-sm font-medium text-gray-700 mb-1">
+                New Owner Address
+              </label>
+              <input
+                type="text"
+                id="modalNewOwnerAddress"
+                value={newOwnerAddress}
+                onChange={(e) => setNewOwnerAddress(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                placeholder="Enter new owner's address"
+              />
+            </div>
+          </div>
+          
+          <div className="mt-6 flex justify-end space-x-3">
+            <button
+              onClick={() => setIsNewOwnerModalOpen(false)}
+              className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={generateFinalCertificate}
+              className="px-4 py-2 bg-green-600 rounded-md text-sm font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+            >
+              Generate Certificate
+            </button>
+          </div>
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -634,18 +734,48 @@ export default function Pedigrees() {
                             </svg>
                             Add Parents
                           </button>
-                          <div className="flex items-center mr-3 text-sm">
-                            <input
-                              type="checkbox"
-                              id="exportCertificate"
-                              checked={isExportCertificate}
-                              onChange={(e) => setIsExportCertificate(e.target.checked)}
-                              className="form-checkbox h-4 w-4 text-green-600 rounded border-gray-300 focus:ring-green-500"
-                            />
-                            <label htmlFor="exportCertificate" className="ml-2 text-gray-700">
-                              Export Certificate
-                            </label>
+                          <div className="flex items-center space-x-4 text-sm">
+                            <div className="flex items-center">
+                              <input
+                                type="checkbox"
+                                id="exportCertificate"
+                                checked={isExportCertificate}
+                                onChange={(e) => {
+                                  const isChecked = e.target.checked;
+                                  setIsExportCertificate(isChecked);
+                                  // Ensure mutual exclusivity
+                                  if (isChecked) {
+                                    setIsFciCertificate(false);
+                                  }
+                                }}
+                                className="form-checkbox h-4 w-4 text-green-600 rounded border-gray-300 focus:ring-green-500"
+                              />
+                              <label htmlFor="exportCertificate" className="ml-2 text-gray-700">
+                                Export Certificate
+                              </label>
+                            </div>
+                            <div className="flex items-center">
+                              <input
+                                type="checkbox"
+                                id="fciCertificate"
+                                checked={isFciCertificate}
+                                onChange={(e) => {
+                                  const isChecked = e.target.checked;
+                                  setIsFciCertificate(isChecked);
+                                  // Ensure mutual exclusivity
+                                  if (isChecked) {
+                                    setIsExportCertificate(false);
+                                  }
+                                }}
+                                className="form-checkbox h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                              />
+                              <label htmlFor="fciCertificate" className="ml-2 text-gray-700">
+                                FCI
+                              </label>
+                            </div>
                           </div>
+                          
+
                           <button
                             onClick={handleExportPedigreePDF}
                             className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors text-sm flex items-center"
@@ -707,6 +837,9 @@ export default function Pedigrees() {
             mode={parentEditorMode}
           />
         )}
+        
+        {/* New Owner Modal */}
+        {renderNewOwnerModal()}
       </div>
     </ProtectedRoute>
   );

@@ -3,13 +3,15 @@
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import DogFormWithOwner from '@/components/dogs/DogFormWithOwner';
+import ProtectedRoute from '@/components/auth/ProtectedRoute';
 
 export default function AddNewDogPage() {
   const router = useRouter();
   
   return (
-    <div className="bg-gray-100 min-h-screen py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <ProtectedRoute allowedRoles={[]} fallbackPath="/auth/login">
+      <div className="bg-gray-100 min-h-screen py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Back button */}
         <div className="mb-6">
           <Link 
@@ -36,7 +38,8 @@ export default function AddNewDogPage() {
             <DogFormWithOwner onSuccess={(dogId) => router.push(`/dogs/${dogId}`)} />
           </div>
         </div>
+        </div>
       </div>
-    </div>
+    </ProtectedRoute>
   );
 }
