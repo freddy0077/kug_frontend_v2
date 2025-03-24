@@ -16,6 +16,7 @@ export interface PedigreeCertificateOptions {
   dateOfBirth?: string;
   dateOfDeath?: string;
   registrationNumber?: string;
+  microchipNumber?: string;
   color?: string;
   isChampion?: boolean;
   healthTested?: boolean;
@@ -41,6 +42,11 @@ export interface PedigreeCertificateOptions {
   
   // Certificate type options
   isExportCertificate?: boolean;
+  isFciCertificate?: boolean;
+  
+  // New owner information
+  newOwnerName?: string;
+  newOwnerAddress?: string;
 }
 
 /**
@@ -55,6 +61,52 @@ interface FourthGeneration {
   damSireDam?: DogNode | null;
   damDamSire?: DogNode | null;
   damDamDam?: DogNode | null;
+}
+
+/**
+ * Check if a dog is a German Shepherd Dog
+ * @param dog The dog to check
+ * @returns True if the dog is a German Shepherd Dog
+ */
+function isGermanShepherd(dog: DogNode | null | undefined): boolean {
+  if (!dog) return false;
+  const breed = dog.breedObj?.name || dog.breed || '';
+  return breed.toLowerCase().includes('german shepherd');
+}
+
+/**
+ * Get dog cell content based on breed-specific requirements
+ * @param dog The dog to get cell content for
+ * @param fontSize Font size for the name
+ * @returns HTML string for the dog cell
+ */
+function getDogCellContent(dog: DogNode | null | undefined, fontSize: number): string {
+  if (!dog) return `
+    <div style="font-weight: bold; font-size: ${fontSize}px;">Unknown</div>
+    <div style="font-size: ${fontSize - 2}px; margin-top: 2px;">Unknown</div>
+  `;
+
+  // Get titles if any
+  const titles = dog.titles ? (Array.isArray(dog.titles) ? dog.titles.join(', ') : dog.titles) : '';
+
+  // For German Shepherd Dogs, only show name, registration number, and titles
+  if (isGermanShepherd(dog)) {
+    return `
+      <div style="font-weight: bold; font-size: ${fontSize}px;">${(dog.name || 'Unknown').toUpperCase()}</div>
+      <div style="font-size: ${fontSize - 2}px; margin-top: 2px;">${(dog.registrationNumber || 'Unknown').toUpperCase()}</div>
+      ${titles ? `<div style="font-size: ${fontSize - 3}px; margin-top: 1px;">${titles.toUpperCase()}</div>` : ''}
+    `;
+  }
+
+  // For other breeds, show all details
+  return `
+    <div style="font-weight: bold; font-size: ${fontSize}px;">${(dog.name || 'Unknown').toUpperCase()}</div>
+    <div style="font-size: ${fontSize - 2}px; margin-top: 2px;">${(dog.registrationNumber || 'Unknown').toUpperCase()}</div>
+    <div style="font-size: ${fontSize - 3}px; margin-top: 1px;">${(dog.breedObj?.name || dog.breed || 'Unknown').toUpperCase()}</div>
+    ${dog.dateOfBirth ? `<div style="font-size: ${fontSize - 3}px; margin-top: 1px;">DOB: ${formatDate(dog.dateOfBirth).toUpperCase()}</div>` : ''}
+    ${dog.color ? `<div style="font-size: ${fontSize - 3}px; margin-top: 1px;">COLOR: ${(dog.color || 'Unknown').toUpperCase()}</div>` : ''}
+    ${titles ? `<div style="font-size: ${fontSize - 3}px; margin-top: 1px;">${titles.toUpperCase()}</div>` : ''}
+  `;
 }
 
 /**
@@ -85,6 +137,14 @@ export const generatePedigreeCertificate = async (
   // Debug logging
   console.log('PDF Generator options:', options);
   console.log('isExportCertificate flag:', options.isExportCertificate);
+  console.log('isFciCertificate flag:', options.isFciCertificate);
+  
+  // Ensure mutual exclusivity between Export and FCI certificate options
+  // If both are true, prioritize FCI over Export
+  if (options.isExportCertificate && options.isFciCertificate) {
+    console.log('Both certificate flags are true, prioritizing FCI certificate');
+    options.isExportCertificate = false;
+  }
   // Create a container to hold the certificate HTML
   const container = document.createElement('div');
   container.style.width = '1122px'; // A4 Landscape width at 96 DPI
@@ -110,6 +170,7 @@ export const generatePedigreeCertificate = async (
       dateOfBirth: options.dog.dateOfBirth || undefined,
       dateOfDeath: options.dog.dateOfDeath || undefined,
       registrationNumber: options.dog.registrationNumber || 'Unknown',
+      microchipNumber: options.dog.microchipNumber || 'Unknown', // Add microchip number
       color: options.dog.color || 'Unknown',
       isChampion: typeof options.dog.isChampion === 'boolean' ? options.dog.isChampion : false,
       healthTested: typeof options.dog.healthTested === 'boolean' ? options.dog.healthTested : false,
@@ -128,6 +189,7 @@ export const generatePedigreeCertificate = async (
       dateOfBirth: options.dateOfBirth || undefined,
       dateOfDeath: options.dateOfDeath || undefined,
       registrationNumber: options.registrationNumber || 'Unknown',
+      microchipNumber: options.microchipNumber || 'Unknown', // Add microchip number
       color: options.color || 'Unknown',
       isChampion: typeof options.isChampion === 'boolean' ? options.isChampion : false,
       healthTested: typeof options.healthTested === 'boolean' ? options.healthTested : false,
@@ -153,6 +215,15 @@ export const generatePedigreeCertificate = async (
   // Generate HTML for the certificate matching the Kennel Union of Ghana layout
   container.innerHTML = `
     <div style="width: 100%; height: 100%; box-sizing: border-box; position: relative; padding: 0; font-family: ${options.fontFamily || 'Arial, sans-serif'}; page-break-after: always;">
+      <!-- KUG Logo Watermark -->
+      <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 0; opacity: 0.05;">
+        <img src="${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/kug_kogo.png" style="width: 1365px; height: auto;" alt="KUG Watermark" />
+      </div>
+      
+      <!-- Gye-Nyame Repeating Background Pattern -->
+      <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; opacity: 0.02; pointer-events: none;">
+        <div style="width: 100%; height: 100%; background-image: url(${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/gye-nyame.png); background-size: 40px auto; background-repeat: repeat; opacity: 0.025;"></div>
+      </div>
       <!-- Ghana Colors Top Border -->
       <div style="display: flex; flex-direction: column;">
         <div style="height: 4px; background-color: red;"></div>
@@ -170,10 +241,14 @@ export const generatePedigreeCertificate = async (
             </div>
           </div>
           
-          <!-- FCI Logo with Contract Partner -->
+          <!-- FCI Logo for both FCI and Export certificates, KUG logo for standard -->
           <div style="display: flex; flex-direction: column; align-items: center; position: absolute; right: 15px; top: -10px;">
-            <img src="${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/fci_logo.png" style="width: 60px; height: 60px;" alt="FCI Logo" />
-            <div style="font-size: 10px; margin-top: 1px;">Contract Partner</div>
+            ${options.isFciCertificate === true || options.isExportCertificate === true ? 
+              `<img src="${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/fci_logo.png" style="width: 60px; height: 60px;" alt="FCI Logo" />
+               <div style="font-size: 10px; margin-top: 1px;">CONTRACT PARTNER</div>` : 
+              `<img src="${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/kug_kogo.png" style="width: 80px; height: 80px; margin-top: -8px;" alt="KUG Logo" />
+               <div style="font-size: 10px; margin-top: 21px; visibility: hidden;">SPACER</div>`
+            }
           </div>
         </div>
         
@@ -192,17 +267,17 @@ export const generatePedigreeCertificate = async (
       
       <!-- Dog Information Box -->
       <div style="background-color: #d6f5d6; padding: 10px 15px; margin: 10px 15px; display: grid; grid-template-columns: 1fr 1fr 1fr; grid-template-rows: auto auto auto auto; gap: 8px 15px;">
-        <div><strong>Name</strong> ${dog.name || 'Unknown'}</div>
-        <div><strong>Pedigree No</strong> ${dog.registrationNumber || 'Unknown'}</div>
-        <div><strong>Microchip</strong> ${dog.microchipNumber ? dog.microchipNumber.substring(0, 15) + (dog.microchipNumber.length > 15 ? '...' : '') : 'Unknown'}</div>
+        <div><strong>NAME</strong> ${(dog.name || 'Unknown').toUpperCase()}</div>
+        <div><strong>PEDIGREE NO</strong> ${(dog.registrationNumber || 'Unknown').toUpperCase()}</div>
+        <div><strong>MICROCHIP</strong> ${dog.microchipNumber ? dog.microchipNumber.substring(0, 15).toUpperCase() + (dog.microchipNumber.length > 15 ? '...' : '') : 'UNKNOWN'}</div>
         
-        <div><strong>Breed</strong> ${dog.breedObj?.name || dog.breed || 'Unknown'}</div>
-        <div><strong>Sex</strong> ${dog.gender || 'Unknown'}</div>
-        <div><strong>Color</strong> ${dog.color || 'Unknown'}</div>
+        <div><strong>BREED</strong> ${(dog.breedObj?.name || dog.breed || 'Unknown').toUpperCase()}</div>
+        <div><strong>SEX</strong> ${(dog.gender || 'Unknown').toUpperCase()}</div>
+        <div><strong>COLOR</strong> ${(dog.color || 'Unknown').toUpperCase()}</div>
         
-        <div><strong>Date of birth</strong> ${formatDate(dog.dateOfBirth)}</div>
-        <div><strong>Coat</strong> ${options.coat || 'Standard'}</div>
-        <div><strong>Size</strong> ${options.size || 'Medium'}</div>
+        <div><strong>DATE OF BIRTH</strong> ${formatDate(dog.dateOfBirth).toUpperCase()}</div>
+        <div><strong>COAT</strong> ${(options.coat || 'Standard').toUpperCase()}</div>
+        <div><strong>SIZE</strong> ${(options.size || 'Medium').toUpperCase()}</div>
       </div>
 
       <!-- Pedigree Table with Generation-based columns (2-4-8) -->
@@ -214,118 +289,86 @@ export const generatePedigreeCertificate = async (
           <tr>
             <!-- Gen 1: Sire (spans 4 rows) -->
             <td rowspan="4" style="width: 14.28%; border: 1px solid #999; background-color: #d6f5d6; padding: 8px; vertical-align: middle; text-align: center;">
-              <div style="font-weight: bold; font-size: 14px;">${dog.sire?.name || 'Unknown'}</div>
-              <div style="font-size: 12px; margin-top: 4px;">${dog.sire?.registrationNumber || 'Unknown'}</div>
-              <div style="font-size: 11px; margin-top: 3px;">${dog.sire?.breedObj?.name || dog.sire?.breed || 'Unknown'}</div>
-              <div style="font-size: 11px; margin-top: 3px;">DOB: ${formatDate(dog.sire?.dateOfBirth)}</div>
-              <div style="font-size: 11px; margin-top: 3px;">Color: ${dog.sire?.color || 'Unknown'}</div>
+              ${getDogCellContent(dog.sire, 14)}
             </td>
             
             <!-- Gen 2: Sire's Sire (spans 2 rows) -->
             <td rowspan="2" style="width: 14.28%; border: 1px solid #999; background-color: #ffffff; padding: 8px; vertical-align: middle; text-align: center;">
-              <div style="font-weight: bold; font-size: 13px;">${dog.sire?.sire?.name || 'Unknown'}</div>
-              <div style="font-size: 11px; margin-top: 3px;">${dog.sire?.sire?.registrationNumber || 'Unknown'}</div>
-              <div style="font-size: 10px; margin-top: 2px;">${dog.sire?.sire?.breedObj?.name || dog.sire?.sire?.breed || 'Unknown'}</div>
+              ${getDogCellContent(dog.sire?.sire, 13)}
             </td>
             
             <!-- Gen 3: Sire's Sire's Sire -->
             <td style="width: 14.28%; border: 1px solid #999; background-color: #d6f5d6; padding: 6px; vertical-align: middle; text-align: center;">
-              <div style="font-weight: bold; font-size: 12px;">${dog.sire?.sire?.sire?.name || 'Unknown'}</div>
-              <div style="font-size: 10px; margin-top: 2px;">${dog.sire?.sire?.sire?.registrationNumber || 'Unknown'}</div>
-              <div style="font-size: 9px; margin-top: 1px;">${dog.sire?.sire?.sire?.breedObj?.name || dog.sire?.sire?.sire?.breed || 'Unknown'}</div>
+              ${getDogCellContent(dog.sire?.sire?.sire, 12)}
             </td>
           </tr>
           
           <tr>
             <!-- Gen 3: Sire's Sire's Dam -->
             <td style="border: 1px solid #999; background-color: #ffffff; padding: 6px; vertical-align: middle; text-align: center;">
-              <div style="font-weight: bold; font-size: 12px;">${dog.sire?.sire?.dam?.name || 'Unknown'}</div>
-              <div style="font-size: 10px; margin-top: 2px;">${dog.sire?.sire?.dam?.registrationNumber || 'Unknown'}</div>
-              <div style="font-size: 9px; margin-top: 1px;">${dog.sire?.sire?.dam?.breedObj?.name || dog.sire?.sire?.dam?.breed || 'Unknown'}</div>
+              ${getDogCellContent(dog.sire?.sire?.dam, 12)}
             </td>
           </tr>
           
           <tr>
             <!-- Gen 2: Sire's Dam (spans 2 rows) -->
             <td rowspan="2" style="border: 1px solid #999; background-color: #d6f5d6; padding: 8px; vertical-align: middle; text-align: center;">
-              <div style="font-weight: bold; font-size: 13px;">${dog.sire?.dam?.name || 'Unknown'}</div>
-              <div style="font-size: 11px; margin-top: 3px;">${dog.sire?.dam?.registrationNumber || 'Unknown'}</div>
-              <div style="font-size: 10px; margin-top: 2px;">${dog.sire?.dam?.breedObj?.name || dog.sire?.dam?.breed || 'Unknown'}</div>
+              ${getDogCellContent(dog.sire?.dam, 13)}
             </td>
             
             <!-- Gen 3: Sire's Dam's Sire -->
             <td style="border: 1px solid #999; background-color: #d6f5d6; padding: 6px; vertical-align: middle; text-align: center;">
-              <div style="font-weight: bold; font-size: 12px;">${dog.sire?.dam?.sire?.name || 'Unknown'}</div>
-              <div style="font-size: 10px; margin-top: 2px;">${dog.sire?.dam?.sire?.registrationNumber || 'Unknown'}</div>
-              <div style="font-size: 9px; margin-top: 1px;">${dog.sire?.dam?.sire?.breedObj?.name || dog.sire?.dam?.sire?.breed || 'Unknown'}</div>
+              ${getDogCellContent(dog.sire?.dam?.sire, 12)}
             </td>
           </tr>
           
           <tr>
             <!-- Gen 3: Sire's Dam's Dam -->
             <td style="border: 1px solid #999; background-color: #ffffff; padding: 6px; vertical-align: middle; text-align: center;">
-              <div style="font-weight: bold; font-size: 12px;">${dog.sire?.dam?.dam?.name || 'Unknown'}</div>
-              <div style="font-size: 10px; margin-top: 2px;">${dog.sire?.dam?.dam?.registrationNumber || 'Unknown'}</div>
-              <div style="font-size: 9px; margin-top: 1px;">${dog.sire?.dam?.dam?.breedObj?.name || dog.sire?.dam?.dam?.breed || 'Unknown'}</div>
+              ${getDogCellContent(dog.sire?.dam?.dam, 12)}
             </td>
           </tr>
           
           <tr>
             <!-- Gen 1: Dam (spans 4 rows) -->
             <td rowspan="4" style="border: 1px solid #999; background-color: #ffffff; padding: 8px; vertical-align: middle; text-align: center;">
-              <div style="font-weight: bold; font-size: 14px;">${dog.dam?.name || 'Unknown'}</div>
-              <div style="font-size: 12px; margin-top: 4px;">${dog.dam?.registrationNumber || 'Unknown'}</div>
-              <div style="font-size: 11px; margin-top: 3px;">${dog.dam?.breedObj?.name || dog.dam?.breed || 'Unknown'}</div>
-              <div style="font-size: 11px; margin-top: 3px;">DOB: ${formatDate(dog.dam?.dateOfBirth)}</div>
-              <div style="font-size: 11px; margin-top: 3px;">Color: ${dog.dam?.color || 'Unknown'}</div>
+              ${getDogCellContent(dog.dam, 14)}
             </td>
             
             <!-- Gen 2: Dam's Sire (spans 2 rows) -->
             <td rowspan="2" style="border: 1px solid #999; background-color: #d6f5d6; padding: 8px; vertical-align: middle; text-align: center;">
-              <div style="font-weight: bold; font-size: 13px;">${dog.dam?.sire?.name || 'Unknown'}</div>
-              <div style="font-size: 11px; margin-top: 3px;">${dog.dam?.sire?.registrationNumber || 'Unknown'}</div>
-              <div style="font-size: 10px; margin-top: 2px;">${dog.dam?.sire?.breedObj?.name || dog.dam?.sire?.breed || 'Unknown'}</div>
+              ${getDogCellContent(dog.dam?.sire, 13)}
             </td>
             
             <!-- Gen 3: Dam's Sire's Sire -->
             <td style="border: 1px solid #999; background-color: #d6f5d6; padding: 6px; vertical-align: middle; text-align: center;">
-              <div style="font-weight: bold; font-size: 12px;">${dog.dam?.sire?.sire?.name || 'Unknown'}</div>
-              <div style="font-size: 10px; margin-top: 2px;">${dog.dam?.sire?.sire?.registrationNumber || 'Unknown'}</div>
-              <div style="font-size: 9px; margin-top: 1px;">${dog.dam?.sire?.sire?.breedObj?.name || dog.dam?.sire?.sire?.breed || 'Unknown'}</div>
+              ${getDogCellContent(dog.dam?.sire?.sire, 12)}
             </td>
           </tr>
           
           <tr>
             <!-- Gen 3: Dam's Sire's Dam -->
             <td style="border: 1px solid #999; background-color: #ffffff; padding: 6px; vertical-align: middle; text-align: center;">
-              <div style="font-weight: bold; font-size: 12px;">${dog.dam?.sire?.dam?.name || 'Unknown'}</div>
-              <div style="font-size: 10px; margin-top: 2px;">${dog.dam?.sire?.dam?.registrationNumber || 'Unknown'}</div>
-              <div style="font-size: 9px; margin-top: 1px;">${dog.dam?.sire?.dam?.breedObj?.name || dog.dam?.sire?.dam?.breed || 'Unknown'}</div>
+              ${getDogCellContent(dog.dam?.sire?.dam, 12)}
             </td>
           </tr>
           
           <tr>
             <!-- Gen 2: Dam's Dam (spans 2 rows) -->
             <td rowspan="2" style="border: 1px solid #999; background-color: #ffffff; padding: 8px; vertical-align: middle; text-align: center;">
-              <div style="font-weight: bold; font-size: 13px;">${dog.dam?.dam?.name || 'Unknown'}</div>
-              <div style="font-size: 11px; margin-top: 3px;">${dog.dam?.dam?.registrationNumber || 'Unknown'}</div>
-              <div style="font-size: 10px; margin-top: 2px;">${dog.dam?.dam?.breedObj?.name || dog.dam?.dam?.breed || 'Unknown'}</div>
+              ${getDogCellContent(dog.dam?.dam, 13)}
             </td>
             
             <!-- Gen 3: Dam's Dam's Sire -->
             <td style="border: 1px solid #999; background-color: #d6f5d6; padding: 6px; vertical-align: middle; text-align: center;">
-              <div style="font-weight: bold; font-size: 12px;">${dog.dam?.dam?.sire?.name || 'Unknown'}</div>
-              <div style="font-size: 10px; margin-top: 2px;">${dog.dam?.dam?.sire?.registrationNumber || 'Unknown'}</div>
-              <div style="font-size: 9px; margin-top: 1px;">${dog.dam?.dam?.sire?.breedObj?.name || dog.dam?.dam?.sire?.breed || 'Unknown'}</div>
+              ${getDogCellContent(dog.dam?.dam?.sire, 12)}
             </td>
           </tr>
           
           <tr>
             <!-- Gen 3: Dam's Dam's Dam -->
             <td style="border: 1px solid #999; background-color: #ffffff; padding: 6px; vertical-align: middle; text-align: center;">
-              <div style="font-weight: bold; font-size: 12px;">${dog.dam?.dam?.dam?.name || 'Unknown'}</div>
-              <div style="font-size: 10px; margin-top: 2px;">${dog.dam?.dam?.dam?.registrationNumber || 'Unknown'}</div>
-              <div style="font-size: 9px; margin-top: 1px;">${dog.dam?.dam?.dam?.breedObj?.name || dog.dam?.dam?.dam?.breed || 'Unknown'}</div>
+              ${getDogCellContent(dog.dam?.dam?.dam, 12)}
             </td>
           </tr>
         </table>
@@ -334,35 +377,46 @@ export const generatePedigreeCertificate = async (
       <!-- Certificate Footer - Transfer of Ownership Information -->
       <div style="margin: 10px 15px; display: flex; justify-content: space-between; align-items: flex-end;">
         <div style="width: 20%; text-align: center;">
-          <div style="border-bottom: 1px solid #000; margin-bottom: 5px; height: 20px;"></div>
+          <div style=" margin-bottom: 5px; height: 20px;">
+            ${options.certificateDate ? formatDate(options.certificateDate) : ''}
+          </div>
           <div style="text-align: center; font-size: 12px;">Transfer of ownership date</div>
         </div>
         
         <div style="width: 25%; text-align: center;">
-          <div style="border-bottom: 1px solid #000; margin-bottom: 5px; height: 20px;"></div>
+          <div style=" margin-bottom: 5px; height: 20px;">
+            ${options.newOwnerName || ''}
+          </div>
           <div style="text-align: center; font-size: 12px;">New Owner Name</div>
         </div>
         
-    
+        <div style="width: 25%; text-align: center;">
+          <div style="margin-bottom: 5px; height: 20px;">
+            ${options.newOwnerAddress || ''}
+          </div>
+          <div style="text-align: center; font-size: 12px;">New Owner Address</div>
+        </div>
         
         <div style="width: 20%; text-align: center;">
-          <div style="border-bottom: 1px solid #000; margin-bottom: 5px; height: 20px;"></div>
+          <div style="margin-bottom: 5px; height: 20px;"></div>
           <div style="text-align: center; font-size: 12px;">Signature</div>
         </div>
       </div>
       
       <!-- Certification Text -->
       <div style="margin: 20px 15px 10px 15px; font-size: 11px; font-style: italic;">
-        I SAMIR MSAILEB, the guardian of the KUG stud book, certify that the above information is correct and reliable. ${formatDate(options.certificateDate || new Date())}
+        I <strong>SAMIR MSAILEB</strong>, the guardian of the KUG stud book, certify that the above information is correct and reliable. ${formatDate(options.certificateDate || new Date())}
       </div>
       
-      <!-- Ghana Colors Bottom Border - Moved before additional info -->
-      <div style="display: flex; flex-direction: column; margin: 5px 0 0 0;">
+      <!-- Some spacing before the bottom border -->
+      <div style="margin-top: 20px;"></div>
+      
+      <!-- Ghana Colors Bottom Border - Moved to the absolute bottom -->
+      <div style="display: flex; flex-direction: column; margin: 5px 0 0 0; position: absolute; bottom: 0; left: 0; right: 0;">
         <div style="height: 4px; background-color: red;"></div>
         <div style="height: 4px; background-color: yellow;"></div>
         <div style="height: 4px; background-color: green;"></div>
       </div>
-  
     </div>
   `;
   
@@ -431,7 +485,7 @@ export const downloadPedigreeCertificate = async (options: PedigreeCertificateOp
  */
 export const formatDate = (dateString?: string | Date | null): string => {
   // Handle null, undefined, or empty string cases
-  if (!dateString) return 'Unknown';
+  if (!dateString) return 'UNKNOWN';
   
   try {
     // Handle timestamp strings
@@ -453,7 +507,7 @@ export const formatDate = (dateString?: string | Date | null): string => {
     // Check if the date is valid
     if (isNaN(date.getTime())) {
       console.warn(`Invalid date format received: ${dateString}`);
-      return typeof dateString === 'string' ? dateString : 'Invalid date';
+      return typeof dateString === 'string' ? dateString.toUpperCase() : 'INVALID DATE';
     }
     
     // Format the date consistently
@@ -461,9 +515,9 @@ export const formatDate = (dateString?: string | Date | null): string => {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric'
-    }).replace(/\//g, '/');
+    }).replace(/\//g, '/').toUpperCase();
   } catch (error) {
     console.warn(`Error formatting date: ${dateString}`, error);
-    return typeof dateString === 'string' ? dateString : 'Invalid date';
+    return typeof dateString === 'string' ? dateString.toUpperCase() : 'INVALID DATE';
   }
 };
