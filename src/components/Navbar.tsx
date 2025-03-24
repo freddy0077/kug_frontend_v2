@@ -121,7 +121,7 @@ export default function Navbar() {
       label: 'Resources', 
       roles: [],
       submenu: [
-        { href: '/resources/breeding-standards', label: 'Breeding Standards', roles: [UserRole.ADMIN, UserRole.OWNER, UserRole.HANDLER, UserRole.CLUB, UserRole.VIEWER] },
+        { href: '/resources/breeding-standards', label: 'Breeding Standards', roles: [] },
       ]
     },
   ];
