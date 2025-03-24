@@ -4,12 +4,13 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import DogFormWithOwner from '@/components/dogs/DogFormWithOwner';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
+import { UserRole } from '@/utils/permissionUtils';
 
 export default function AddNewDogPage() {
   const router = useRouter();
   
   return (
-    <ProtectedRoute allowedRoles={[]} fallbackPath="/auth/login">
+    <ProtectedRoute allowedRoles={[UserRole.ADMIN]} fallbackPath="/auth/login">
       <div className="bg-gray-100 min-h-screen py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Back button */}
