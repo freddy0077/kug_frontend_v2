@@ -29,6 +29,7 @@ export default function Register() {
   const recaptchaRef = useRef<ReCAPTCHA>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -79,17 +80,15 @@ export default function Register() {
       });
       
       if (response.data?.register) {
-        const { token, expiresAt } = response.data.register;
+        // Don't store token or refresh user - require explicit login
         
-        // Store the token and expiration
-        localStorage.setItem('auth_token', token);
-        localStorage.setItem('auth_expiration', expiresAt);
+        // Show success message and redirect to login page
+        setSuccessMessage('Registration successful! Please log in with your credentials.');
         
-        // Refresh user data in context
-        await refreshUser();
-        
-        // Redirect to user dashboard after successful registration
-        router.push('/user-dashboard');
+        // Redirect to login page after a brief delay to show the success message
+        setTimeout(() => {
+          router.push('/auth/login?registered=true');
+        }, 2000);
       }
     } catch (err: any) {
       if (err.graphQLErrors?.length > 0) {
@@ -114,6 +113,12 @@ export default function Register() {
           {error && (
             <div className="mb-6 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md">
               {error}
+            </div>
+          )}
+
+          {successMessage && (
+            <div className="mb-6 bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-md">
+              {successMessage}
             </div>
           )}
 

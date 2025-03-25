@@ -23,13 +23,20 @@ function LoginContent() {
   const recaptchaRef = useRef<ReCAPTCHA>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
   const [redirectPath, setRedirectPath] = useState('/dashboard');
 
-  // Extract redirect path from URL parameters if it exists
+  // Extract redirect path and check for registration success
   useEffect(() => {
     const redirect = searchParams?.get('redirect');
     if (redirect) {
       setRedirectPath(decodeURIComponent(redirect));
+    }
+    
+    // Check if user was redirected from registration
+    const registered = searchParams?.get('registered');
+    if (registered === 'true') {
+      setSuccessMessage('Your account has been successfully created. Please log in with your credentials.');
     }
     
     // If already authenticated, redirect immediately
@@ -115,6 +122,12 @@ function LoginContent() {
           {error && (
             <div className="mb-6 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md">
               {error}
+            </div>
+          )}
+
+          {successMessage && (
+            <div className="mb-6 bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-md">
+              {successMessage}
             </div>
           )}
 
