@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { UserRole } from '@/utils/permissionUtils';
 import { 
   Box, 
@@ -206,7 +205,6 @@ export default function UserGuides() {
   const selectedCategoryData = guideCategories.find(category => category.id === selectedCategory);
 
   return (
-    <ProtectedRoute allowedRoles={[]}>
       <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <Typography variant="h4" component="h1" gutterBottom>
@@ -442,6 +440,5 @@ export default function UserGuides() {
           </Grid>
         </div>
       </div>
-    </ProtectedRoute>
   );
 }

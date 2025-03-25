@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { 
   Box, 
   Typography, 
@@ -297,7 +296,6 @@ export default function FAQsPage() {
     : faqCategories;
 
   return (
-    <ProtectedRoute allowedRoles={[]}>
       <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <Typography variant="h4" component="h1" gutterBottom>
@@ -490,6 +488,5 @@ export default function FAQsPage() {
           </Grid>
         </div>
       </div>
-    </ProtectedRoute>
   );
 }
