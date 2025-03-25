@@ -2,13 +2,9 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useAuth } from '@/contexts/AuthContext';
-import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
-import { UserRole } from '@/utils/permissionUtils';
 import breedStandards, { BreedStandard } from '@/data/breedStandards';
 
 export default function BreedingStandards() {
-  const { user } = useAuth();
   const [selectedBreed, setSelectedBreed] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState<string>('');
 
@@ -21,7 +17,6 @@ export default function BreedingStandards() {
   const selectedBreedData = selectedBreed ? breedStandards.find(breed => breed.id === selectedBreed) : null;
 
   return (
-    <ProtectedRoute allowedRoles={[UserRole.ADMIN, UserRole.OWNER, UserRole.HANDLER, UserRole.CLUB, UserRole.VIEWER]}>
       <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <h1 className="text-3xl font-bold text-gray-900 mb-6">Breed Standards</h1>
@@ -138,6 +133,5 @@ export default function BreedingStandards() {
           </div>
         </div>
       </div>
-    </ProtectedRoute>
   );
 }

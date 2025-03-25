@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 
 const healthCategories = [
   {
@@ -227,7 +226,6 @@ export default function HealthGuidelines() {
     : healthCategories[0];
 
   return (
-    <ProtectedRoute allowedRoles={[]}>
       <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <h1 className="text-3xl font-bold text-gray-900 mb-6">Health Guidelines</h1>
@@ -331,6 +329,5 @@ export default function HealthGuidelines() {
           </div>
         </div>
       </div>
-    </ProtectedRoute>
   );
 }
