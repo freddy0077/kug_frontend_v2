@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useQuery, useMutation } from '@apollo/client';
 import { GET_USERS } from '@/graphql/queries/userQueries';
-import { DEACTIVATE_USER_MUTATION } from '@/graphql/mutations/userMutations';
+import { DEACTIVATE_USER_MUTATION, ACTIVATE_USER_MUTATION } from '@/graphql/mutations/userMutations';
 import { useAuth } from '@/contexts/AuthContext';
 import { format } from 'date-fns';
 import { UserRole } from '@/utils/permissionUtils';
@@ -36,16 +36,31 @@ export default function UserManagement() {
       refetch();
     },
     onError: (error) => {
-      alert(`Failed to update user status: ${error.message}`);
+      alert(`Failed to deactivate user: ${error.message}`);
+    }
+  });
+
+  const [activateUser, { loading: activateLoading }] = useMutation(ACTIVATE_USER_MUTATION, {
+    onCompleted: () => {
+      refetch();
+    },
+    onError: (error) => {
+      alert(`Failed to activate user: ${error.message}`);
     }
   });
 
   const handleUserStatusChange = async (userId: string, isCurrentlyActive: boolean) => {
     if (confirm(`Are you sure you want to ${isCurrentlyActive ? 'deactivate' : 'activate'} this user?`)) {
       try {
-        await deactivateUser({
-          variables: { userId }
-        });
+        if (isCurrentlyActive) {
+          await deactivateUser({
+            variables: { userId }
+          });
+        } else {
+          await activateUser({
+            variables: { userId }
+          });
+        }
       } catch (err) {
         console.error('Error updating user status:', err);
       }
@@ -266,9 +281,9 @@ export default function UserManagement() {
                           Edit
                         </Link>
                         <button 
-                          className="text-red-600 hover:text-red-900"
+                          className={user.isActive ? "text-red-600 hover:text-red-900" : "text-green-600 hover:text-green-900"}
                           onClick={() => handleUserStatusChange(user.id, user.isActive)}
-                          disabled={deactivateLoading}
+                          disabled={deactivateLoading || activateLoading}
                         >
                           {user.isActive ? 'Deactivate' : 'Activate'}
                         </button>

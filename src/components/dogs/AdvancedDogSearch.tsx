@@ -57,11 +57,10 @@ const AdvancedDogSearch: React.FC<AdvancedDogSearchProps> = ({
     setLocalFilters(filters);
   }, [filters]);
 
-  // Handle immediate search input change
+  // Handle search input change (only updates local state)
   const handleSearchInputChange = (value: string) => {
     const updatedFilters = { ...localFilters, searchQuery: value };
     setLocalFilters(updatedFilters);
-    onFiltersChange(updatedFilters);
   };
 
   // Handle filter change
@@ -111,15 +110,27 @@ const AdvancedDogSearch: React.FC<AdvancedDogSearchProps> = ({
     <div className="bg-white shadow-sm rounded-lg p-6 mb-8 transition-all duration-300">
       {/* Search bar with filter button */}
       <div className="flex flex-col md:flex-row gap-4 items-start md:items-center mb-4">
-        <div className="relative flex-grow">
+        <div className="relative flex-grow flex">
           <input
             type="text"
             placeholder="Search by name, registration number, microchip..."
-            className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+            className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
             value={localFilters.searchQuery}
             onChange={(e) => handleSearchInputChange(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                applyFilters();
+              }
+            }}
             disabled={loading}
           />
+          <button
+            onClick={applyFilters}
+            className="px-4 py-3 bg-green-600 text-white font-medium rounded-r-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors duration-200"
+            disabled={loading}
+          >
+            Search
+          </button>
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />

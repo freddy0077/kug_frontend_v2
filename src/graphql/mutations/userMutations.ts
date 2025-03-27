@@ -87,3 +87,18 @@ export const DEACTIVATE_USER_MUTATION = gql`
     }
   }
 `;
+
+export const ACTIVATE_USER_MUTATION = gql`
+  mutation ActivateUser($userId: ID!) {
+    activateUser(userId: $userId) {
+      id
+      email
+      firstName
+      lastName
+      fullName
+      role
+      isActive
+      updatedAt
+    }
+  }
+`;
