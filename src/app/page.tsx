@@ -43,7 +43,7 @@ export default function Home() {
   const { loading, error, data } = useQuery(GET_DOGS, {
     variables: {
       limit: 3,
-      sortBy: DogSortField.DATE_OF_BIRTH,
+      sortBy: DogSortField.CREATED_AT,
       sortDirection: SortDirection.DESC,
     },
   });

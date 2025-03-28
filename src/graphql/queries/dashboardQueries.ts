@@ -1,5 +1,148 @@
 import { gql } from '@apollo/client';
 
+// Comprehensive dashboard statistics query
+export const GET_DASHBOARD_STATISTICS = gql`
+  query GetDashboardStatistics {
+    dashboardStatistics {
+      dogs {
+        totalDogs
+        maleCount
+        femaleCount
+        registeredThisMonth
+        registeredThisYear
+        byBreed {
+          breedId
+          breedName
+          count
+          percentage
+        }
+        byGender {
+          gender
+          count
+          percentage
+        }
+        registrationsTrend {
+          date
+          count
+        }
+        topBreeders {
+          breederId
+          breederName
+          count
+        }
+      }
+      litters {
+        totalLitters
+        registeredThisMonth
+        registeredThisYear
+        averageLitterSize
+        puppiesRegisteredThisMonth
+        puppiesRegisteredThisYear
+        byBreed {
+          breedId
+          breedName
+          count
+          percentage
+        }
+        registrationsTrend {
+          date
+          count
+        }
+      }
+      users {
+        totalUsers
+        activeUsers
+        newUsersThisMonth
+        newUsersThisYear
+        byRole {
+          role
+          count
+          percentage
+        }
+        registrationsTrend {
+          date
+          count
+        }
+      }
+      events {
+        totalEvents
+        upcomingEvents
+        pastEvents
+        eventsThisMonth
+        eventsThisYear
+        participationRate
+        popularEvents {
+          eventId
+          eventName
+          registrationCount
+          percentage
+        }
+        registrationsTrend {
+          date
+          count
+        }
+      }
+      health {
+        totalRecords
+        recordsThisMonth
+        recordsThisYear
+        commonConditions {
+          condition
+          count
+          percentage
+        }
+        recordsTrend {
+          date
+          count
+        }
+      }
+      activity {
+        totalLogins
+        loginsThisMonth
+        loginsThisYear
+        totalApiCalls
+        apiCallsThisMonth
+        apiCallsThisYear
+        activityTrend {
+          date
+          count
+        }
+      }
+      pedigree {
+        averageGenerations
+        maxGenerations
+        generationDistribution {
+          generation
+          count
+          percentage
+        }
+        completeThreeGenPedigreePercentage
+        averageInbreedingCoefficient
+        inbreedingCoefficientDistribution {
+          range
+          count
+          percentage
+        }
+        inbreedingTrend {
+          date
+          count
+        }
+        pedigreeCompleteness {
+          complete
+          partial
+          missing
+          completePercentage
+          partialPercentage
+          missingPercentage
+        }
+        missingAncestorCount
+        completenessImprovementRate
+      }
+      lastUpdated
+    }
+  }
+`;
+
 // Query to get dashboard summary data
 export const GET_DASHBOARD_SUMMARY = gql`
   query GetDashboardSummary {

@@ -1,0 +1,716 @@
+'use client';
+
+import { Fragment, useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { useQuery } from '@apollo/client';
+// Import GraphQL queries individually for dashboard data
+import { gql } from '@apollo/client';
+
+// Define queries directly to avoid import issues
+const GET_DASHBOARD_STATISTICS = gql`
+  query GetDashboardStatistics {
+    dashboardStatistics {
+      dogs {
+        totalDogs
+        maleCount
+        femaleCount
+        registeredThisMonth
+        registeredThisYear
+        byBreed {
+          breedId
+          breedName
+          count
+          percentage
+        }
+        byGender {
+          gender
+          count
+          percentage
+        }
+        registrationsTrend {
+          date
+          count
+        }
+        topBreeders {
+          breederId
+          breederName
+          count
+        }
+      }
+      litters {
+        totalLitters
+        averageLitterSize
+        registeredThisMonth
+        registeredThisYear
+      }
+      users {
+        totalUsers
+        newUsersThisMonth
+        activeUsers
+        byRole {
+          role
+          count
+          percentage
+        }
+      }
+      events {
+        upcomingEventsCount
+        pastEventsCount
+        byType {
+          eventType
+          count
+          percentage
+        }
+      }
+      health {
+        totalRecords
+        recordsThisMonth
+        recordsThisYear
+        byCondition {
+          condition
+          count
+          percentage
+        }
+        recordsTrend {
+          date
+          count
+        }
+      }
+      activity {
+        totalLogins
+        loginsThisMonth
+        loginsThisYear
+        totalApiCalls
+        apiCallsThisMonth
+        apiCallsThisYear
+        activityTrend {
+          date
+          count
+        }
+      }
+      lastUpdated
+    }
+  }
+`;
+
+const GET_RECENT_DOGS = gql`
+  query GetRecentDogs($limit: Int = 5) {
+    dogs(limit: $limit, sortBy: REGISTRATION_NUMBER, sortDirection: DESC) {
+      items {
+        id
+        name
+        breed
+        gender
+        dateOfBirth
+        registrationNumber
+        mainImageUrl
+        breedObj {
+          name
+        }
+        currentOwner {
+          name
+        }
+      }
+    }
+  }
+`;
+
+const GET_RECENT_HEALTH_RECORDS = gql`
+  query GetRecentHealthRecords($limit: Int = 5) {
+    dogs(limit: $limit) {
+      items {
+        id
+        name
+        healthRecords(limit: 1, sortDirection: DESC) {
+          id
+          date
+          type
+          description
+          results
+        }
+      }
+    }
+  }
+`;
+
+const GET_RECENT_COMPETITIONS = gql`
+  query GetRecentCompetitions($limit: Int = 5) {
+    competitions(
+      limit: $limit
+      sortBy: EVENT_DATE
+      sortDirection: DESC
+    ) {
+      items {
+        id
+        dogId
+        dogName
+        eventName
+        eventDate
+        category
+        placement
+        score
+      }
+    }
+  }
+`;
+import { PieChart, Pie, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, AreaChart, Area, LineChart, Line, Cell } from 'recharts';
+import { FiUsers, FiUserPlus, FiCalendar, FiActivity, FiSettings, FiDatabase, FiList, FiMonitor, FiAlertTriangle } from 'react-icons/fi';
+import { FaDog, FaPaw, FaUserFriends, FaMedal, FaUserCheck, FaChartBar } from 'react-icons/fa';
+import { HiOutlineDocumentReport } from 'react-icons/hi';
+import { UserRole } from '@/types/enums';
+
+export default function AdminDashboard() {
+  const router = useRouter();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userRole, setUserRole] = useState<UserRole | string>('');
+  const [userName, setUserName] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+  
+  // GraphQL queries for dashboard data
+  const { loading: statsLoading, error: statsError, data: statsData } = useQuery(GET_DASHBOARD_STATISTICS, {
+    fetchPolicy: 'network-only', // Don't use the cache
+    nextFetchPolicy: 'cache-first', // But use the cache for subsequent fetches
+    skip: !isAuthenticated || userRole !== UserRole.ADMIN
+  });
+  
+  const { loading: dogsLoading, data: recentDogsData } = useQuery(GET_RECENT_DOGS, {
+    variables: { limit: 5 },
+    skip: !isAuthenticated || userRole !== UserRole.ADMIN
+  });
+  
+  const { loading: healthLoading, data: healthData } = useQuery(GET_RECENT_HEALTH_RECORDS, {
+    variables: { limit: 5 },
+    skip: !isAuthenticated || userRole !== UserRole.ADMIN
+  });
+  
+  const { loading: competitionsLoading, data: competitionsData } = useQuery(GET_RECENT_COMPETITIONS, {
+    variables: { limit: 5 },
+    skip: !isAuthenticated || userRole !== UserRole.ADMIN
+  });
+
+  // Mock data for demonstration (will be replaced with actual data)
+  const mockStats = {
+    dogs: {
+      totalDogs: 532,
+      maleCount: 287,
+      femaleCount: 245,
+      registeredThisMonth: 24,
+      registeredThisYear: 156,
+      byBreed: [
+        { breedId: '1', breedName: 'German Shepherd', count: 124, percentage: 23.3 },
+        { breedId: '2', breedName: 'Golden Retriever', count: 98, percentage: 18.4 },
+        { breedId: '3', breedName: 'Labrador Retriever', count: 87, percentage: 16.4 },
+        { breedId: '4', breedName: 'Beagle', count: 65, percentage: 12.2 },
+        { breedId: '5', breedName: 'Other Breeds', count: 158, percentage: 29.7 },
+      ],
+      byGender: [
+        { gender: 'Male', count: 287, percentage: 54 },
+        { gender: 'Female', count: 245, percentage: 46 },
+      ],
+      registrationsTrend: [
+        { date: '2024-10', count: 18 },
+        { date: '2024-11', count: 22 },
+        { date: '2024-12', count: 16 },
+        { date: '2025-01', count: 19 },
+        { date: '2025-02', count: 26 },
+        { date: '2025-03', count: 24 },
+      ],
+      topBreeders: [
+        { breederId: '1', breederName: 'Elite Kennels', count: 45 },
+        { breederId: '2', breederName: 'Golden Pups', count: 38 },
+        { breederId: '3', breederName: 'Champion Breeders', count: 29 },
+      ],
+    },
+    users: {
+      totalUsers: 124,
+      activeUsers: 98,
+      newUsersThisMonth: 12,
+      newUsersThisYear: 67,
+      byRole: [
+        { role: UserRole.ADMIN, count: 3, percentage: 2.4 },
+        { role: UserRole.OWNER, count: 76, percentage: 61.3 },
+        { role: UserRole.HANDLER, count: 28, percentage: 22.6 },
+        { role: UserRole.CLUB, count: 12, percentage: 9.7 },
+        { role: UserRole.VIEWER, count: 5, percentage: 4 },
+      ],
+      registrationsTrend: [
+        { date: '2024-10', count: 8 },
+        { date: '2024-11', count: 14 },
+        { date: '2024-12', count: 9 },
+        { date: '2025-01', count: 12 },
+        { date: '2025-02', count: 15 },
+        { date: '2025-03', count: 12 },
+      ],
+    },
+    health: {
+      totalRecords: 1245,
+      recordsThisMonth: 76,
+      recordsThisYear: 342,
+      commonConditions: [
+        { condition: 'Hip Dysplasia', count: 87, percentage: 7 },
+        { condition: 'Allergies', count: 124, percentage: 10 },
+        { condition: 'Vaccinations', count: 498, percentage: 40 },
+        { condition: 'Routine Checkup', count: 356, percentage: 28.6 },
+        { condition: 'Other', count: 180, percentage: 14.4 },
+      ],
+      recordsTrend: [
+        { date: '2024-10', count: 95 },
+        { date: '2024-11', count: 112 },
+        { date: '2024-12', count: 87 },
+        { date: '2025-01', count: 92 },
+        { date: '2025-02', count: 104 },
+        { date: '2025-03', count: 76 },
+      ],
+    },
+  };
+
+  // Get real data or use mock data
+  const dashboard = statsData?.dashboardStatistics || mockStats;
+
+  // Sample user data for demonstration
+  const users = [
+    { id: 1, name: 'Jane Cooper', email: 'jane@example.com', role: UserRole.OWNER, status: 'active', lastLogin: '2024-11-28' },
+    { id: 2, name: 'Michael Scott', email: 'michael@example.com', role: UserRole.OWNER, status: 'active', lastLogin: '2024-11-27' },
+    { id: 3, name: 'Robert Johnson', email: 'robert@example.com', role: UserRole.HANDLER, status: 'inactive', lastLogin: '2024-10-15' },
+    { id: 4, name: 'Sarah Williams', email: 'sarah@example.com', role: UserRole.CLUB, status: 'active', lastLogin: '2024-11-25' },
+    { id: 5, name: 'David Brown', email: 'david@example.com', role: UserRole.OWNER, status: 'pending', lastLogin: 'N/A' },
+  ];
+
+  // System statistics (will use real data when available)
+  const statistics = [
+    { label: 'Total Users', value: dashboard?.users?.totalUsers || '124', icon: <FiUsers className="w-5 h-5" />, color: 'bg-blue-100 text-blue-800' },
+    { label: 'Total Dogs', value: dashboard?.dogs?.totalDogs || '532', icon: <FaDog className="w-5 h-5" />, color: 'bg-green-100 text-green-800' },
+    { label: 'Health Records', value: dashboard?.health?.totalRecords || '1,245', icon: <HiOutlineDocumentReport className="w-5 h-5" />, color: 'bg-amber-100 text-amber-800' },
+    { label: 'New This Month', value: dashboard?.dogs?.registeredThisMonth || '24', icon: <FiUserPlus className="w-5 h-5" />, color: 'bg-purple-100 text-purple-800' },
+  ];
+
+  // Admin operations
+  const adminOperations = [
+    { 
+      title: 'User Management', 
+      description: 'Add, edit, or remove users and manage user roles',
+      href: '/admin/users',
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-8 h-8">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+        </svg>
+      )
+    },
+    { 
+      title: 'Role Management', 
+      description: 'Define and manage user roles and permissions',
+      href: '/admin/roles',
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-8 h-8">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15.75 5.25a3 3 0 013 3m-3-3a3 3 0 00-3 3m3-3v1.5m0 4.5h1.5m0 0v1.5m0-1.5h1.5m-7.5-1.5h.008v.008h-.008v-.008zm1.5 0h.008v.008h-.008v-.008zm1.5 0h.008v.008h-.008v-.008zm-1.5 1.5h.008v.008h-.008v-.008zm1.5 0h.008v.008h-.008v-.008zm-1.5 1.5h.008v.008h-.008v-.008zm1.5 0h.008v.008h-.008v-.008z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" />
+        </svg>
+      )
+    },
+    { 
+      title: 'System Settings', 
+      description: 'Configure application settings and preferences',
+      href: '/admin/settings',
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-8 h-8">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+      )
+    },
+    { 
+      title: 'Data Management', 
+      description: 'Backup, restore, and manage system data',
+      href: '/admin/data',
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-8 h-8">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75C20.25 16.153 16.556 18 12 18s-8.25-1.847-8.25-4.125v-3.75m16.5 0c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125" />
+        </svg>
+      )
+    },
+    { 
+      title: 'Logs & Activity', 
+      description: 'View system logs and user activity',
+      href: '/admin/logs',
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-8 h-8">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 7.5h1.5m-1.5 3h1.5m-7.5 3h7.5m-7.5 3h7.5m3-9h3.375c.621 0 1.125.504 1.125 1.125V18a2.25 2.25 0 01-2.25 2.25M16.5 7.5V18a2.25 2.25 0 002.25 2.25M16.5 7.5V4.875c0-.621-.504-1.125-1.125-1.125H4.125C3.504 3.75 3 4.254 3 4.875V18a2.25 2.25 0 002.25 2.25h13.5M6 7.5h3v3H6v-3z" />
+        </svg>
+      )
+    }
+  ];
+
+  useEffect(() => {
+    // We'll be using the auth context in a real implementation
+    // but for demo purposes, we still use localStorage
+    const authStatus = localStorage.getItem('isAuthenticated') === 'true';
+    const role = localStorage.getItem('userRole') || '';
+    const name = localStorage.getItem('userName') || 'User';
+    
+    setIsAuthenticated(authStatus);
+    setUserRole(role.toUpperCase() as UserRole);
+    setUserName(name);
+    setIsLoading(false);
+    
+    // Redirect if not authenticated or not an admin
+    if (!authStatus) {
+      router.push('/auth/login');
+    } else if (role.toUpperCase() !== UserRole.ADMIN) {
+      router.push('/user/dashboard');
+    }
+  }, [router]);
+
+  // TypeScript interfaces for component props
+  interface StatCardProps {
+    title: string;
+    value: number | string;
+    icon: React.ReactNode;
+    description?: string;
+    change?: number;
+    color: string;
+  }
+
+  interface ChartSectionProps {
+    title: string;
+    children: React.ReactNode;
+  }
+
+  interface DataTableProps {
+    title: string;
+    columns: string[];
+    data: Record<string, React.ReactNode>[];
+    viewAllLink?: string;
+  }
+  
+  // Define User interface with UserRole enum type
+  interface User {
+    id: number | string;
+    name: string;
+    email: string;
+    role: UserRole;
+    status: 'active' | 'inactive' | 'pending';
+    lastLogin: string;
+  }
+
+  // Components for dashboard statistics visualization
+  const StatCard = ({ title, value, icon, description, change, color }: StatCardProps) => (
+    <div className="bg-white p-6 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
+      <div className="flex justify-between items-start">
+        <div>
+          <p className="text-sm text-gray-500 font-medium">{title}</p>
+          <p className="text-2xl font-bold mt-1">{value}</p>
+          {description && <p className="text-xs text-gray-500 mt-1">{description}</p>}
+          {change && (
+            <p className={`text-xs mt-2 ${change > 0 ? 'text-green-600' : 'text-red-600'} flex items-center`}>
+              {change > 0 ? '↑' : '↓'} {Math.abs(change)}% from last month
+            </p>
+          )}
+        </div>
+        <div className={`${color} p-3 rounded-full`}>
+          {icon}
+        </div>
+      </div>
+    </div>
+  );
+
+  const ChartSection = ({ title, children }: ChartSectionProps) => (
+    <div className="bg-white p-6 rounded-lg shadow-md overflow-hidden mb-6">
+      <h3 className="text-lg font-semibold text-gray-800 mb-4">{title}</h3>
+      <div className="h-64">
+        {children}
+      </div>
+    </div>
+  );
+
+  const DataTable = ({ title, columns, data, viewAllLink }: DataTableProps) => (
+    <div className="bg-white rounded-lg shadow-md overflow-hidden mb-6">
+      <div className="px-6 py-5 border-b border-gray-200 flex justify-between items-center">
+        <h3 className="text-lg font-medium text-gray-900">{title}</h3>
+        {viewAllLink && (
+          <Link 
+            href={viewAllLink}
+            className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+          >
+            View all
+          </Link>
+        )}
+      </div>
+      <div className="px-6 py-5">
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead>
+              <tr>
+                {columns.map((column, index) => (
+                  <th key={index} className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    {column}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {data.map((row, rowIndex) => (
+                <tr key={rowIndex}>
+                  {Object.values(row).map((cell, cellIndex) => (
+                    <td key={cellIndex} className="px-6 py-4 whitespace-nowrap">
+                      {typeof cell === 'object' ? cell : <div className="text-sm text-gray-900">{cell}</div>}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen bg-gray-100">
+        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+  
+  if (!isAuthenticated || userRole !== 'ADMIN') {
+    return null; // We already redirect in the useEffect, this is just a safeguard
+  }
+
+  // Format user data for the table
+  const formattedUsers = users.map(user => ({
+    name: <div className="text-sm font-medium text-gray-900">{user.name}</div>,
+    email: <div className="text-sm text-gray-500">{user.email}</div>,
+    role: <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">{user.role}</span>,
+    status: <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+      user.status === 'active' ? 'bg-green-100 text-green-800' : 
+      user.status === 'inactive' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'
+    }`}>{user.status}</span>,
+    lastLogin: user.lastLogin
+  }));
+
+  // Create data for charts
+  const breedData = dashboard?.dogs?.byBreed || [];
+  const genderData = dashboard?.dogs?.byGender || [];
+  const roleData = dashboard?.users?.byRole || [];
+  const registrationTrend = dashboard?.dogs?.registrationsTrend || [];
+  const healthRecordsTrend = dashboard?.health?.recordsTrend || [];
+
+  return (
+    <div className="bg-gray-100 min-h-screen">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Admin Dashboard Header */}
+        <div className="bg-white shadow-md rounded-lg overflow-hidden mb-8">
+          <div className="bg-blue-700 px-6 py-10 sm:px-10 sm:py-12">
+            <div className="text-center">
+              <h1 className="text-3xl font-extrabold text-white sm:text-4xl">
+                Admin Dashboard
+              </h1>
+              <p className="mt-4 text-lg text-blue-100">
+                Welcome, {userName}. Manage users, system settings, and monitor application activity.
+              </p>
+              <div className="mt-4 inline-block bg-blue-800 px-3 py-1 rounded-full text-sm text-white">
+                Administrator Access
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Quick Stat Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <StatCard 
+            title="Total Dogs" 
+            value={dashboard?.dogs?.totalDogs || 0} 
+            icon={<FaDog className="w-6 h-6 text-blue-600" />} 
+            description="Registered in the system" 
+            change={5.8} 
+            color="bg-blue-100" 
+          />
+          <StatCard 
+            title="Total Users" 
+            value={dashboard?.users?.totalUsers || 0} 
+            icon={<FiUsers className="w-6 h-6 text-green-600" />} 
+            description="Active accounts" 
+            change={2.1} 
+            color="bg-green-100" 
+          />
+          <StatCard 
+            title="Health Records" 
+            value={dashboard?.health?.totalRecords || 0} 
+            icon={<HiOutlineDocumentReport className="w-6 h-6 text-amber-600" />} 
+            description="Total records" 
+            change={8.3} 
+            color="bg-amber-100" 
+          />
+          <StatCard 
+            title="New Registrations" 
+            value={dashboard?.dogs?.registeredThisMonth || 0} 
+            icon={<FiUserPlus className="w-6 h-6 text-purple-600" />} 
+            description="This month" 
+            change={-1.2} 
+            color="bg-purple-100" 
+          />
+        </div>
+
+        {/* Charts Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          {/* Dog Registration Trend */}
+          <ChartSection title="Dog Registration Trends">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={registrationTrend}>
+                <defs>
+                  <linearGradient id="colorRegistrations" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.8}/>
+                    <stop offset="95%" stopColor="#3B82F6" stopOpacity={0.1}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="date" />
+                <YAxis />
+                <Tooltip />
+                <Area type="monotone" dataKey="count" stroke="#3B82F6" fillOpacity={1} fill="url(#colorRegistrations)" />
+              </AreaChart>
+            </ResponsiveContainer>
+          </ChartSection>
+
+          {/* Health Records Trend */}
+          <ChartSection title="Health Records Trend">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={healthRecordsTrend}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="date" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Line type="monotone" dataKey="count" stroke="#F59E0B" strokeWidth={2} dot={{ r: 4 }} />
+              </LineChart>
+            </ResponsiveContainer>
+          </ChartSection>
+
+          {/* Breed Distribution */}
+          <ChartSection title="Dog Breed Distribution">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={breedData} layout="vertical">
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis type="number" />
+                <YAxis dataKey="breedName" type="category" width={150} />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="count" fill="#4ADE80" />
+              </BarChart>
+            </ResponsiveContainer>
+          </ChartSection>
+
+          {/* User Roles Distribution */}
+          <ChartSection title="User Roles Distribution">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={roleData}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  outerRadius={80}
+                  fill="#8884d8"
+                  dataKey="count"
+                  nameKey="role"
+                  label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                >
+                  {roleData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'][index % 5]} />
+                  ))}
+                </Pie>
+                <Tooltip />
+              </PieChart>
+            </ResponsiveContainer>
+          </ChartSection>
+        </div>
+
+        {/* Admin Operation Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          {adminOperations.map((operation, index) => (
+            <Link 
+              href={operation.href}
+              key={index}
+              className="bg-white rounded-lg shadow-md overflow-hidden transition-transform duration-300 hover:transform hover:scale-105 hover:shadow-lg border-b-4 border-blue-500"
+            >
+              <div className="p-6 flex items-start">
+                <div className="bg-blue-100 text-blue-800 p-3 rounded-lg mr-4 flex-shrink-0">
+                  {operation.icon}
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">{operation.title}</h3>
+                  <p className="text-sm text-gray-600">{operation.description}</p>
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+        
+        {/* Recent Users Table */}
+        <DataTable 
+          title="Recent Users" 
+          columns={['Name', 'Email', 'Role', 'Status', 'Last Login']} 
+          data={formattedUsers} 
+          viewAllLink="/admin/users"
+        />
+        </div>
+        
+        {/* System Status */}
+        <div className="bg-white rounded-lg shadow-md overflow-hidden">
+          <div className="px-6 py-5 border-b border-gray-200">
+            <h3 className="text-lg font-medium text-gray-900">System Status</h3>
+          </div>
+          
+          <div className="px-6 py-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <div className="flex justify-between items-center mb-2">
+                  <h4 className="font-medium text-gray-700">Database</h4>
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                    Operational
+                  </span>
+                </div>
+                <p className="text-sm text-gray-500">Last backup: 2024-11-29 04:00 AM</p>
+              </div>
+              
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <div className="flex justify-between items-center mb-2">
+                  <h4 className="font-medium text-gray-700">API Services</h4>
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                    Operational
+                  </span>
+                </div>
+                <p className="text-sm text-gray-500">Current version: v2.4.1</p>
+              </div>
+              
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <div className="flex justify-between items-center mb-2">
+                  <h4 className="font-medium text-gray-700">Storage</h4>
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                    72% Used
+                  </span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2.5">
+                  <div className="bg-yellow-500 h-2.5 rounded-full" style={{ width: '72%' }}></div>
+                </div>
+              </div>
+              
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <div className="flex justify-between items-center mb-2">
+                  <h4 className="font-medium text-gray-700">Memory</h4>
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                    38% Used
+                  </span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2.5">
+                  <div className="bg-green-500 h-2.5 rounded-full" style={{ width: '38%' }}></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

@@ -154,7 +154,7 @@ export default function Navbar() {
     if (!user) return { href: '/user-dashboard', label: 'Dashboard' };
 
     return user.role === UserRole.ADMIN
-      ? { href: '/dashboard', label: 'Admin Dashboard' }
+      ? { href: '/admin/dashboard', label: 'Admin Dashboard' }
       : { href: '/user-dashboard', label: 'Dashboard' };
   };
 
@@ -174,7 +174,7 @@ export default function Navbar() {
       if (item.label === 'Dashboard') {
         return {
           ...item,
-          href: userRole === UserRole.ADMIN ? '/dashboard' : '/user-dashboard'
+          href: userRole === UserRole.ADMIN ? '/admin/dashboard' : '/user-dashboard'
         };
       }
       
