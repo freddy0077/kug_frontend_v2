@@ -14,7 +14,7 @@ interface ProtectedRouteProps {
 export const ProtectedRoute = ({ 
   children, 
   allowedRoles = [UserRole.ADMIN, UserRole.OWNER],
-  fallbackPath = "/user/dashboard" 
+  fallbackPath = "/user-dashboard" 
 }: ProtectedRouteProps) => {
   const { user, loading, isAuthenticated } = useAuth();
   const router = useRouter();

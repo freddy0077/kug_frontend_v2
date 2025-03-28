@@ -103,7 +103,8 @@ export default function Dogs() {
       maxAge: searchFilters.maxAge,
       titles: searchFilters.titles.length > 0 ? searchFilters.titles as string[] : undefined,
       sortBy: searchFilters.sortField,
-      sortDirection: searchFilters.sortDirection
+      sortDirection: searchFilters.sortDirection,
+      approvalStatus: isAdmin ? undefined : ApprovalStatus.APPROVED
     },
     fetchPolicy: 'network-only'
   });

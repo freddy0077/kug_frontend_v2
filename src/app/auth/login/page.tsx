@@ -24,7 +24,7 @@ function LoginContent() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
-  const [redirectPath, setRedirectPath] = useState('/dashboard');
+  const [redirectPath, setRedirectPath] = useState('/user-dashboard');
 
   // Extract redirect path and check for registration success
   useEffect(() => {

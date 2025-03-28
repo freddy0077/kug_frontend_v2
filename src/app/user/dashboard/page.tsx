@@ -7,8 +7,18 @@ import { format } from 'date-fns';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import { useAuth } from '@/contexts/AuthContext';
 
+import { useRouter } from 'next/navigation';
+
 export default function UserDashboard() {
   const { user, isAuthenticated, loading } = useAuth();
+  const router = useRouter();
+  
+  // Redirect admin users to admin dashboard
+  useEffect(() => {
+    if (!loading && isAuthenticated && user?.role === 'ADMIN') {
+      router.push('/admin/dashboard');
+    }
+  }, [isAuthenticated, loading, user, router]);
   const [dogData, setDogData] = useState([
     { id: 1, name: 'Max', breed: 'Golden Retriever', age: 3, registrationNumber: 'PD-12345' },
     { id: 2, name: 'Luna', breed: 'German Shepherd', age: 2, registrationNumber: 'PD-67890' },

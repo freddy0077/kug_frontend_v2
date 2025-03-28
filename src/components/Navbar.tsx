@@ -53,11 +53,11 @@ export default function Navbar() {
     { 
       href: '#',
       label: 'Dog Registry', 
-      roles: [UserRole.ADMIN, UserRole.OWNER],
+      roles: [UserRole.ADMIN],
       submenu: [
-        { href: '/pedigrees', label: 'Pedigrees', roles: [UserRole.ADMIN, UserRole.OWNER] },
-        { href: '/breeds', label: 'Breeds', roles: [UserRole.ADMIN, UserRole.OWNER] },
-        { href: '/dogs/new', label: 'Register New Dog', roles: [] },  // Empty roles array = accessible to any logged-in user
+        { href: '/pedigrees', label: 'Pedigrees', roles: [UserRole.ADMIN] },
+        { href: '/breeds', label: 'Breeds', roles: [UserRole.ADMIN] },
+        { href: '/dogs/new', label: 'Register New Dog', roles: [UserRole.ADMIN] },
       ]
     },
     
@@ -73,16 +73,16 @@ export default function Navbar() {
     },
     
     // Health & Competition Records
-    { 
-      href: '#',
-      label: 'Records', 
-      roles: [UserRole.ADMIN, UserRole.OWNER, UserRole.HANDLER, UserRole.CLUB],
-      submenu: [
-        { href: '/health-records', label: 'Health Records', roles: [UserRole.ADMIN, UserRole.OWNER] },
-        { href: '/competitions', label: 'Competitions', roles: [UserRole.ADMIN, UserRole.OWNER, UserRole.HANDLER, UserRole.CLUB] },
-        { href: '/ownerships', label: 'Ownership Records', roles: [UserRole.ADMIN, UserRole.OWNER] },
-      ]
-    },
+    // { 
+    //   href: '#',
+    //   label: 'Records', 
+    //   roles: [UserRole.ADMIN, UserRole.OWNER, UserRole.HANDLER, UserRole.CLUB],
+    //   submenu: [
+    //     { href: '/health-records', label: 'Health Records', roles: [UserRole.ADMIN, UserRole.OWNER] },
+    //     { href: '/competitions', label: 'Competitions', roles: [UserRole.ADMIN, UserRole.OWNER, UserRole.HANDLER, UserRole.CLUB] },
+    //     { href: '/ownerships', label: 'Ownership Records', roles: [UserRole.ADMIN, UserRole.OWNER] },
+    //   ]
+    // },
     
     // Club specific menu (uncomment when needed)
     { 

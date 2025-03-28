@@ -44,7 +44,7 @@ export default function UserDashboard() {
   // If the user is an admin, redirect to the admin dashboard
   useEffect(() => {
     if (user?.role === 'ADMIN') {
-      router.push('/dashboard');
+      router.push('/admin/dashboard');
     }
   }, [user, router]);
 

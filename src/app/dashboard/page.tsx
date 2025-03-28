@@ -39,10 +39,14 @@ export default function Dashboard() {
     }
   }, [isAuthenticated, loading, router]);
 
-  // Redirect non-admin users to user dashboard
+  // Redirect based on user role
   useEffect(() => {
-    if (isAuthenticated && user && user.role !== 'ADMIN') {
-      router.push('/user-dashboard');
+    if (isAuthenticated && user) {
+      if (user.role === 'ADMIN') {
+        router.push('/admin/dashboard');
+      } else {
+        router.push('/user-dashboard');
+      }
     }
   }, [isAuthenticated, user, router]);
   

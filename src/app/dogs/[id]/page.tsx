@@ -5,6 +5,8 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useQuery } from '@apollo/client';
 import { GET_DOG_BY_ID } from '@/graphql/queries/dogQueries';
+import { useAuth } from '@/contexts/AuthContext';
+import { UserRole } from '@/types/enums';
 import DogProfile from '@/components/dogs/DogProfile';
 import HealthRecords from '@/components/dogs/HealthRecords';
 import CompetitionResults from '@/components/dogs/CompetitionResults';
@@ -13,6 +15,8 @@ import OwnershipHistory from '@/components/dogs/OwnershipHistory';
 export default function DogDetailsPage() {
   const params = useParams();
   const router = useRouter();
+  const { user } = useAuth();
+  const isAdmin = user?.role === UserRole.ADMIN;
   const dogId = params.id as string;
   
   // Check if the route is for creating a new dog
@@ -98,16 +102,17 @@ export default function DogDetailsPage() {
             Back to Dogs
           </Link>
           
-          {/* Admin actions */}
-          {/* This could be conditionally rendered based on user role */}
-          <div className="flex space-x-3">
-            <Link
-              href={`/manage/dogs/${dogId}/edit`}
-              className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-            >
-              Edit Dog
-            </Link>
-          </div>
+          {/* Admin actions - only visible to admins */}
+          {isAdmin && (
+            <div className="flex space-x-3">
+              <Link
+                href={`/manage/dogs/${dogId}/edit`}
+                className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+              >
+                Edit Dog
+              </Link>
+            </div>
+          )}
         </div>
         
         {/* Main content */}

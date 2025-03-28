@@ -5,6 +5,7 @@ import Link from "next/link";
 import { format } from "date-fns";
 import { useQuery } from "@apollo/client";
 import { GET_DOGS, DogSortField, SortDirection } from "@/graphql/queries/dogQueries";
+import { ApprovalStatus } from "@/types/enums";
 import { useState, useEffect } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SITE_NAME } from "@/config/site";
@@ -45,6 +46,7 @@ export default function Home() {
       limit: 3,
       sortBy: DogSortField.CREATED_AT,
       sortDirection: SortDirection.DESC,
+      approvalStatus: ApprovalStatus.APPROVED
     },
   });
 
