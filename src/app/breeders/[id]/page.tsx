@@ -1,17 +1,17 @@
 'use client';
 
 import React from 'react';
-import ModernBreedList from '@/components/breeds/ModernBreedList';
+import OwnerDetail from '@/components/breeders/OwnerDetail';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import { UserRole } from '@/utils/permissionUtils';
 
-export default function BreedsPage() {
+export default function OwnerDetailPage({ params }: any) {
   return (
     <ProtectedRoute
       allowedRoles={[UserRole.ADMIN, UserRole.OWNER]}
       fallbackPath="/auth/login"
     >
-      <ModernBreedList />
+      <OwnerDetail ownerId={params.id} />
     </ProtectedRoute>
   );
 }

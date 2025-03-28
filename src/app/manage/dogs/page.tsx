@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { format } from 'date-fns';
+import { useAuth } from '@/contexts/AuthContext';
 
 // Define TypeScript interfaces
 interface FormDog {
@@ -20,6 +21,16 @@ interface FormDog {
 
 export default function ManageDogs() {
   const router = useRouter();
+  const { user, loading } = useAuth();
+  
+  // We'll initialize the auth state but won't redirect
+  // This prevents unwanted redirects while still using auth context
+  useEffect(() => {
+    // Log authentication status for debugging
+    if (user) {
+      console.log('User authenticated:', user.role);
+    }
+  }, [user]);
   
   // List of common dog breeds
   const breedOptions = [

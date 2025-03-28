@@ -193,7 +193,7 @@ export default function OffspringManager({
                       </Link>
                       {hasManagePermission && (
                         <Link
-                          href={`/manage/dogs/${puppy.id}/edit`}
+                          href={`/manage/dogs/${puppy.id}/profile`}
                           className="text-blue-600 hover:text-blue-900"
                         >
                           Edit

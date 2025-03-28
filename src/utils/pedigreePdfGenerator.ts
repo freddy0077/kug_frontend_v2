@@ -78,9 +78,10 @@ function isGermanShepherd(dog: DogNode | null | undefined): boolean {
  * Get dog cell content based on breed-specific requirements
  * @param dog The dog to get cell content for
  * @param fontSize Font size for the name
+ * @param isLastColumn Whether this is the last column (3rd generation) in the pedigree table
  * @returns HTML string for the dog cell
  */
-function getDogCellContent(dog: DogNode | null | undefined, fontSize: number): string {
+function getDogCellContent(dog: DogNode | null | undefined, fontSize: number, isLastColumn: boolean = false): string {
   if (!dog) return `
     <div style="font-weight: bold; font-size: ${fontSize}px;">Unknown</div>
     <div style="font-size: ${fontSize - 2}px; margin-top: 2px;">Unknown</div>
@@ -89,6 +90,14 @@ function getDogCellContent(dog: DogNode | null | undefined, fontSize: number): s
   // Get titles if any
   const titles = dog.titles ? (Array.isArray(dog.titles) ? dog.titles.join(', ') : dog.titles) : '';
 
+  // For the last column (3rd generation), only show name and registration number
+  if (isLastColumn) {
+    return `
+      <div style="font-weight: bold; font-size: ${fontSize}px;">${(dog.name || 'Unknown').toUpperCase()}</div>
+      <div style="font-size: ${fontSize - 2}px; margin-top: 2px;">${(dog.registrationNumber || 'Unknown').toUpperCase()}</div>
+    `;
+  }
+  
   // For German Shepherd Dogs, only show name, registration number, and titles
   if (isGermanShepherd(dog)) {
     return `
@@ -299,14 +308,14 @@ export const generatePedigreeCertificate = async (
             
             <!-- Gen 3: Sire's Sire's Sire -->
             <td style="width: 14.28%; border: 1px solid #999; background-color: #d6f5d6; padding: 6px; vertical-align: middle; text-align: center;">
-              ${getDogCellContent(dog.sire?.sire?.sire, 12)}
+              ${getDogCellContent(dog.sire?.sire?.sire, 12, true)}
             </td>
           </tr>
           
           <tr>
             <!-- Gen 3: Sire's Sire's Dam -->
             <td style="border: 1px solid #999; background-color: #ffffff; padding: 6px; vertical-align: middle; text-align: center;">
-              ${getDogCellContent(dog.sire?.sire?.dam, 12)}
+              ${getDogCellContent(dog.sire?.sire?.dam, 12, true)}
             </td>
           </tr>
           
@@ -318,14 +327,14 @@ export const generatePedigreeCertificate = async (
             
             <!-- Gen 3: Sire's Dam's Sire -->
             <td style="border: 1px solid #999; background-color: #d6f5d6; padding: 6px; vertical-align: middle; text-align: center;">
-              ${getDogCellContent(dog.sire?.dam?.sire, 12)}
+              ${getDogCellContent(dog.sire?.dam?.sire, 12, true)}
             </td>
           </tr>
           
           <tr>
             <!-- Gen 3: Sire's Dam's Dam -->
             <td style="border: 1px solid #999; background-color: #ffffff; padding: 6px; vertical-align: middle; text-align: center;">
-              ${getDogCellContent(dog.sire?.dam?.dam, 12)}
+              ${getDogCellContent(dog.sire?.dam?.dam, 12, true)}
             </td>
           </tr>
           
@@ -342,14 +351,14 @@ export const generatePedigreeCertificate = async (
             
             <!-- Gen 3: Dam's Sire's Sire -->
             <td style="border: 1px solid #999; background-color: #d6f5d6; padding: 6px; vertical-align: middle; text-align: center;">
-              ${getDogCellContent(dog.dam?.sire?.sire, 12)}
+              ${getDogCellContent(dog.dam?.sire?.sire, 12, true)}
             </td>
           </tr>
           
           <tr>
             <!-- Gen 3: Dam's Sire's Dam -->
             <td style="border: 1px solid #999; background-color: #ffffff; padding: 6px; vertical-align: middle; text-align: center;">
-              ${getDogCellContent(dog.dam?.sire?.dam, 12)}
+              ${getDogCellContent(dog.dam?.sire?.dam, 12, true)}
             </td>
           </tr>
           
@@ -361,14 +370,14 @@ export const generatePedigreeCertificate = async (
             
             <!-- Gen 3: Dam's Dam's Sire -->
             <td style="border: 1px solid #999; background-color: #d6f5d6; padding: 6px; vertical-align: middle; text-align: center;">
-              ${getDogCellContent(dog.dam?.dam?.sire, 12)}
+              ${getDogCellContent(dog.dam?.dam?.sire, 12, true)}
             </td>
           </tr>
           
           <tr>
             <!-- Gen 3: Dam's Dam's Dam -->
             <td style="border: 1px solid #999; background-color: #ffffff; padding: 6px; vertical-align: middle; text-align: center;">
-              ${getDogCellContent(dog.dam?.dam?.dam, 12)}
+              ${getDogCellContent(dog.dam?.dam?.dam, 12, true)}
             </td>
           </tr>
         </table>

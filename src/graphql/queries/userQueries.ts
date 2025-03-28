@@ -58,11 +58,15 @@ export const GET_USERS = gql`
 export const GET_OWNERS = gql`
   query GetOwners($limit: Int = 100) {
     owners(limit: $limit) {
-      id
-      name
-      contactEmail
-      contactPhone
-      address
+      totalCount
+      hasMore
+      items {
+        id
+        name
+        contactEmail
+        contactPhone
+        address
+      }
     }
   }
 `;

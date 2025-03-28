@@ -30,3 +30,15 @@ export enum DogRole {
   DAM = 'DAM',
   BOTH = 'BOTH'
 }
+
+export enum BreedGroupEnum {
+  SPORTING = 'SPORTING',
+  HOUND = 'HOUND',
+  WORKING = 'WORKING',
+  TERRIER = 'TERRIER',
+  TOY = 'TOY',
+  NON_SPORTING = 'NON_SPORTING',
+  HERDING = 'HERDING',
+  MISCELLANEOUS = 'MISCELLANEOUS',
+  FOUNDATION_STOCK = 'FOUNDATION_STOCK'
+}
