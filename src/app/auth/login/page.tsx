@@ -70,7 +70,7 @@ function LoginContent() {
       const user = await login(formData.email, formData.password, recaptchaToken);
       
       // Check if we have a redirect path from the URL
-      if (redirectPath && redirectPath !== '/dashboard') {
+      if (redirectPath && redirectPath !== '/admin/dashboard') {
         router.push(redirectPath);
         return;
       }
@@ -84,18 +84,18 @@ function LoginContent() {
           case 'OWNER':
           case 'BREEDER':
           case 'HANDLER':
-            router.push('/user/dashboard');
+            router.push('/user-dashboard');
             break;
           case 'CLUB':
             router.push('/club-events');
             break;
           default:
-            router.push('/dashboard');
+            router.push('/user-dashboard');
             break;
         }
       } else {
         // Default fallback if role not found
-        router.push('/dashboard');
+        router.push('/user-dashboard');
       }
     } catch (err) {
       const apolloError = err as ApolloError;
