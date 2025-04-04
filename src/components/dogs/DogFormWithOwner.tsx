@@ -6,7 +6,7 @@ import { CREATE_DOG_MUTATION } from '@/graphql/mutations/dogMutations';
 import { GET_BREEDS, GET_BREED_BY_NAME, SortDirection } from '@/graphql/queries/breedQueries';
 import { ApprovalStatus } from '@/types/enums';
 import ApprovalStatusBadge from '../common/ApprovalStatusBadge';
-// import { GET_OWNERS } from '@/graphql/queries/ownerQueries';
+import UserSearchSelect from '../common/UserSearchSelect';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 
@@ -26,7 +26,7 @@ type FormInputs = {
   titles?: string;
   biography?: string;
   mainImageUrl?: string;
-  ownerId: string; // Required field for dog ownership
+  userId: string; // Required field for dog ownership
 };
 
 // Initial form state
@@ -37,7 +37,7 @@ const initialFormState: FormInputs = {
   color: '',
   dateOfBirth: '',
   isNeutered: false,
-  ownerId: '', // Default empty string for ownerId
+  userId: '', // Default empty string for userId
 };
 
 // Valid gender options
@@ -63,10 +63,7 @@ const DogFormWithOwner: React.FC<DogFormProps> = ({ onSuccess }) => {
     }
   });
   
-  // // Fetch owners for dropdown
-  // const { data: ownersData, loading: ownersLoading } = useQuery(GET_OWNERS, {
-  //   variables: { limit: 100 }
-  // });
+    // We'll use the UserSearchSelect component instead of fetching all users at once
 
   // Get detailed breed info when breed is selected
   const { data: breedData } = useQuery(GET_BREED_BY_NAME, {
@@ -165,6 +162,10 @@ const DogFormWithOwner: React.FC<DogFormProps> = ({ onSuccess }) => {
       errors.color = 'Color is required';
     }
     
+    if (!formData.userId) {
+      errors.userId = 'User is required';
+    }
+    
     if (!formData.dateOfBirth) {
       errors.dateOfBirth = 'Date of birth is required';
     } else if (!isValidDate(formData.dateOfBirth)) {
@@ -233,7 +234,7 @@ const DogFormWithOwner: React.FC<DogFormProps> = ({ onSuccess }) => {
         dateOfDeath: dateOfDeath?.toISOString(),
         titles,
         breedId: breedId ?? undefined,
-        ownerId: formData.ownerId // Include the owner ID in the mutation input
+        userId: formData.userId // Include the user ID in the mutation input
       };
       
       // Submit mutation
@@ -278,8 +279,39 @@ const DogFormWithOwner: React.FC<DogFormProps> = ({ onSuccess }) => {
           </div>
         </div>
       </div>
+
+      {/* Ownership Section - Moved to the top for clarity */}
+      <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6">
+        <h2 className="text-lg font-medium text-gray-900 mb-4">Ownership Information</h2>
+        <div className="grid grid-cols-1 gap-6">
+          {/* User Selection with Search */}
+          <UserSearchSelect
+            label="Owner"
+            placeholder="Search for a user..."
+            value={formData.userId}
+            onChange={(userId) => {
+              setFormData(prev => ({
+                ...prev,
+                userId
+              }));
+              // Clear any validation errors
+              if (formErrors.userId) {
+                setFormErrors(prev => {
+                  const newErrors = { ...prev };
+                  delete newErrors.userId;
+                  return newErrors;
+                });
+              }
+            }}
+            required
+            error={formErrors.userId}
+            className="col-span-6"
+          />
+        </div>
+      </div>
+      
       {/* Basic Information Section */}
-      <div>
+      <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6">
         <h2 className="text-lg font-medium text-gray-900 mb-4">Basic Information</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Name */}
@@ -298,34 +330,6 @@ const DogFormWithOwner: React.FC<DogFormProps> = ({ onSuccess }) => {
             />
             {formErrors.name && (
               <p className="mt-1 text-sm text-red-600">{formErrors.name}</p>
-            )}
-          </div>
-          
-          {/* Owner Selection */}
-          <div>
-            {/* <label htmlFor="ownerId" className="block text-sm font-medium text-gray-700 mb-1">
-              Owner <span className="text-red-500">*</span>
-            </label> */}
-            {/* <select
-              name="ownerId"
-              id="ownerId"
-              value={formData.ownerId}
-              onChange={handleChange}
-              className={`mt-1 block w-full rounded-md shadow-sm ${formErrors.ownerId ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : 'border-gray-300 focus:border-green-500 focus:ring-green-500'}`}
-            >
-              <option value="">Select Owner</option>
-              {ownersLoading ? (
-                <option value="" disabled>Loading owners...</option>
-              ) : (
-                ownersData?.owners?.items?.map((owner: any) => (
-                  <option key={owner.id} value={owner.id}>
-                    {owner.name}
-                  </option>
-                ))
-              )}
-            </select> */}
-            {formErrors.ownerId && (
-              <p className="mt-1 text-sm text-red-600">{formErrors.ownerId}</p>
             )}
           </div>
           
@@ -401,7 +405,13 @@ const DogFormWithOwner: React.FC<DogFormProps> = ({ onSuccess }) => {
               <p className="mt-1 text-sm text-red-600">{formErrors.color}</p>
             )}
           </div>
-          
+        </div>
+      </div>
+
+      {/* Dates and Measurements */}
+      <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6">
+        <h2 className="text-lg font-medium text-gray-900 mb-4">Dates and Measurements</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Date of Birth */}
           <div>
             <label htmlFor="dateOfBirth" className="block text-sm font-medium text-gray-700 mb-1">
@@ -437,50 +447,7 @@ const DogFormWithOwner: React.FC<DogFormProps> = ({ onSuccess }) => {
               <p className="mt-1 text-sm text-red-600">{formErrors.dateOfDeath}</p>
             )}
           </div>
-        </div>
-      </div>
-
-      {/* Registration Information */}
-      <div>
-        <h2 className="text-lg font-medium text-gray-900 mb-4">Registration Information</h2>
-        <div className="grid grid-cols-1 gap-6">
-          {/* Microchip Number */}
-          <div>
-            <label htmlFor="microchipNumber" className="block text-sm font-medium text-gray-700 mb-1">
-              Microchip Number
-            </label>
-            <input
-              type="text"
-              name="microchipNumber"
-              id="microchipNumber"
-              value={formData.microchipNumber || ''}
-              onChange={handleChange}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
-              placeholder="Microchip identification number"
-            />
-          </div>
           
-          {/* Is Neutered */}
-          <div className="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              name="isNeutered"
-              id="isNeutered"
-              checked={formData.isNeutered}
-              onChange={handleChange}
-              className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
-            />
-            <label htmlFor="isNeutered" className="text-sm font-medium text-gray-700">
-              Is Neutered/Spayed
-            </label>
-          </div>
-        </div>
-      </div>
-
-      {/* Physical Attributes */}
-      <div>
-        <h2 className="text-lg font-medium text-gray-900 mb-4">Physical Attributes</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Height */}
           <div>
             <label htmlFor="height" className="block text-sm font-medium text-gray-700 mb-1">
@@ -519,8 +486,45 @@ const DogFormWithOwner: React.FC<DogFormProps> = ({ onSuccess }) => {
         </div>
       </div>
 
+      {/* Identification */}
+      <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6">
+        <h2 className="text-lg font-medium text-gray-900 mb-4">Identification</h2>
+        <div className="grid grid-cols-1 gap-6">
+          {/* Microchip Number */}
+          <div>
+            <label htmlFor="microchipNumber" className="block text-sm font-medium text-gray-700 mb-1">
+              Microchip Number
+            </label>
+            <input
+              type="text"
+              name="microchipNumber"
+              id="microchipNumber"
+              value={formData.microchipNumber || ''}
+              onChange={handleChange}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+              placeholder="Microchip identification number"
+            />
+          </div>
+          
+          {/* Is Neutered */}
+          <div className="flex items-center space-x-2 p-2 bg-gray-50 rounded-md">
+            <input
+              type="checkbox"
+              name="isNeutered"
+              id="isNeutered"
+              checked={formData.isNeutered}
+              onChange={handleChange}
+              className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+            />
+            <label htmlFor="isNeutered" className="text-sm font-medium text-gray-700">
+              Is Neutered/Spayed
+            </label>
+          </div>
+        </div>
+      </div>
+
       {/* Additional Information */}
-      <div>
+      <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6">
         <h2 className="text-lg font-medium text-gray-900 mb-4">Additional Information</h2>
         <div className="space-y-6">
           {/* Titles */}
@@ -561,28 +565,36 @@ const DogFormWithOwner: React.FC<DogFormProps> = ({ onSuccess }) => {
       </div>
 
       {/* Submit Button */}
-      <div className="flex items-center justify-end space-x-3 pt-6 border-t border-gray-200">
-        <Link 
-          href="/dogs"
-          className="inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-        >
-          Cancel
-        </Link>
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className={`inline-flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 ${isSubmitting ? 'opacity-75 cursor-not-allowed' : ''}`}
-        >
-          {isSubmitting ? 'Creating...' : 'Create Dog'}
-        </button>
-      </div>
-      
-      {/* Error Message */}
-      {submitError && (
-        <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md">
-          <p className="text-sm text-red-600">{submitError}</p>
+      <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-lg font-medium text-gray-900">Submit Registration</h2>
+            <p className="text-sm text-gray-500 mt-1">Review all information before submitting</p>
+          </div>
+          <div className="flex items-center space-x-3">
+            <Link 
+              href="/dogs"
+              className="inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+            >
+              Cancel
+            </Link>
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className={`inline-flex justify-center py-2 px-6 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 ${isSubmitting ? 'opacity-75 cursor-not-allowed' : ''}`}
+            >
+              {isSubmitting ? 'Creating...' : 'Create Dog'}
+            </button>
+          </div>
         </div>
-      )}
+        
+        {/* Error Message */}
+        {submitError && (
+          <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md">
+            <p className="text-sm text-red-600">{submitError}</p>
+          </div>
+        )}
+      </div>
     </form>
   );
 };

@@ -27,7 +27,6 @@ export const GET_COMPETITION_RESULTS = gql`
       items {
         id
         dogId
-        dogName
         eventName
         eventDate
         location
@@ -54,7 +53,6 @@ export const GET_COMPETITION_RESULT = gql`
     competition(id: $id) {
       id
       dogId
-      dogName
       eventName
       eventDate
       location

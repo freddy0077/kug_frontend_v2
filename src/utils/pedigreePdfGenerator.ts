@@ -32,7 +32,7 @@ export interface PedigreeCertificateOptions {
   
   // Additional dog details
   coat?: string;
-  size?: string;
+  // Replacing size with breeder information from user object
   ownerName?: string;
   ownerAddress?: string;
   
@@ -286,7 +286,7 @@ export const generatePedigreeCertificate = async (
         
         <div><strong>DATE OF BIRTH</strong> ${formatDate(dog.dateOfBirth).toUpperCase()}</div>
         <div><strong>COAT</strong> ${(options.coat || 'Standard').toUpperCase()}</div>
-        <div><strong>SIZE</strong> ${(options.size || 'Medium').toUpperCase()}</div>
+        <div><strong>BREEDER</strong> ${(options.dog?.user ? `${options.dog.user.firstName || ''} ${options.dog.user.lastName || ''}` : options.breederName || 'Unknown').toUpperCase()}</div>
       </div>
 
       <!-- Pedigree Table with Generation-based columns (2-4-8) -->

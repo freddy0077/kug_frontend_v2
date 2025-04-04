@@ -55,6 +55,14 @@ export interface DogNode {
     id?: string;
     name: string;
   };
+  user?: {
+    id: string;
+    email?: string;
+    firstName?: string;
+    lastName?: string;
+    role?: string;
+    profileImageUrl?: string;
+  };
 }
 
 /**

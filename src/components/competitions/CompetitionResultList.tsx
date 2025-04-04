@@ -3,35 +3,34 @@
 import { format } from 'date-fns';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
+import { useCompetitionResults, CompetitionFilters } from '@/hooks/useCompetitions';
 
-// Interface using title_earned instead of certificate as per memory
-export interface CompetitionResult {
-  id: string;
-  dogId: string;
-  dogName: string;
-  eventName: string;
-  eventDate: Date;
-  location: string;
-  category: string;
-  rank: number;
-  title_earned: string; // Correct field name per memory
-  judge: string;
-  points: number;
-  description?: string;
-  totalParticipants?: number;
-  imageUrl?: string;
-  createdAt?: string;
-  updatedAt?: string;
-}
+// Using the type from our hooks instead
+import type { CompetitionResult } from '@/hooks/useCompetitions';
 
 interface CompetitionResultListProps {
-  results: CompetitionResult[];
+  filters?: CompetitionFilters;
+  initialResults?: CompetitionResult[];
 }
 
-export const CompetitionResultList: React.FC<CompetitionResultListProps> = ({ results }) => {
+export const CompetitionResultList: React.FC<CompetitionResultListProps> = ({ filters = {}, initialResults }) => {
   const { user } = useAuth();
+  const { 
+    competitions = { items: initialResults || [], totalCount: initialResults?.length || 0, hasMore: false },
+    loading, 
+    error, 
+    loadMore 
+  } = useCompetitionResults(filters);
   
-  if (!results || results.length === 0) {
+  if (error) {
+    return (
+      <div className="bg-white rounded-lg p-6 shadow-sm text-center">
+        <p className="text-red-500">Error loading competition results: {error.message}</p>
+      </div>
+    );
+  }
+  
+  if (!loading && (!competitions.items || competitions.items.length === 0)) {
     return (
       <div className="bg-white rounded-lg p-6 shadow-sm text-center">
         <p className="text-gray-500">No competition results found.</p>
@@ -54,7 +53,16 @@ export const CompetitionResultList: React.FC<CompetitionResultListProps> = ({ re
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {results.map((result) => (
+            {loading && !competitions.items.length ? (
+              <tr>
+                <td colSpan={6} className="px-6 py-4 text-center">
+                  <div className="flex justify-center">
+                    <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-green-500"></div>
+                  </div>
+                </td>
+              </tr>
+            ) : (
+              competitions.items.map((result) => (
               <tr key={result.id} className="hover:bg-gray-50">
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   {format(new Date(result.eventDate), 'MMM d, yyyy')}
@@ -97,10 +105,33 @@ export const CompetitionResultList: React.FC<CompetitionResultListProps> = ({ re
                   )}
                 </td>
               </tr>
-            ))}
+            )))}
           </tbody>
         </table>
       </div>
+      
+      {/* Load more button */}
+      {competitions.hasMore && (
+        <div className="flex justify-center mt-4 pb-4">
+          <button
+            onClick={() => loadMore()}
+            className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
+            disabled={loading}
+          >
+            {loading ? (
+              <span className="flex items-center">
+                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Loading...
+              </span>
+            ) : (
+              'Load More'
+            )}
+          </button>
+        </div>
+      )}
     </div>
   );
 };

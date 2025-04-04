@@ -73,16 +73,17 @@ export default function Navbar() {
     },
     
     // Health & Competition Records
-    // { 
-    //   href: '#',
-    //   label: 'Records', 
-    //   roles: [UserRole.ADMIN, UserRole.OWNER, UserRole.HANDLER, UserRole.CLUB],
-    //   submenu: [
-    //     { href: '/health-records', label: 'Health Records', roles: [UserRole.ADMIN, UserRole.OWNER] },
-    //     { href: '/competitions', label: 'Competitions', roles: [UserRole.ADMIN, UserRole.OWNER, UserRole.HANDLER, UserRole.CLUB] },
-    //     { href: '/ownerships', label: 'Ownership Records', roles: [UserRole.ADMIN, UserRole.OWNER] },
-    //   ]
-    // },
+    { 
+      href: '#',
+      label: 'Records', 
+      roles: [UserRole.ADMIN, UserRole.OWNER, UserRole.HANDLER, UserRole.CLUB],
+      submenu: [
+        // { href: '/health-records', label: 'Health Records', roles: [UserRole.ADMIN, UserRole.OWNER] },
+        { href: '/competitions', label: 'View Competitions', roles: [UserRole.ADMIN, UserRole.OWNER, UserRole.HANDLER, UserRole.CLUB] },
+        { href: '/competitions/new', label: 'Add Competition Result', roles: [UserRole.ADMIN, UserRole.OWNER, UserRole.HANDLER] },
+        // { href: '/ownerships', label: 'Ownership Records', roles: [UserRole.ADMIN, UserRole.OWNER] },
+      ]
+    },
     
     // Club specific menu (uncomment when needed)
     { 

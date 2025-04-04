@@ -47,10 +47,11 @@ export default function DogRegistrationForm({
     breed: '',
     breedObj: undefined,
     gender: 'male',
-    dateOfBirth: new Date(),
+    dateOfBirth: new Date(), // Always initialize with a valid Date object
     color: '',
     microchipNumber: '',
-    ownerId: userId,
+    userId: userId, // Using userId instead of ownerId to match schema
+    ownerId: userId, // Keep for backward compatibility
     ...initialData
   });
   
@@ -59,16 +60,20 @@ export default function DogRegistrationForm({
   const [showDeceased, setShowDeceased] = useState(false);
 
   useEffect(() => {
-    // Set default owner ID if not provided in initial data
-    if (!formData.ownerId) {
-      setFormData(prev => ({...prev, ownerId: userId}));
+    // Set default user ID and owner ID if not provided in initial data
+    if (!formData.userId || !formData.ownerId) {
+      setFormData(prev => ({
+        ...prev, 
+        userId: userId,
+        ownerId: userId
+      }));
     }
 
     // Check if dog has a death date to show the deceased section
     if (initialData?.dateOfDeath) {
       setShowDeceased(true);
     }
-  }, [initialData, userId]);
+  }, [initialData, userId, formData.userId, formData.ownerId]);
 
   const validateForm = () => {
     let tempErrors: Record<string, string> = {};
@@ -154,10 +159,27 @@ export default function DogRegistrationForm({
     e.preventDefault();
     
     if (validateForm()) {
+      // Extra validation to ensure dateOfBirth is always a valid Date object
+      if (!formData.dateOfBirth || !(formData.dateOfBirth instanceof Date) || isNaN(formData.dateOfBirth.getTime())) {
+        setErrors(prev => ({ ...prev, dateOfBirth: 'Date of birth must be a valid date' }));
+        return;
+      }
+      
+      // Extra validation for dateOfDeath if present
+      if (formData.dateOfDeath && (!(formData.dateOfDeath instanceof Date) || isNaN(formData.dateOfDeath.getTime()))) {
+        setErrors(prev => ({ ...prev, dateOfDeath: 'Date of death must be a valid date' }));
+        return;
+      }
+      
       setIsSubmitting(true);
       
       // Create the dog data object for submission
-      const dogData: DogFormData = {...formData};
+      const dogData: DogFormData = {
+        ...formData,
+        // Ensure both userId and ownerId are set for compatibility
+        userId: formData.userId || userId,
+        ownerId: formData.ownerId || userId
+      };
       
       // If not deceased, remove the death date
       if (!showDeceased) {

@@ -24,6 +24,11 @@ export const CREATE_DOG_MUTATION = gql`
         id
         name
       }
+      user {
+        id
+        fullName
+        email
+      }
     }
   }
 `;
@@ -50,6 +55,11 @@ export const UPDATE_DOG_MUTATION = gql`
       breedObj {
         id
         name
+      }
+      user {
+        id
+        fullName
+        email
       }
     }
   }
@@ -84,28 +94,28 @@ export interface CreateDogInput {
   breedId?: number;  
   gender: string;
   color: string;
-  dateOfBirth: Date;
+  dateOfBirth: Date;  // Must be a valid Date, never undefined
   dateOfDeath?: Date;
   height?: number;
   weight?: number;
   registrationNumber?: string;
   microchipNumber?: string;
   isNeutered?: boolean;
-  ownerId?: string | number;  
-  sireId?: number;
-  damId?: number;
+  userId: string;  // Changed from ownerId to userId to match the schema
+  sireId?: string | number;
+  damId?: string | number;
   titles?: string[];
   biography?: string;
   mainImageUrl?: string;
 }
 
-export interface UpdateDogInput extends Partial<CreateDogInput> {
+export interface UpdateDogInput extends Partial<Omit<CreateDogInput, 'userId'>> {
   breedId?: number;  
+  // Omitted userId from CreateDogInput since it shouldn't be updated
 }
 
 export interface DogImageInput {
-  imageUrl: string;  
-  url?: string;      
+  url: string;  // Changed from imageUrl to url to match the schema
   caption?: string;
   isPrimary?: boolean;
 }
@@ -139,6 +149,21 @@ export const DECLINE_DOG_MUTATION = gql`
       approvedBy {
         id
         fullName
+      }
+    }
+  }
+`;
+
+// Transfer dog ownership
+export const TRANSFER_DOG_OWNERSHIP_MUTATION = gql`
+  mutation TransferDogOwnership($dogId: ID!, $newUserId: ID!) {
+    transferDogOwnership(dogId: $dogId, newUserId: $newUserId) {
+      id
+      name
+      user {
+        id
+        fullName
+        email
       }
     }
   }

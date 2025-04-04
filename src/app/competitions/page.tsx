@@ -8,11 +8,12 @@ import toast from 'react-hot-toast';
 
 import { GET_COMPETITION_RESULTS } from '@/graphql/queries/competitionQueries';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
-import CompetitionResultList, { CompetitionResult } from '@/components/competitions/CompetitionResultList';
+import CompetitionResultList from '@/components/competitions/CompetitionResultList';
+import { CompetitionResult } from '@/hooks/useCompetitions';
 import CompetitionFilters, { competitionCategories } from '@/components/competitions/CompetitionFilters';
 import { useAuth } from '@/contexts/AuthContext';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
-import { UserRole } from '@/utils/permissionUtils';
+import { UserRole } from '@/types/enums';
 
 // Define filter options interface
 interface FilterOptions {
@@ -117,8 +118,8 @@ export default function CompetitionsPage() {
           <h1 className="text-3xl font-bold text-gray-900">Competition Results</h1>
           {(user?.role === UserRole.ADMIN || user?.role === UserRole.HANDLER || user?.role === UserRole.OWNER) && (
             <Link 
-              href="/manage/competitions/add"
-              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition flex items-center"
+              href="/competitions/new"
+              className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition flex items-center"
             >
               <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
@@ -185,7 +186,7 @@ export default function CompetitionsPage() {
           </div>
         ) : (
           <CompetitionResultList 
-            results={filteredResults} 
+            initialResults={filteredResults} 
           />
         )}
         

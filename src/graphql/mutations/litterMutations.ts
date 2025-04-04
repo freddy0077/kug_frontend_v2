@@ -30,6 +30,11 @@ export const CREATE_LITTER = gql`
         gender
         color
         microchipNumber
+        user {
+          id
+          fullName
+          email
+        }
       }
       notes
       createdAt
@@ -74,6 +79,11 @@ export const REGISTER_LITTER_PUPPIES = gql`
         breed
         color
         litterId
+        user {
+          id
+          fullName
+          email
+        }
       }
     }
   }
@@ -96,12 +106,13 @@ export interface LitterInput {
   damId: string;
   litterName: string;
   registrationNumber?: string;
-  whelpingDate: string; // ISO format date string
+  whelpingDate: Date; // Must be a valid Date object
   totalPuppies: number;
   malePuppies?: number;
   femalePuppies?: number;
   puppyDetails?: PuppyDetailInput[];
   notes?: string;
+  userId?: string; // Added to specify the owner of the litter and puppies
 }
 
 export interface UpdateLitterInput {
@@ -117,11 +128,15 @@ export interface UpdateLitterInput {
 
 export interface RegisterLitterPuppiesInput {
   litterId: string;
-  puppies: {
-    name: string;
-    gender: string;
-    color: string;
-    microchipNumber?: string;
-    isNeutered?: boolean;
-  }[];
+  puppies: PuppyRegistrationInput[];
+}
+
+export interface PuppyRegistrationInput {
+  name: string;
+  gender: string;
+  color: string;
+  microchipNumber?: string;
+  isNeutered?: boolean;
+  userId?: string;  // Changed from ownerId to userId to match schema
+  ownerId?: string;  // Kept for backward compatibility
 }

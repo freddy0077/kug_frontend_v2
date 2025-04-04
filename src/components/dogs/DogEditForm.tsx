@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import { useMutation, useQuery } from '@apollo/client';
-import { UPDATE_DOG_MUTATION } from '@/graphql/mutations/dogMutations';
+import { UPDATE_DOG_MUTATION, TRANSFER_DOG_OWNERSHIP_MUTATION } from '@/graphql/mutations/dogMutations';
 import { GET_BREEDS, GET_BREED_BY_NAME, SortDirection } from '@/graphql/queries/breedQueries';
 import { ApprovalStatus } from '@/types/enums';
 import ApprovalStatusBadge from '../common/ApprovalStatusBadge';
+import UserSearchSelect from '../common/UserSearchSelect';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { UserRole } from '@/utils/permissionUtils';
@@ -27,7 +28,7 @@ type FormInputs = {
   titles?: string;
   biography?: string;
   mainImageUrl?: string;
-  ownerId: string; // Required field for dog ownership
+  userId: string; // Required field for dog ownership
   registrationNumber?: string;
 };
 
@@ -54,7 +55,7 @@ const DogEditForm: React.FC<DogEditFormProps> = ({ dogData, dogId, onSuccess }) 
       color: '',
       dateOfBirth: '',
       isNeutered: false,
-      ownerId: '',
+      userId: '',
     };
 
     // Prioritize breedObj.name over the breed string when it's available
@@ -77,7 +78,7 @@ const DogEditForm: React.FC<DogEditFormProps> = ({ dogData, dogId, onSuccess }) 
       titles: dogData.titles ? dogData.titles.join(', ') : '',
       biography: dogData.biography || '',
       mainImageUrl: dogData.mainImageUrl || '',
-      ownerId: dogData.currentOwner?.id || '',
+      userId: dogData.user?.id || '',
       registrationNumber: dogData.registrationNumber || '',
     };
   };
@@ -91,6 +92,14 @@ const DogEditForm: React.FC<DogEditFormProps> = ({ dogData, dogId, onSuccess }) 
 
   // Update form data when dogData changes
   useEffect(() => {
+    // Debug: Log the entire dog data to see what's received from API
+    console.log('Full Dog Data received:', dogData);
+    console.log('Registration, Microchip, Neutered status:', {
+      registrationNumber: dogData?.registrationNumber,
+      microchipNumber: dogData?.microchipNumber,
+      isNeutered: dogData?.isNeutered
+    });
+    
     const formValues = getDogFormData();
     setFormData(formValues);
     setSelectedBreedId(dogData?.breedObj?.id || null);
@@ -102,6 +111,9 @@ const DogEditForm: React.FC<DogEditFormProps> = ({ dogData, dogId, onSuccess }) 
       breedObjId: dogData?.breedObj?.id,
       formBreed: formValues.breed
     });
+    
+    // Debug: Log the form values to verify what's being set
+    console.log('Form values after initialization:', formValues);
   }, [dogData]);
 
   // Fetch breeds for dropdown
@@ -152,17 +164,44 @@ const DogEditForm: React.FC<DogEditFormProps> = ({ dogData, dogId, onSuccess }) 
 
   // Update dog mutation
   const [updateDog] = useMutation(UPDATE_DOG_MUTATION, {
-    onCompleted: () => {
-      toast.success('Dog updated successfully!');
-      // Navigate to dog details page after successful update
-      setTimeout(() => {
-        window.location.href = `/dogs/${dogId}`;
-      }, 500); // Short delay to allow toast to be seen
-      // Also call onSuccess for any additional cleanup
-      onSuccess();
+    onCompleted: (data) => {
+      // Owner updates are now handled directly in the updateDog mutation since userId is in the schema
+      if (false) {
+        // This code block is now unnecessary as we handle userId directly in the update
+        // Keeping empty block for structure
+      } else {
+        // Standard update without ownership change
+        toast.success('Dog updated successfully!');
+        // Navigate to dog details page after successful update
+        setTimeout(() => {
+          window.location.href = `/dogs/${dogId}`;
+        }, 500); // Short delay to allow toast to be seen
+        // Also call onSuccess for any additional cleanup
+        onSuccess();
+        setIsSubmitting(false);
+      }
     },
     onError: (error) => {
       toast.error(`Error updating dog: ${error.message}`);
+      setSubmitError(error.message);
+      setIsSubmitting(false);
+    }
+  });
+  
+  // Transfer dog ownership mutation
+  const [transferDogOwnership] = useMutation(TRANSFER_DOG_OWNERSHIP_MUTATION, {
+    onCompleted: (data) => {
+      toast.success('Dog updated and ownership transferred successfully!');
+      // Navigate to dog details page after successful transfer
+      setTimeout(() => {
+        window.location.href = `/dogs/${dogId}`;
+      }, 500);
+      // Call onSuccess for any additional cleanup
+      onSuccess();
+      setIsSubmitting(false);
+    },
+    onError: (error) => {
+      toast.error(`Error transferring ownership: ${error.message}`);
       setSubmitError(error.message);
       setIsSubmitting(false);
     }
@@ -247,6 +286,10 @@ const DogEditForm: React.FC<DogEditFormProps> = ({ dogData, dogId, onSuccess }) 
     
     if (!formData.color.trim()) {
       errors.color = 'Color is required';
+    }
+    
+    if (!formData.userId) {
+      errors.userId = 'Owner is required';
     }
     
     if (!formData.dateOfBirth) {
@@ -421,6 +464,46 @@ const DogEditForm: React.FC<DogEditFormProps> = ({ dogData, dogId, onSuccess }) 
             />
             {formErrors.name && (
               <p className="mt-1 text-sm text-red-600">{formErrors.name}</p>
+            )}
+          </div>
+
+          {/* Owner Selection */}
+          <div>
+            <UserSearchSelect
+              label="Owner"
+              placeholder="Search for a user..."
+              value={formData.userId}
+              onChange={(userId) => {
+                setFormData(prev => ({
+                  ...prev,
+                  userId
+                }));
+                // Clear any validation errors
+                if (formErrors.userId) {
+                  setFormErrors(prev => {
+                    const newErrors = { ...prev };
+                    delete newErrors.userId;
+                    return newErrors;
+                  });
+                }
+              }}
+              required
+              error={formErrors.userId}
+              className="w-full"
+              disabled={!isAdmin} // Only admins can change ownership
+            />
+            {!isAdmin && dogData?.user && (
+              <p className="mt-1 text-xs text-gray-500">
+                Only administrators can change dog ownership.
+              </p>
+            )}
+            {isAdmin && dogData?.user && formData.userId !== dogData.user.id && (
+              <p className="mt-1 text-xs text-green-600 font-semibold">
+                Ownership will be transferred from {dogData.user.fullName} when you save changes.
+              </p>
+            )}
+            {formErrors.userId && (
+              <p className="mt-1 text-sm text-red-600">{formErrors.userId}</p>
             )}
           </div>
 

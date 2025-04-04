@@ -120,6 +120,7 @@ export const GET_DOG_BY_ID = gql`
       titles
       biography
       mainImageUrl
+      color
       sire {
         id
         name
@@ -164,6 +165,15 @@ export const GET_DOG_BY_ID = gql`
         contactEmail
         contactPhone
       }
+      user {
+        id
+        email
+        firstName
+        lastName
+        role
+        profileImageUrl
+        __typename
+      }
       approvalStatus
       approvalDate
       approvalNotes
@@ -203,6 +213,15 @@ export const GET_DOG_PEDIGREE = gql`
       id
       name
       breed
+      user {
+        id
+        email
+        firstName
+        lastName
+        role
+        profileImageUrl
+        __typename
+      }
       breedObj {
         id
         name
@@ -461,7 +480,7 @@ export const GET_DOG_PEDIGREE = gql`
 // Query to get dogs owned by the current user
 export const GET_USER_DOGS = gql`
   query GetUserDogs {
-    userDogs {
+    ownerDogs {
       id
       name
       breed

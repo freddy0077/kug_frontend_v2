@@ -25,12 +25,22 @@ export type DogFormData = {
     origin?: string;
   };
   gender: string;
-  dateOfBirth: Date;
+  dateOfBirth: Date;  // Must be a valid Date, never undefined
   dateOfDeath?: Date;
   registrationNumber?: string;
   microchipNumber?: string;
   color: string;
-  ownerId: string;
+  userId: string;  // Changed from ownerId to userId to match the schema
+  // Legacy field for backward compatibility
+  ownerId?: string;
+  sireId?: string;
+  damId?: string;
+  titles?: string[];
+  biography?: string;
+  mainImageUrl?: string;
+  isNeutered?: boolean;
+  height?: number;
+  weight?: number;
 };
 
 export type HealthRecordFormData = {
