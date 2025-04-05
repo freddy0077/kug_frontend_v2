@@ -235,14 +235,17 @@ export default function ImportDogRegistrations({
         let value = rowData[header];
         
         // Special handling for date fields
-        if (field === 'dateOfBirth' || field === 'dateOfDeath') {
-          // Ensure dates are always Date objects and never undefined
+        if (field === 'dateOfBirth') {
+          // Ensure dateOfBirth is always a valid Date object
           const dateValue = value ? new Date(value) : new Date();
-          if (isNaN(dateValue.getTime())) {
-            // If date parsing failed, use current date
-            dogData[field as keyof DogFormData] = new Date() as any;
-          } else {
-            dogData[field as keyof DogFormData] = dateValue as any;
+          // If date parsing failed, use current date
+          dogData.dateOfBirth = isNaN(dateValue.getTime()) ? new Date() : dateValue;
+        } else if (field === 'dateOfDeath' && value) {
+          // Handle optional dateOfDeath field
+          const dateValue = new Date(value);
+          // Only set if it's a valid date
+          if (!isNaN(dateValue.getTime())) {
+            dogData.dateOfDeath = dateValue;
           }
         }
         // Special handling for gender field

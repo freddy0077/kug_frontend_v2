@@ -190,7 +190,7 @@ export default function CompetitionDetailsPage() {
           )}
           
           {/* Actions component */}
-          <CompetitionActions competitionId={competition.id} userRole={userRole} />
+          <CompetitionActions competitionId={String(competition.id)} userRole={userRole} />
         </>
       )}
     </div>
