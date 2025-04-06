@@ -407,7 +407,9 @@ export const generatePedigreeCertificate = async (
         </div>
         
         <div style="width: 20%; text-align: center;">
-          <div style="margin-bottom: 5px; height: 20px;"></div>
+          <div style="margin-bottom: 5px; height: 50px;">
+            <img src="/signature.png" alt="Signature" style="max-height: 50px; max-width: 100%; object-fit: contain;" />
+          </div>
           <div style="text-align: center; font-size: 12px;">Signature</div>
         </div>
       </div>
