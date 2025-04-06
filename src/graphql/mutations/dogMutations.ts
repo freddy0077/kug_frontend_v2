@@ -110,8 +110,8 @@ export interface CreateDogInput {
 }
 
 export interface UpdateDogInput extends Partial<Omit<CreateDogInput, 'userId'>> {
-  breedId?: number;  
-  // Omitted userId from CreateDogInput since it shouldn't be updated
+  breedId?: number;
+  userId?: string;  // Added userId to allow owner updates
 }
 
 export interface DogImageInput {

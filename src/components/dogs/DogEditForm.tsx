@@ -392,6 +392,8 @@ const DogEditForm: React.FC<DogEditFormProps> = ({ dogData, dogId, onSuccess }) 
         biography: formData.biography,
         mainImageUrl: formData.mainImageUrl,
         breedId: breedId ?? undefined,
+        // Include userId to update the dog's owner
+        userId: formData.userId,
         // Keep the existing registration number without modification
         registrationNumber: dogData?.registrationNumber,
       };
