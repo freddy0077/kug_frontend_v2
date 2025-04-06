@@ -11,6 +11,7 @@ import { GET_DOGS, DogSortField, SortDirection } from '@/graphql/queries/dogQuer
 import { GET_BREEDING_RECORDS } from '@/graphql/queries/pedigreeQueries';
 import { UserRole } from '@/utils/permissionUtils';
 import DogSearchSelect from '@/components/common/DogSearchSelect';
+import UserSearchSelect from '@/components/common/UserSearchSelect';
 
 interface LitterRegistrationFormProps {
   breedingId?: string;
@@ -62,14 +63,16 @@ const LitterRegistrationForm: React.FC<LitterRegistrationFormProps> = ({
   // State for info popup
   const [showInfoPopup, setShowInfoPopup] = useState(true);
   
-  const [formData, setFormData] = useState<Omit<LitterInput, 'sireId' | 'damId'> & {
+  const [formData, setFormData] = useState<Omit<LitterInput, 'sireId' | 'damId' | 'userId'> & {
     sireId: string;
     damId: string;
+    userId: string;
     puppyDetails?: PuppyDetail[];
   }>({
     sireId: initialSireId || '',
     damId: initialDamId || '',
     breedingRecordId: breedingId || '',
+    userId: userId, // Initialize with the provided userId prop
     litterName: '',
     whelpingDate: '',
     totalPuppies: 0,
@@ -578,6 +581,8 @@ const LitterRegistrationForm: React.FC<LitterRegistrationFormProps> = ({
         ...baseData,
         // Ensure whelping date is a valid date
         whelpingDate: new Date(formData.whelpingDate).toISOString(),
+        // Explicitly include userId for ownership
+        userId: formData.userId,
       };
       
       // If using detailed registration and have puppy details, include them
@@ -585,10 +590,7 @@ const LitterRegistrationForm: React.FC<LitterRegistrationFormProps> = ({
         input.puppyDetails = puppyDetails;
       }
       
-      await createLitter({
-        variables: { input }
-      });
-      
+      // Execute the createLitter mutation (removed duplicate call)
       const response = await createLitter({
         variables: { input }
       });
@@ -939,6 +941,33 @@ const LitterRegistrationForm: React.FC<LitterRegistrationFormProps> = ({
               excludeIds={formData.sireId ? [formData.sireId] : []}
               disabled={!!breedingId || !!initialDamId}
             />
+            
+            {/* Owner Selection */}
+            <div className="md:col-span-2">
+              <UserSearchSelect
+                label="Owner"
+                placeholder="Search for owner..."
+                value={formData.userId}
+                onChange={(userId) => {
+                  setFormData(prev => ({
+                    ...prev,
+                    userId: userId
+                  }));
+                }}
+                error={formErrors.userId}
+                required={true}
+                className="w-full"
+                disabled={userRole !== UserRole.ADMIN}
+              />
+              <p className="mt-1 text-xs text-gray-500">
+                Select the owner of this litter
+              </p>
+              {userRole !== UserRole.ADMIN && (
+                <p className="mt-1 text-xs text-gray-500">
+                  Only administrators can change the owner. The current user will be set as the owner.
+                </p>
+              )}
+            </div>
           </div>
         </div>
         
