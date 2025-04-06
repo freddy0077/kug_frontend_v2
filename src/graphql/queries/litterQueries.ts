@@ -77,10 +77,12 @@ export const GET_LITTER = gql`
         mainImageUrl
         color
         titles
-        owner {
+        user {
           id
-          name
+          firstName
+          lastName
           email
+          __typename
         }
       }
       dam {
@@ -91,10 +93,12 @@ export const GET_LITTER = gql`
         mainImageUrl
         color
         titles
-        owner {
+        user {
           id
-          name
+          firstName
+          lastName
           email
+          __typename
         }
       }
       puppies {
@@ -105,10 +109,12 @@ export const GET_LITTER = gql`
         color
         microchipNumber
         mainImageUrl
-        owner {
+        user {
           id
-          name
+          firstName
+          lastName
           email
+          __typename
         }
       }
       createdAt
