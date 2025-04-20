@@ -13,6 +13,7 @@ export const CREATE_DOG_MUTATION = gql`
       dateOfBirth
       dateOfDeath
       registrationNumber
+      otherRegistrationNumber
       microchipNumber
       isNeutered
       height
@@ -45,6 +46,7 @@ export const UPDATE_DOG_MUTATION = gql`
       dateOfBirth
       dateOfDeath
       registrationNumber
+      otherRegistrationNumber
       microchipNumber
       isNeutered
       height
@@ -99,6 +101,7 @@ export interface CreateDogInput {
   height?: number;
   weight?: number;
   registrationNumber?: string;
+  otherRegistrationNumber?: string;
   microchipNumber?: string;
   isNeutered?: boolean;
   userId: string;  // Changed from ownerId to userId to match the schema

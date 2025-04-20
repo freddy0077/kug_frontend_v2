@@ -30,6 +30,7 @@ type FormInputs = {
   mainImageUrl?: string;
   userId: string; // Required field for dog ownership
   registrationNumber?: string;
+  otherRegistrationNumber?: string; // Added other registration number field
 };
 
 // Valid gender options
@@ -80,6 +81,7 @@ const DogEditForm: React.FC<DogEditFormProps> = ({ dogData, dogId, onSuccess }) 
       mainImageUrl: dogData.mainImageUrl || '',
       userId: dogData.user?.id || '',
       registrationNumber: dogData.registrationNumber || '',
+      otherRegistrationNumber: dogData.otherRegistrationNumber || '',
     };
   };
 
@@ -396,6 +398,7 @@ const DogEditForm: React.FC<DogEditFormProps> = ({ dogData, dogId, onSuccess }) 
         userId: formData.userId,
         // Keep the existing registration number without modification
         registrationNumber: dogData?.registrationNumber,
+        otherRegistrationNumber: formData.otherRegistrationNumber,
       };
       
       // Submit mutation
@@ -510,9 +513,9 @@ const DogEditForm: React.FC<DogEditFormProps> = ({ dogData, dogId, onSuccess }) 
           </div>
 
           {/* Registration Number */}
-          <div>
+          <div className="md:col-span-1">
             <label htmlFor="registrationNumber" className="block text-sm font-medium text-gray-700 mb-1">
-              Registration Number <span className="text-xs text-gray-500">(Not editable)</span>
+              Registration Number
             </label>
             <input
               type="text"
@@ -520,15 +523,26 @@ const DogEditForm: React.FC<DogEditFormProps> = ({ dogData, dogId, onSuccess }) 
               id="registrationNumber"
               value={formData.registrationNumber || ''}
               onChange={handleChange}
-              className={`mt-1 block w-full rounded-md shadow-sm ${
-                formErrors.registrationNumber ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : 'border-gray-300 focus:border-green-500 focus:ring-green-500'
-              }`}
-              placeholder="Registration number"
-              disabled={true}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
             />
-            {formErrors.registrationNumber && (
-              <p className="mt-1 text-sm text-red-600">{formErrors.registrationNumber}</p>
-            )}
+          </div>
+          
+          {/* Other Registration Number */}
+          <div className="md:col-span-1">
+            <label htmlFor="otherRegistrationNumber" className="block text-sm font-medium text-gray-700 mb-1">
+              Other Registration Number
+            </label>
+            <input
+              type="text"
+              name="otherRegistrationNumber"
+              id="otherRegistrationNumber"
+              value={formData.otherRegistrationNumber || ''}
+              onChange={handleChange}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+            />
+            <p className="mt-1 text-xs text-gray-500">
+              Alternative registration number (if available)
+            </p>
           </div>
           
           {/* Breed */}

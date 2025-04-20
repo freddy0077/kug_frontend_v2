@@ -50,6 +50,8 @@ export default function DogRegistrationForm({
     dateOfBirth: new Date(), // Always initialize with a valid Date object
     color: '',
     microchipNumber: '',
+    registrationNumber: '',
+    otherRegistrationNumber: '',
     userId: userId, // Using userId instead of ownerId to match schema
     ownerId: userId, // Keep for backward compatibility
     ...initialData
@@ -363,9 +365,49 @@ export default function DogRegistrationForm({
         {/* Registration Information */}
         <div>
           <h3 className="text-lg font-medium leading-6 text-gray-900 mb-4">Registration Information</h3>
-          <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Registration Number */}
+            <div className="sm:col-span-1">
+              <label htmlFor="registrationNumber" className="block text-sm font-medium text-gray-700">
+                Registration Number
+              </label>
+              <div className="mt-1">
+                <input
+                  type="text"
+                  id="registrationNumber"
+                  name="registrationNumber"
+                  value={formData.registrationNumber || ''}
+                  onChange={handleChange}
+                  className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                />
+              </div>
+              <p className="mt-1 text-xs text-gray-500">
+                Official registration number from kennel club
+              </p>
+            </div>
+
+            {/* Other Registration Number */}
+            <div className="sm:col-span-1">
+              <label htmlFor="otherRegistrationNumber" className="block text-sm font-medium text-gray-700">
+                Other Registration Number
+              </label>
+              <div className="mt-1">
+                <input
+                  type="text"
+                  id="otherRegistrationNumber"
+                  name="otherRegistrationNumber"
+                  value={formData.otherRegistrationNumber || ''}
+                  onChange={handleChange}
+                  className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                />
+              </div>
+              <p className="mt-1 text-xs text-gray-500">
+                Alternative registration number (if available)
+              </p>
+            </div>
+
             {/* Microchip Number */}
-            <div className="sm:col-span-6">
+            <div className="sm:col-span-2">
               <label htmlFor="microchipNumber" className="block text-sm font-medium text-gray-700">
                 Microchip Number
               </label>

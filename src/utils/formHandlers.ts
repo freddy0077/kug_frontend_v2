@@ -28,6 +28,7 @@ export type DogFormData = {
   dateOfBirth: Date;  // Must be a valid Date, never undefined
   dateOfDeath?: Date;
   registrationNumber?: string;
+  otherRegistrationNumber?: string; // Added other registration number field
   microchipNumber?: string;
   color: string;
   userId: string;  // Changed from ownerId to userId to match the schema
