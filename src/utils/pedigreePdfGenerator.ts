@@ -16,6 +16,7 @@ export interface PedigreeCertificateOptions {
   dateOfBirth?: string;
   dateOfDeath?: string;
   registrationNumber?: string;
+  otherRegistrationNumber?: string; // Add support for alternative registration number
   microchipNumber?: string;
   color?: string;
   isChampion?: boolean;
@@ -94,7 +95,7 @@ function getDogCellContent(dog: DogNode | null | undefined, fontSize: number, is
   if (isLastColumn) {
     return `
       <div style="font-weight: bold; font-size: ${fontSize}px;">${(dog.name || 'Unknown').toUpperCase()}</div>
-      <div style="font-size: ${fontSize - 2}px; margin-top: 2px;">${(dog.registrationNumber || 'Unknown').toUpperCase()}</div>
+      <div style="font-size: ${fontSize - 2}px; margin-top: 2px;">${(getBestRegistrationNumber(dog)).toUpperCase()}</div>
     `;
   }
   
@@ -102,7 +103,7 @@ function getDogCellContent(dog: DogNode | null | undefined, fontSize: number, is
   if (isGermanShepherd(dog)) {
     return `
       <div style="font-weight: bold; font-size: ${fontSize}px;">${(dog.name || 'Unknown').toUpperCase()}</div>
-      <div style="font-size: ${fontSize - 2}px; margin-top: 2px;">${(dog.registrationNumber || 'Unknown').toUpperCase()}</div>
+      <div style="font-size: ${fontSize - 2}px; margin-top: 2px;">${(getBestRegistrationNumber(dog)).toUpperCase()}</div>
       ${titles ? `<div style="font-size: ${fontSize - 3}px; margin-top: 1px;">${titles.toUpperCase()}</div>` : ''}
     `;
   }
@@ -110,12 +111,26 @@ function getDogCellContent(dog: DogNode | null | undefined, fontSize: number, is
   // For other breeds, show all details
   return `
     <div style="font-weight: bold; font-size: ${fontSize}px;">${(dog.name || 'Unknown').toUpperCase()}</div>
-    <div style="font-size: ${fontSize - 2}px; margin-top: 2px;">${(dog.registrationNumber || 'Unknown').toUpperCase()}</div>
+    <div style="font-size: ${fontSize - 2}px; margin-top: 2px;">${(getBestRegistrationNumber(dog)).toUpperCase()}</div>
     <div style="font-size: ${fontSize - 3}px; margin-top: 1px;">${(dog.breedObj?.name || dog.breed || 'Unknown').toUpperCase()}</div>
     ${dog.dateOfBirth ? `<div style="font-size: ${fontSize - 3}px; margin-top: 1px;">DOB: ${formatDate(dog.dateOfBirth).toUpperCase()}</div>` : ''}
     ${dog.color ? `<div style="font-size: ${fontSize - 3}px; margin-top: 1px;">COLOR: ${(dog.color || 'Unknown').toUpperCase()}</div>` : ''}
     ${titles ? `<div style="font-size: ${fontSize - 3}px; margin-top: 1px;">${titles.toUpperCase()}</div>` : ''}
   `;
+}
+
+/**
+ * Helper function to get the most appropriate registration number
+ * @param dog The dog to get the registration number for
+ * @returns The best registration number for the dog
+ */
+function getBestRegistrationNumber(dog: DogNode | null | undefined): string {
+  // If the dog has an otherRegistrationNumber (from another country), use that instead
+  if (dog?.otherRegistrationNumber) {
+    return dog.otherRegistrationNumber;
+  }
+  // Otherwise use the regular registration number, or default to 'Unknown'
+  return dog?.registrationNumber || 'Unknown';
 }
 
 /**
@@ -179,6 +194,7 @@ export const generatePedigreeCertificate = async (
       dateOfBirth: options.dog.dateOfBirth || undefined,
       dateOfDeath: options.dog.dateOfDeath || undefined,
       registrationNumber: options.dog.registrationNumber || 'Unknown',
+      otherRegistrationNumber: options.dog.otherRegistrationNumber || '',
       microchipNumber: options.dog.microchipNumber || 'Unknown', // Add microchip number
       color: options.dog.color || 'Unknown',
       isChampion: typeof options.dog.isChampion === 'boolean' ? options.dog.isChampion : false,
@@ -198,6 +214,7 @@ export const generatePedigreeCertificate = async (
       dateOfBirth: options.dateOfBirth || undefined,
       dateOfDeath: options.dateOfDeath || undefined,
       registrationNumber: options.registrationNumber || 'Unknown',
+      otherRegistrationNumber: options.otherRegistrationNumber || '',
       microchipNumber: options.microchipNumber || 'Unknown', // Add microchip number
       color: options.color || 'Unknown',
       isChampion: typeof options.isChampion === 'boolean' ? options.isChampion : false,
@@ -270,14 +287,14 @@ export const generatePedigreeCertificate = async (
           <div style="font-size: 12px;">www.kennelunionofghana.com</div>
           <!-- Kennel Union Logo -->
           <img src="${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/kug_kogo.png" style="position: absolute; left: 30px; top: -10px; width: 80px; height: 80px;" alt="KUG Logo" />
-          <div style="font-size: 14px; font-weight: bold; margin-top: 25px;">${options.isExportCertificate === true ? 'EX ' : ''}${dog.registrationNumber || '0000001'}</div>
+          <div style="font-size: 14px; font-weight: bold; margin-top: 25px;">${options.isExportCertificate === true ? 'EX ' : ''}${getBestRegistrationNumber(dog)}</div>
         </div>
       </div>
       
       <!-- Dog Information Box -->
       <div style="background-color: #d6f5d6; padding: 10px 15px; margin: 10px 15px; display: grid; grid-template-columns: 1fr 1fr 1fr; grid-template-rows: auto auto auto auto; gap: 8px 15px;">
         <div><strong>NAME</strong> ${(dog.name || 'Unknown').toUpperCase()}</div>
-        <div><strong>PEDIGREE NO</strong> ${(dog.registrationNumber || 'Unknown').toUpperCase()}</div>
+        <div><strong>PEDIGREE NO</strong> ${(getBestRegistrationNumber(dog)).toUpperCase()}</div>
         <div><strong>MICROCHIP</strong> ${dog.microchipNumber ? dog.microchipNumber.substring(0, 15).toUpperCase() + (dog.microchipNumber.length > 15 ? '...' : '') : 'UNKNOWN'}</div>
         
         <div><strong>BREED</strong> ${(dog.breedObj?.name || dog.breed || 'Unknown').toUpperCase()}</div>

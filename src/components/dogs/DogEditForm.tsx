@@ -31,6 +31,7 @@ type FormInputs = {
   userId: string; // Required field for dog ownership
   registrationNumber?: string;
   otherRegistrationNumber?: string; // Added other registration number field
+  isRegisteredInOtherCountry?: boolean;
 };
 
 // Valid gender options
@@ -64,6 +65,9 @@ const DogEditForm: React.FC<DogEditFormProps> = ({ dogData, dogId, onSuccess }) 
     const breedToUse = dogData.breedObj?.name || dogData.breed || '';
     console.log('Using breed for form:', breedToUse);
     
+    // Check if there's an existing otherRegistrationNumber to set isRegisteredInOtherCountry flag
+    const hasOtherRegistration = !!dogData.otherRegistrationNumber;
+    
     return {
       name: dogData.name || '',
       breed: breedToUse,
@@ -82,6 +86,7 @@ const DogEditForm: React.FC<DogEditFormProps> = ({ dogData, dogId, onSuccess }) 
       userId: dogData.user?.id || '',
       registrationNumber: dogData.registrationNumber || '',
       otherRegistrationNumber: dogData.otherRegistrationNumber || '',
+      isRegisteredInOtherCountry: hasOtherRegistration,
     };
   };
 
@@ -174,10 +179,15 @@ const DogEditForm: React.FC<DogEditFormProps> = ({ dogData, dogId, onSuccess }) 
       } else {
         // Standard update without ownership change
         toast.success('Dog updated successfully!');
-        // Navigate to dog details page after successful update
+        
+        // Log the response data
+        console.log('Update Dog Response:', data);
+        
+        // Redirect to dog details page after successful update
         setTimeout(() => {
           window.location.href = `/dogs/${dogId}`;
-        }, 500); // Short delay to allow toast to be seen
+        }, 500); // Short delay to allow toast to be seen and allow user to see success message
+        
         // Also call onSuccess for any additional cleanup
         onSuccess();
         setIsSubmitting(false);
@@ -291,7 +301,7 @@ const DogEditForm: React.FC<DogEditFormProps> = ({ dogData, dogId, onSuccess }) 
     }
     
     if (!formData.userId) {
-      errors.userId = 'Owner is required';
+      errors.userId = 'User is required';
     }
     
     if (!formData.dateOfBirth) {
@@ -302,6 +312,11 @@ const DogEditForm: React.FC<DogEditFormProps> = ({ dogData, dogId, onSuccess }) 
     
     if (formData.dateOfDeath && !isValidDate(formData.dateOfDeath)) {
       errors.dateOfDeath = 'Date of death must be a valid date';
+    }
+    
+    // Validate other registration number if dog is registered in another country
+    if (formData.isRegisteredInOtherCountry && !formData.otherRegistrationNumber?.trim()) {
+      errors.otherRegistrationNumber = 'Registration number is required when dog is registered in another country';
     }
     
     if (Object.keys(errors).length > 0) {
@@ -326,7 +341,7 @@ const DogEditForm: React.FC<DogEditFormProps> = ({ dogData, dogId, onSuccess }) 
           throw new Error('Invalid date of birth');
         }
       } catch (error) {
-        setFormErrors({ dateOfBirth: 'Invalid date format for date of birth' });
+        setFormErrors(prev => ({ ...prev, dateOfBirth: 'Invalid date of birth format' }));
         setIsSubmitting(false);
         return;
       }
@@ -340,7 +355,7 @@ const DogEditForm: React.FC<DogEditFormProps> = ({ dogData, dogId, onSuccess }) 
             throw new Error('Invalid date of death');
           }
         } catch (error) {
-          setFormErrors({ dateOfDeath: 'Invalid date format for date of death' });
+          setFormErrors(prev => ({ ...prev, dateOfDeath: 'Invalid date format for date of death' }));
           setIsSubmitting(false);
           return;
         }
@@ -378,8 +393,8 @@ const DogEditForm: React.FC<DogEditFormProps> = ({ dogData, dogId, onSuccess }) 
         }
       }
       
-      // Create input for mutation
-      const input = {
+      // Create dog data for mutation
+      const dogInput = {
         name: formData.name,
         breed: formData.breed,
         gender: formData.gender,
@@ -388,24 +403,30 @@ const DogEditForm: React.FC<DogEditFormProps> = ({ dogData, dogId, onSuccess }) 
         dateOfDeath: dateOfDeath?.toISOString(),
         microchipNumber: formData.microchipNumber,
         isNeutered: formData.isNeutered,
-        height,
-        weight,
-        titles,
+        height: height,
+        weight: weight,
+        titles: titles,
         biography: formData.biography,
         mainImageUrl: formData.mainImageUrl,
-        breedId: breedId ?? undefined,
-        // Include userId to update the dog's owner
         userId: formData.userId,
-        // Keep the existing registration number without modification
+        // We'll use the selected breed ID from the GET_BREED_BY_NAME query if available
+        breedId: breedId,
+        // Keep the existing registration number, only otherRegistrationNumber is editable
         registrationNumber: dogData?.registrationNumber,
+        // Only otherRegistrationNumber should be editable
         otherRegistrationNumber: formData.otherRegistrationNumber,
+        // Exclude isRegisteredInOtherCountry as it's not part of the API schema
       };
       
-      // Submit mutation
+      // Log the mutation input for debugging
+      console.log('Dog Update Input:', dogInput);
+      console.log('Other Registration Number Value:', formData.otherRegistrationNumber);
+      
+      // Update the dog
       await updateDog({
-        variables: { 
+        variables: {
           id: dogId,
-          input 
+          input: dogInput
         }
       });
       
@@ -515,7 +536,7 @@ const DogEditForm: React.FC<DogEditFormProps> = ({ dogData, dogId, onSuccess }) 
           {/* Registration Number */}
           <div className="md:col-span-1">
             <label htmlFor="registrationNumber" className="block text-sm font-medium text-gray-700 mb-1">
-              Registration Number
+              Registration Number <span className="text-xs text-gray-500">(Not editable)</span>
             </label>
             <input
               type="text"
@@ -523,26 +544,9 @@ const DogEditForm: React.FC<DogEditFormProps> = ({ dogData, dogId, onSuccess }) 
               id="registrationNumber"
               value={formData.registrationNumber || ''}
               onChange={handleChange}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 bg-gray-100"
+              disabled={true}
             />
-          </div>
-          
-          {/* Other Registration Number */}
-          <div className="md:col-span-1">
-            <label htmlFor="otherRegistrationNumber" className="block text-sm font-medium text-gray-700 mb-1">
-              Other Registration Number
-            </label>
-            <input
-              type="text"
-              name="otherRegistrationNumber"
-              id="otherRegistrationNumber"
-              value={formData.otherRegistrationNumber || ''}
-              onChange={handleChange}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
-            />
-            <p className="mt-1 text-xs text-gray-500">
-              Alternative registration number (if available)
-            </p>
           </div>
           
           {/* Breed */}
@@ -680,7 +684,6 @@ const DogEditForm: React.FC<DogEditFormProps> = ({ dogData, dogId, onSuccess }) 
               value={formData.microchipNumber || ''}
               onChange={handleChange}
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
-              placeholder="e.g. 123456789012345"
             />
           </div>
           
@@ -788,6 +791,83 @@ const DogEditForm: React.FC<DogEditFormProps> = ({ dogData, dogId, onSuccess }) 
               Enter a URL for the main image of this dog. For better photo management, use the Photos tab.
             </p>
           </div>
+        </div>
+      </div>
+      
+      {/* Identification */}
+      <div className="border-t border-gray-200 pt-6 mt-6">
+        <h3 className="text-lg font-medium text-gray-900">Registration & Identification</h3>
+        <div className="mt-4 grid grid-cols-1 gap-y-6 sm:grid-cols-2 sm:gap-x-4">
+          {/* Registration Number - read-only field */}
+          <div>
+            <label htmlFor="registrationNumber" className="block text-sm font-medium text-gray-700 mb-1">
+              Registration Number (Not Editable)
+            </label>
+            <input
+              type="text"
+              name="registrationNumber"
+              id="registrationNumber"
+              value={formData.registrationNumber || ''}
+              readOnly
+              disabled
+              className="mt-1 block w-full rounded-md border-gray-300 bg-gray-100 shadow-sm focus:border-green-500 focus:ring-green-500 cursor-not-allowed"
+            />
+            <p className="mt-1 text-xs text-gray-500">
+              The primary registration number cannot be modified.
+            </p>
+          </div>
+
+          {/* Microchip Number */}
+          <div>
+            <label htmlFor="microchipNumber" className="block text-sm font-medium text-gray-700 mb-1">
+              Microchip Number
+            </label>
+            <input
+              type="text"
+              name="microchipNumber"
+              id="microchipNumber"
+              value={formData.microchipNumber || ''}
+              onChange={handleChange}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+            />
+          </div>
+          
+          {/* Other Country Registration Checkbox */}
+          <div className="flex items-center space-x-2 p-2 bg-gray-50 rounded-md">
+            <input
+              type="checkbox"
+              name="isRegisteredInOtherCountry"
+              id="isRegisteredInOtherCountry"
+              checked={formData.isRegisteredInOtherCountry || false}
+              onChange={handleChange}
+              className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+            />
+            <label htmlFor="isRegisteredInOtherCountry" className="text-sm font-medium text-gray-700">
+              Dog is already registered in another country
+            </label>
+          </div>
+          
+          {/* Other Registration Number - only show if isRegisteredInOtherCountry is true */}
+          {formData.isRegisteredInOtherCountry && (
+            <div>
+              <label htmlFor="otherRegistrationNumber" className="block text-sm font-medium text-gray-700 mb-1">
+                Other Registration Number
+              </label>
+              <input
+                type="text"
+                name="otherRegistrationNumber"
+                id="otherRegistrationNumber"
+                value={formData.otherRegistrationNumber || ''}
+                onChange={handleChange}
+                className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 ${formErrors.otherRegistrationNumber ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : ''}`}
+                placeholder="Registration number from another country"
+                required={formData.isRegisteredInOtherCountry}
+              />
+              {formErrors.otherRegistrationNumber && (
+                <p className="mt-1 text-sm text-red-600">{formErrors.otherRegistrationNumber}</p>
+              )}
+            </div>
+          )}
         </div>
       </div>
       

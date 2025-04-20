@@ -30,6 +30,7 @@ export interface DogNode {
   id?: string;
   name: string;
   registrationNumber?: string;
+  otherRegistrationNumber?: string; // Added for dogs registered in another country
   microchipNumber?: string;
   breed?: string;
   breedObj?: {

@@ -51,6 +51,7 @@ export const GET_DOGS = gql`
         color
         dateOfDeath
         registrationNumber
+        otherRegistrationNumber
         microchipNumber
         isNeutered
         height
@@ -90,7 +91,6 @@ export const GET_DOGS = gql`
 `;
 
 
-
 // Query to get a single dog by ID
 export const GET_DOG_BY_ID = gql`
   query GetDogById($id: ID!) {
@@ -113,6 +113,7 @@ export const GET_DOG_BY_ID = gql`
       dateOfBirth
       dateOfDeath
       registrationNumber
+      otherRegistrationNumber
       microchipNumber
       isNeutered
       height
@@ -202,7 +203,6 @@ export const GET_DOG_BY_ID = gql`
 `;
 
 
-
 // Alias GET_DOG_BY_ID as GET_DOG for backward compatibility
 export const GET_DOG = GET_DOG_BY_ID;
 
@@ -232,6 +232,7 @@ export const GET_DOG_PEDIGREE = gql`
       gender
       dateOfBirth
       registrationNumber
+      otherRegistrationNumber
       microchipNumber
       color
       mainImageUrl
@@ -249,6 +250,7 @@ export const GET_DOG_PEDIGREE = gql`
         gender
         dateOfBirth
         registrationNumber
+        otherRegistrationNumber
         microchipNumber
         color
         mainImageUrl
@@ -266,6 +268,7 @@ export const GET_DOG_PEDIGREE = gql`
           gender
           dateOfBirth
           registrationNumber
+          otherRegistrationNumber
           microchipNumber
           color
           mainImageUrl
@@ -281,6 +284,7 @@ export const GET_DOG_PEDIGREE = gql`
             gender
             dateOfBirth
             registrationNumber
+            otherRegistrationNumber
             microchipNumber
             color
             mainImageUrl
@@ -297,6 +301,7 @@ export const GET_DOG_PEDIGREE = gql`
             gender
             dateOfBirth
             registrationNumber
+            otherRegistrationNumber
             microchipNumber
             color
             mainImageUrl
@@ -316,6 +321,7 @@ export const GET_DOG_PEDIGREE = gql`
           gender
           dateOfBirth
           registrationNumber
+          otherRegistrationNumber
           microchipNumber
           color
           mainImageUrl
@@ -331,6 +337,7 @@ export const GET_DOG_PEDIGREE = gql`
             gender
             dateOfBirth
             registrationNumber
+            otherRegistrationNumber
             microchipNumber
             color
             mainImageUrl
@@ -347,6 +354,7 @@ export const GET_DOG_PEDIGREE = gql`
             gender
             dateOfBirth
             registrationNumber
+            otherRegistrationNumber
             microchipNumber
             color
             mainImageUrl
@@ -367,6 +375,7 @@ export const GET_DOG_PEDIGREE = gql`
         gender
         dateOfBirth
         registrationNumber
+        otherRegistrationNumber
         microchipNumber
         color
         mainImageUrl
@@ -384,6 +393,7 @@ export const GET_DOG_PEDIGREE = gql`
           gender
           dateOfBirth
           registrationNumber
+          otherRegistrationNumber
           microchipNumber
           color
           mainImageUrl
@@ -399,6 +409,7 @@ export const GET_DOG_PEDIGREE = gql`
             gender
             dateOfBirth
             registrationNumber
+            otherRegistrationNumber
             microchipNumber
             color
             mainImageUrl
@@ -415,6 +426,7 @@ export const GET_DOG_PEDIGREE = gql`
             gender
             dateOfBirth
             registrationNumber
+            otherRegistrationNumber
             microchipNumber
             color
             mainImageUrl
@@ -434,6 +446,7 @@ export const GET_DOG_PEDIGREE = gql`
           gender
           dateOfBirth
           registrationNumber
+          otherRegistrationNumber
           microchipNumber
           color
           mainImageUrl
@@ -449,6 +462,7 @@ export const GET_DOG_PEDIGREE = gql`
             gender
             dateOfBirth
             registrationNumber
+            otherRegistrationNumber
             microchipNumber
             color
             mainImageUrl
@@ -465,6 +479,7 @@ export const GET_DOG_PEDIGREE = gql`
             gender
             dateOfBirth
             registrationNumber
+            otherRegistrationNumber
             microchipNumber
             color
             mainImageUrl
@@ -474,7 +489,6 @@ export const GET_DOG_PEDIGREE = gql`
     }
   }
 `;
-
 
 
 // Query to get dogs owned by the current user
@@ -488,6 +502,7 @@ export const GET_USER_DOGS = gql`
       dateOfBirth
       mainImageUrl
       registrationNumber
+      otherRegistrationNumber
       microchipNumber
       currentOwner {
         id
@@ -496,7 +511,6 @@ export const GET_USER_DOGS = gql`
     }
   }
 `;
-
 
 
 // Define enums to match GraphQL schema
@@ -558,7 +572,6 @@ export const SEARCH_DOGS = gql`
 `;
 
 
-
 // Mutation to link a dog to its parents
 export const LINK_DOG_TO_PARENTS = gql`
   mutation linkDogToParents($dogId: ID!, $sireId: ID, $damId: ID) {
@@ -582,5 +595,3 @@ export const LINK_DOG_TO_PARENTS = gql`
     }
   }
 `;
-
-

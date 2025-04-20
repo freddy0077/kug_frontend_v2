@@ -17,6 +17,7 @@ type FormInputs = {
   dateOfBirth: string;
   dateOfDeath?: string;
   registrationNumber?: string;
+  otherRegistrationNumber?: string;
   microchipNumber?: string;
   isNeutered: boolean;
   height?: number;
@@ -405,6 +406,22 @@ const EnhancedDogForm: React.FC<DogFormProps> = ({ onSuccess }) => {
               onChange={handleChange}
               className="mt-1 block w-full rounded-md shadow-sm border-gray-300 focus:border-green-500 focus:ring-green-500"
               placeholder="Official registration number"
+            />
+          </div>
+          
+          {/* Other Registration Number */}
+          <div>
+            <label htmlFor="otherRegistrationNumber" className="block text-sm font-medium text-gray-700 mb-1">
+              Other Registration Number
+            </label>
+            <input
+              type="text"
+              name="otherRegistrationNumber"
+              id="otherRegistrationNumber"
+              value={formData.otherRegistrationNumber || ''}
+              onChange={handleChange}
+              className="mt-1 block w-full rounded-md shadow-sm border-gray-300 focus:border-green-500 focus:ring-green-500"
+              placeholder="Other registration number"
             />
           </div>
           

@@ -7,6 +7,7 @@ export const GET_DOG_PEDIGREE: DocumentNode = gql`
       id
       name
       registrationNumber
+      otherRegistrationNumber
       breed
       breedObj {
         id
@@ -25,6 +26,7 @@ export const GET_DOG_PEDIGREE: DocumentNode = gql`
         id
         name
         registrationNumber
+        otherRegistrationNumber
         breed
         breedObj {
           id
@@ -43,6 +45,7 @@ export const GET_DOG_PEDIGREE: DocumentNode = gql`
           id
           name
           registrationNumber
+          otherRegistrationNumber
           breed
           breedObj {
             id
@@ -61,6 +64,7 @@ export const GET_DOG_PEDIGREE: DocumentNode = gql`
           id
           name
           registrationNumber
+          otherRegistrationNumber
           breed
           breedObj {
             id
@@ -80,6 +84,7 @@ export const GET_DOG_PEDIGREE: DocumentNode = gql`
         id
         name
         registrationNumber
+        otherRegistrationNumber
         breed
         breedObj {
           id
@@ -98,6 +103,7 @@ export const GET_DOG_PEDIGREE: DocumentNode = gql`
           id
           name
           registrationNumber
+          otherRegistrationNumber
           breed
           breedObj {
             id
@@ -116,6 +122,7 @@ export const GET_DOG_PEDIGREE: DocumentNode = gql`
           id
           name
           registrationNumber
+          otherRegistrationNumber
           breed
           breedObj {
             id
@@ -161,6 +168,7 @@ export const GET_BREEDING_RECORDS: DocumentNode = gql`
           name
           breed
           registrationNumber
+          otherRegistrationNumber
           mainImageUrl
         }
         dam {
@@ -168,6 +176,7 @@ export const GET_BREEDING_RECORDS: DocumentNode = gql`
           name
           breed
           registrationNumber
+          otherRegistrationNumber
           mainImageUrl
         }
         puppies {
@@ -202,6 +211,7 @@ export const GET_LINEBREEDING_ANALYSIS: DocumentNode = gql`
           id
           name
           registrationNumber
+          otherRegistrationNumber
         }
         occurrences
         contribution
@@ -221,6 +231,7 @@ export const CREATE_PEDIGREE: DocumentNode = gql`
         id
         name
         registrationNumber
+        otherRegistrationNumber
       }
       generation
       coefficient
@@ -230,6 +241,7 @@ export const CREATE_PEDIGREE: DocumentNode = gql`
           id
           name
           registrationNumber
+          otherRegistrationNumber
         }
         generation
       }
@@ -239,6 +251,7 @@ export const CREATE_PEDIGREE: DocumentNode = gql`
           id
           name
           registrationNumber
+          otherRegistrationNumber
         }
         generation
       }

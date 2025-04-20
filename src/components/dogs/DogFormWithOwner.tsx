@@ -20,6 +20,8 @@ type FormInputs = {
   dateOfBirth: string;
   dateOfDeath?: string;
   microchipNumber?: string;
+  otherRegistrationNumber?: string;
+  isRegisteredInOtherCountry?: boolean;
   isNeutered: boolean;
   height?: number;
   weight?: number;
@@ -37,6 +39,7 @@ const initialFormState: FormInputs = {
   color: '',
   dateOfBirth: '',
   isNeutered: false,
+  isRegisteredInOtherCountry: false,
   userId: '', // Default empty string for userId
 };
 
@@ -176,6 +179,11 @@ const DogFormWithOwner: React.FC<DogFormProps> = ({ onSuccess }) => {
       errors.dateOfDeath = 'Date of death must be a valid date';
     }
     
+    // Validate other registration number if dog is registered in another country
+    if (formData.isRegisteredInOtherCountry && !formData.otherRegistrationNumber?.trim()) {
+      errors.otherRegistrationNumber = 'Registration number is required when dog is registered in another country';
+    }
+    
     if (Object.keys(errors).length > 0) {
       setFormErrors(errors);
       return;
@@ -236,6 +244,9 @@ const DogFormWithOwner: React.FC<DogFormProps> = ({ onSuccess }) => {
         breedId: breedId ?? undefined,
         userId: formData.userId // Include the user ID in the mutation input
       };
+      
+      // Debug log
+      console.log('Dog registration data being sent:', input);
       
       // Submit mutation
       await createDog({
@@ -486,10 +497,10 @@ const DogFormWithOwner: React.FC<DogFormProps> = ({ onSuccess }) => {
         </div>
       </div>
 
-      {/* Identification */}
+      {/* Registration Information */}
       <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6">
-        <h2 className="text-lg font-medium text-gray-900 mb-4">Identification</h2>
-        <div className="grid grid-cols-1 gap-6">
+        <h2 className="text-lg font-medium text-gray-900 mb-4">Registration Information</h2>
+        <div className="space-y-6">
           {/* Microchip Number */}
           <div>
             <label htmlFor="microchipNumber" className="block text-sm font-medium text-gray-700 mb-1">
@@ -505,6 +516,43 @@ const DogFormWithOwner: React.FC<DogFormProps> = ({ onSuccess }) => {
               placeholder="Microchip identification number"
             />
           </div>
+          
+          {/* Other Country Registration Checkbox */}
+          <div className="flex items-center space-x-2 p-2 bg-gray-50 rounded-md">
+            <input
+              type="checkbox"
+              name="isRegisteredInOtherCountry"
+              id="isRegisteredInOtherCountry"
+              checked={formData.isRegisteredInOtherCountry || false}
+              onChange={handleChange}
+              className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+            />
+            <label htmlFor="isRegisteredInOtherCountry" className="text-sm font-medium text-gray-700">
+              Dog is already registered in another country
+            </label>
+          </div>
+          
+          {/* Other Registration Number - only show if isRegisteredInOtherCountry is true */}
+          {formData.isRegisteredInOtherCountry && (
+            <div>
+              <label htmlFor="otherRegistrationNumber" className="block text-sm font-medium text-gray-700 mb-1">
+                Other Registration Number
+              </label>
+              <input
+                type="text"
+                name="otherRegistrationNumber"
+                id="otherRegistrationNumber"
+                value={formData.otherRegistrationNumber || ''}
+                onChange={handleChange}
+                className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 ${formErrors.otherRegistrationNumber ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : ''}`}
+                placeholder="Registration number from another country"
+                required={formData.isRegisteredInOtherCountry}
+              />
+              {formErrors.otherRegistrationNumber && (
+                <p className="mt-1 text-sm text-red-600">{formErrors.otherRegistrationNumber}</p>
+              )}
+            </div>
+          )}
           
           {/* Is Neutered */}
           <div className="flex items-center space-x-2 p-2 bg-gray-50 rounded-md">
