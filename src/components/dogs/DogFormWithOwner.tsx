@@ -236,14 +236,17 @@ const DogFormWithOwner: React.FC<DogFormProps> = ({ onSuccess }) => {
       }
       
       // Create input for mutation
-      const input = {
-        ...formData,
-        dateOfBirth: dateOfBirth.toISOString(),
-        dateOfDeath: dateOfDeath?.toISOString(),
-        titles,
-        breedId: breedId ?? undefined,
-        userId: formData.userId // Include the user ID in the mutation input
-      };
+    // Destructure to exclude isRegisteredInOtherCountry as it's not part of the API schema
+    const { isRegisteredInOtherCountry, ...dogData } = formData;
+    
+    const input = {
+      ...dogData,
+      dateOfBirth: dateOfBirth.toISOString(),
+      dateOfDeath: dateOfDeath?.toISOString(),
+      titles,
+      breedId: breedId ?? undefined,
+      userId: formData.userId // Include the user ID in the mutation input
+    };
       
       // Debug log
       console.log('Dog registration data being sent:', input);
