@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useQuery } from '@apollo/client';
 import { GET_DOG_PEDIGREE, GET_DOGS, DogSortField, SortDirection } from '@/graphql/queries/dogQueries';
@@ -14,6 +14,17 @@ import ParentEditor from '@/components/pedigrees/ParentEditor';
 import { DogNode, extractFourthGeneration, formatDate, calculatePedigreeCompleteness } from '@/utils/pedigreeFormatters';
 import { toast } from 'react-hot-toast';
 import { downloadPedigreeCertificate } from '@/utils/pedigreePdfGenerator';
+
+// Export the main component without directly using useSearchParams
+export default function Pedigrees() {
+  return (
+    <ProtectedRoute allowedRoles={[UserRole.ADMIN, UserRole.OWNER, UserRole.HANDLER, UserRole.VIEWER]}>
+      <Suspense fallback={<PedigreesLoadingFallback />}>
+        <PedigreesContentWrapper />
+      </Suspense>
+    </ProtectedRoute>
+  );
+}
 
 interface DogListItem {
   id: string;
@@ -34,8 +45,26 @@ interface DogsData {
   };
 }
 
-export default function Pedigrees() {
+// Loading fallback component for Suspense
+function PedigreesLoadingFallback() {
+  return (
+    <div className="container mx-auto p-6">
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500"></div>
+      </div>
+    </div>
+  );
+}
+
+// Main content component that uses useSearchParams
+// This wrapper allows useSearchParams to be safely used inside a Suspense boundary
+function PedigreesContentWrapper() {
+  return <PedigreesContent />;
+}
+
+function PedigreesContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user, loading: authLoading } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDogId, setSelectedDogId] = useState<string | null>(null);
@@ -44,6 +73,8 @@ export default function Pedigrees() {
   const [generationsToShow, setGenerationsToShow] = useState<number>(4);
   const [editingParentsForDog, setEditingParentsForDog] = useState<{id: string, name: string, sire?: DogNode | null, dam?: DogNode | null} | null>(null);
   const [parentEditorMode, setParentEditorMode] = useState<'edit' | 'add'>('edit');
+  const [isExportCertificate, setIsExportCertificate] = useState<boolean>(false);
+  const [isFciCertificate, setIsFciCertificate] = useState<boolean>(false);
 
   // Use debounce to prevent excessive API calls while typing
   const debouncedSearchTerm = useDebounce(searchQuery, 300);
@@ -74,6 +105,22 @@ export default function Pedigrees() {
       setSearchErrorMessage(null); // Clear error when we get successful data
     }
   }, [dogsData]);
+  
+  // Check for dogId in URL parameters when component mounts
+  useEffect(() => {
+    const dogIdParam = searchParams.get('dogId');
+    if (dogIdParam && !selectedDogId) {
+      // If dogId is in URL and no dog is selected yet, select it
+      setSelectedDogId(dogIdParam);
+      // Scroll to the pedigree section when data loads
+      setTimeout(() => {
+        const pedigreeSection = document.getElementById('pedigree-section');
+        if (pedigreeSection) {
+          pedigreeSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 500); // 500ms delay to allow for data loading
+    }
+  }, [searchParams, selectedDogId]);
 
   // Use Apollo Client to fetch the pedigree data when a dog is selected
   const { data: pedigreeData, loading: pedigreeLoading, error: pedigreeError, refetch: refetchPedigree } = useQuery<{ dogPedigree: DogNode }>(GET_DOG_PEDIGREE, {
@@ -84,9 +131,6 @@ export default function Pedigrees() {
     skip: !selectedDogId,
   });
 
-  // State for export certificate checkbox
-  const [isExportCertificate, setIsExportCertificate] = useState(false);
-  const [isFciCertificate, setIsFciCertificate] = useState(false);
   const [newOwnerName, setNewOwnerName] = useState('');
   const [newOwnerAddress, setNewOwnerAddress] = useState('');
   const [isNewOwnerModalOpen, setIsNewOwnerModalOpen] = useState(false);
@@ -96,6 +140,15 @@ export default function Pedigrees() {
   const handleDogSelection = (dogId: string) => {
     setSelectedDogId(dogId);
     setEditingParentsForDog(null); // Close any open parent editor
+    
+    // Add a small delay to ensure pedigree data has time to load before scrolling
+    setTimeout(() => {
+      // Scroll to the pedigree section
+      const pedigreeSection = document.getElementById('pedigree-section');
+      if (pedigreeSection) {
+        pedigreeSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 500); // 500ms delay to allow for data loading
   };
 
   // Handle parent editing
@@ -484,12 +537,33 @@ export default function Pedigrees() {
     );
   };
 
-  return (
-    <ProtectedRoute
-      allowedRoles={[UserRole.ADMIN]}
-      fallbackPath="/auth/login">
+  // Check if user has permission to access this page
+  useEffect(() => {
+    if (!authLoading && (!user || user.role !== UserRole.ADMIN)) {
+      router.push('/auth/login');
+    }
+  }, [user, authLoading, router]);
 
-      <div className="min-h-screen bg-gray-50">
+  // Show loading state while checking authentication
+  if (authLoading) {
+    return <div className="flex justify-center items-center h-64">Loading...</div>;
+  }
+
+  // If not authenticated or not admin, don't render content
+  if (!user || user.role !== UserRole.ADMIN) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen">
+        <div className="bg-white p-8 rounded shadow-md text-center">
+          <h2 className="text-2xl font-bold mb-4 text-red-600">Access Denied</h2>
+          <p className="mb-2">You must be an administrator to view this page.</p>
+          <Link href="/auth/login" className="text-blue-600 underline">Go to Login</Link>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50">
         {/* Header Section */}
         <div className="bg-gradient-to-r from-green-700 to-green-900 text-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -599,7 +673,7 @@ export default function Pedigrees() {
                     <p>Error loading pedigree: {pedigreeError.message}</p>
                   </div>
                 ) : pedigreeData?.dogPedigree ? (
-                  <div className="space-y-6">
+                  <div id="pedigree-section" className="space-y-6">
                     {/* Dog Overview */}
                     <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
                       <div className="flex justify-between items-center p-4 border-b border-gray-200">
@@ -658,103 +732,8 @@ export default function Pedigrees() {
                             </p>
                           </div>
                           <div>
-                            <h3 className="text-sm font-medium text-gray-500">Date of Birth</h3>
-                            <p className="mt-1 text-sm text-gray-900">
-                              {formatDate(pedigreeData.dogPedigree.dateOfBirth)}
-                            </p>
-                          </div>
-                          {pedigreeData.dogPedigree.color && (
-                            <div>
-                              <h3 className="text-sm font-medium text-gray-500">Color</h3>
-                              <p className="mt-1 text-sm text-gray-900 capitalize">
-                                {pedigreeData.dogPedigree.color}
-                              </p>
-                            </div>
-                          )}
-                          {pedigreeData.dogPedigree.coefficient !== undefined && (
-                            <div>
-                              <h3 className="text-sm font-medium text-gray-500">Inbreeding Coefficient</h3>
-                              <p className="mt-1 text-sm text-gray-900">
-                                {(pedigreeData.dogPedigree.coefficient * 100).toFixed(2)}%
-                              </p>
-                            </div>
-                          )}
-                          <div>
-                            <h3 className="text-sm font-medium text-gray-500">Pedigree Completeness</h3>
-                            <div className="mt-1 flex items-center">
-                              <div className="flex-1 bg-gray-200 rounded-full h-2 mr-2">
-                                <div 
-                                  className="bg-green-500 h-2 rounded-full" 
-                                  style={{ width: `${calculatePedigreeCompleteness(pedigreeData.dogPedigree, 4)}%` }}
-                                ></div>
-                              </div>
-                              <span className="text-sm text-gray-600">
-                                {calculatePedigreeCompleteness(pedigreeData.dogPedigree, 4)}%
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    {/* Pedigree Controls */}
-                    <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
-                      <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-                        <div className="flex items-center gap-3">
-                          <label htmlFor="generations" className="text-sm font-medium text-gray-700">
-                            Generations:
-                          </label>
-                          <select
-                            id="generations"
-                            value={generationsToShow}
-                            onChange={(e) => setGenerationsToShow(Number(e.target.value))}
-                            className="border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-blue-500 focus:border-blue-500"
-                          >
-                            <option value={2}>2</option>
-                            <option value={3}>3</option>
-                            <option value={4}>4</option>
-                          </select>
-                        </div>
-                        <div className="flex gap-3">
-                          <button
-                            onClick={() => handleEditParents(pedigreeData.dogPedigree?.id || '')}
-                            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm flex items-center"
-                          >
-                            <svg className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                            </svg>
-                            Edit Parents
-                          </button>
-                          <button
-                            onClick={() => handleAddParents(pedigreeData.dogPedigree?.id || '')}
-                            className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors text-sm flex items-center"
-                          >
-                            <svg className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                            </svg>
-                            Add Parents
-                          </button>
-                          <div className="flex items-center space-x-4 text-sm">
-                            <div className="flex items-center">
-                              <input
-                                type="checkbox"
-                                id="exportCertificate"
-                                checked={isExportCertificate}
-                                onChange={(e) => {
-                                  const isChecked = e.target.checked;
-                                  setIsExportCertificate(isChecked);
-                                  // Ensure mutual exclusivity
-                                  if (isChecked) {
-                                    setIsFciCertificate(false);
-                                  }
-                                }}
-                                className="form-checkbox h-4 w-4 text-green-600 rounded border-gray-300 focus:ring-green-500"
-                              />
-                              <label htmlFor="exportCertificate" className="ml-2 text-gray-700">
-                                Export Certificate
-                              </label>
-                            </div>
-                            <div className="flex items-center">
+                            <h3 className="text-sm font-medium text-gray-500">Certificate Type</h3>
+                            <div className="flex items-center mt-1">
                               <input
                                 type="checkbox"
                                 id="fciCertificate"
@@ -770,7 +749,7 @@ export default function Pedigrees() {
                                 className="form-checkbox h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
                               />
                               <label htmlFor="fciCertificate" className="ml-2 text-gray-700">
-                                FCI
+                                FCI EXPORT
                               </label>
                             </div>
                           </div>
@@ -783,7 +762,7 @@ export default function Pedigrees() {
                             <svg className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                             </svg>
-                            Export Certificate
+                            KUG CERTIFICATE
                           </button>
                         </div>
                       </div>
@@ -841,6 +820,6 @@ export default function Pedigrees() {
         {/* New Owner Modal */}
         {renderNewOwnerModal()}
       </div>
-    </ProtectedRoute>
+   
   );
 }

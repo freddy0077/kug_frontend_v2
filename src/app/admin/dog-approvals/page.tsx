@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import DogApprovalList from '@/components/admin/DogApprovalList';
+import DogApprovalDashboard from '@/components/admin/dogApprovals/DogApprovalDashboard';
 import { useAuth } from '@/contexts/AuthContext';
 import { UserRole } from '@/types/enums';
 import { useRouter } from 'next/navigation';
@@ -30,14 +30,12 @@ export default function DogApprovalsPage() {
   }
 
   return (
-    <div className="container mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-6">Dog Approval Dashboard</h1>
-      <div className="bg-white rounded-lg shadow p-6">
-        <p className="text-gray-600 mb-4">
-          Review and approve or decline dog registrations submitted by users.
-        </p>
-        <DogApprovalList />
+    <div className="container mx-auto py-6 px-4 sm:px-6 lg:px-8">
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-2xl font-bold text-gray-900">Dog Approval Dashboard</h1>
       </div>
+      
+      <DogApprovalDashboard />
     </div>
   );
 }

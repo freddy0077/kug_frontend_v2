@@ -3,7 +3,19 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery, useMutation } from '@apollo/client';
-import { XCircleIcon } from '@heroicons/react/24/outline';
+import { 
+  XCircleIcon, 
+  UserPlusIcon, 
+  ArrowDownTrayIcon,
+  MagnifyingGlassIcon,
+  FunnelIcon,
+  ArrowPathIcon,
+  ChartBarIcon,
+  UserGroupIcon,
+  ShieldCheckIcon,
+  ClockIcon
+} from '@heroicons/react/24/outline';
+import { UserIcon } from '@heroicons/react/24/solid';
 
 // Import GraphQL queries and mutations
 import { GET_USERS } from '../../../graphql/queries/userQueries';
@@ -14,8 +26,6 @@ import {
 } from '../../../graphql/mutations/userMutations';
 
 // Import components
-
-
 import FilterPanel from './components/FilterPanel';
 import UserTableView from './components/UserTableView';
 import UserDetailsModal from './components/UserDetailsModal';
@@ -26,6 +36,7 @@ import ConfirmationDialog from './components/ConfirmationDialog';
 // Import types
 import { User, FilterOptions, UserAction } from './types';
 import { useAuth } from '../../../contexts/AuthContext';
+import Link from 'next/link';
 
 const UserManagement: React.FC = () => {
   const router = useRouter();
@@ -178,61 +189,185 @@ const UserManagement: React.FC = () => {
     );
   }
   
+  // Calculate user statistics
+  const totalUsers = data?.users?.totalCount || 0;
+  const activeUsers = data?.users?.items?.filter(user => user.isActive)?.length || 0;
+  const inactiveUsers = totalUsers - activeUsers;
+  const adminUsers = data?.users?.items?.filter(user => user.role === 'ADMIN')?.length || 0;
+  
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">User Management</h1>
-          <p className="mt-1 text-sm text-gray-500">
-            Manage and monitor all user accounts in the system
-          </p>
+      {/* Page Header */}
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-8">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center">
+            <UserGroupIcon className="h-8 w-8 text-green-600 mr-3" />
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">User Management</h1>
+              <p className="mt-1 text-sm text-gray-500">
+                Manage and monitor all user accounts in the system
+              </p>
+            </div>
+          </div>
         </div>
-        <div className="mt-4 md:mt-0 flex space-x-3">
-          <button
-            onClick={() => router.push('/admin/users/create')}
-            className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-150"
+        <div className="flex flex-wrap gap-3">
+          <Link
+            href="/admin/users/add"
+            className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-150"
           >
+            <UserPlusIcon className="-ml-1 mr-2 h-5 w-5" aria-hidden="true" />
             Add New User
-          </button>
+          </Link>
           <button
             onClick={() => setIsExportOpen(true)}
-            className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-150"
+            className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-150"
           >
+            <ArrowDownTrayIcon className="-ml-1 mr-2 h-5 w-5 text-gray-500" aria-hidden="true" />
             Export Data
           </button>
         </div>
       </div>
       
-      {/* Main Content */}
-      <div className="mt-6 bg-white shadow rounded-xl p-6">
-        {/* Filter Panel */}
-        <FilterPanel
-          filterOptions={filterOptions}
-          onFilterChange={handleFilterChange}
-          isFilterOpen={isFilterOpen}
-          setIsFilterOpen={setIsFilterOpen}
-        />
-        
-        {loading ? (
-          <div className="flex justify-center py-8">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
-          </div>
-        ) : error ? (
-          <div className="bg-red-50 border-l-4 border-red-400 p-4 mt-4">
-            <div className="flex">
-              <div className="flex-shrink-0">
-                <XCircleIcon className="h-5 w-5 text-red-400" aria-hidden="true" />
+      {/* Stats Cards */}
+      {!loading && !error && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          <div className="bg-white rounded-lg shadow p-5 border-l-4 border-blue-500 hover:shadow-md transition-shadow duration-200">
+            <div className="flex items-center">
+              <div className="p-3 rounded-full bg-blue-100 mr-4">
+                <UserGroupIcon className="h-6 w-6 text-blue-600" />
               </div>
-              <div className="ml-3">
-                <p className="text-sm text-red-700">
-                  Error loading user data. Please try again.
-                </p>
+              <div>
+                <p className="text-sm font-medium text-gray-500">Total Users</p>
+                <p className="text-2xl font-bold text-gray-900">{totalUsers}</p>
               </div>
             </div>
           </div>
+          
+          <div className="bg-white rounded-lg shadow p-5 border-l-4 border-green-500 hover:shadow-md transition-shadow duration-200">
+            <div className="flex items-center">
+              <div className="p-3 rounded-full bg-green-100 mr-4">
+                <UserIcon className="h-6 w-6 text-green-600" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-500">Active Users</p>
+                <p className="text-2xl font-bold text-gray-900">{activeUsers}</p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-white rounded-lg shadow p-5 border-l-4 border-red-500 hover:shadow-md transition-shadow duration-200">
+            <div className="flex items-center">
+              <div className="p-3 rounded-full bg-red-100 mr-4">
+                <UserIcon className="h-6 w-6 text-red-600" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-500">Inactive Users</p>
+                <p className="text-2xl font-bold text-gray-900">{inactiveUsers}</p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-white rounded-lg shadow p-5 border-l-4 border-purple-500 hover:shadow-md transition-shadow duration-200">
+            <div className="flex items-center">
+              <div className="p-3 rounded-full bg-purple-100 mr-4">
+                <ShieldCheckIcon className="h-6 w-6 text-purple-600" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-500">Admin Users</p>
+                <p className="text-2xl font-bold text-gray-900">{adminUsers}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Search and Filter Bar */}
+      <div className="bg-white rounded-lg shadow mb-6">
+        <div className="p-4 border-b border-gray-200">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div className="relative flex-1">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
+              </div>
+              <input
+                type="text"
+                placeholder="Search users..."
+                value={filterOptions.searchTerm}
+                onChange={(e) => handleFilterChange({ searchTerm: e.target.value })}
+                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-green-500 focus:border-green-500 sm:text-sm"
+              />
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => setIsFilterOpen(!isFilterOpen)}
+                className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+              >
+                <FunnelIcon className="-ml-0.5 mr-2 h-4 w-4" aria-hidden="true" />
+                Filters
+              </button>
+              
+              <button
+                onClick={() => refetch()}
+                className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                title="Refresh data"
+              >
+                <ArrowPathIcon className="h-4 w-4" aria-hidden="true" />
+              </button>
+            </div>
+          </div>
+          
+          {/* Expanded Filter Panel */}
+          {isFilterOpen && (
+            <div className="mt-4 pt-4 border-t border-gray-200">
+              <FilterPanel
+                filterOptions={filterOptions}
+                onFilterChange={handleFilterChange}
+                isFilterOpen={isFilterOpen}
+                setIsFilterOpen={setIsFilterOpen}
+              />
+            </div>
+          )}
+        </div>
+      </div>
+      
+      {/* Main Content */}
+      <div className="bg-white shadow rounded-lg overflow-hidden">
+        {loading ? (
+          <div className="flex flex-col items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-600 mb-4"></div>
+            <p className="text-gray-500">Loading user data...</p>
+          </div>
+        ) : error ? (
+          <div className="bg-red-50 p-6 flex items-start">
+            <div className="flex-shrink-0">
+              <XCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />
+            </div>
+            <div className="ml-3">
+              <h3 className="text-sm font-medium text-red-800">Error loading user data</h3>
+              <p className="mt-2 text-sm text-red-700">
+                Please try refreshing the page or contact support if the problem persists.
+              </p>
+              <button
+                onClick={() => refetch()}
+                className="mt-4 inline-flex items-center px-3 py-2 border border-red-300 shadow-sm text-sm leading-4 font-medium rounded-md text-red-700 bg-red-50 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+              >
+                <ArrowPathIcon className="-ml-0.5 mr-2 h-4 w-4" aria-hidden="true" />
+                Try Again
+              </button>
+            </div>
+          </div>
+        ) : data?.users?.items?.length === 0 ? (
+          <div className="text-center py-12">
+            <UserIcon className="mx-auto h-12 w-12 text-gray-400" />
+            <h3 className="mt-2 text-sm font-medium text-gray-900">No users found</h3>
+            <p className="mt-1 text-sm text-gray-500">
+              Try adjusting your search or filter criteria.
+            </p>
+          </div>
         ) : (
           <>
-            <div className="mt-4">
+            <div className="overflow-x-auto">
               <UserTableView
                 users={data?.users?.items || []}
                 onUserSelect={handleUserSelect}
@@ -242,7 +377,7 @@ const UserManagement: React.FC = () => {
               />
             </div>
             
-            <div className="mt-6">
+            <div className="px-6 py-4 border-t border-gray-200">
               <Pagination
                 currentPage={currentPage}
                 pageSize={pageSize}

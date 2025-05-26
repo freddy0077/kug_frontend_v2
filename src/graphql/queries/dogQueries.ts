@@ -572,6 +572,15 @@ export const SEARCH_DOGS = gql`
 `;
 
 
+// Query to get count of dogs by approval status - used for statistics
+export const GET_DOGS_COUNT = gql`
+  query GetDogsCount($approvalStatus: ApprovalStatus) {
+    dogs(approvalStatus: $approvalStatus) {
+      totalCount
+    }
+  }
+`;
+
 // Mutation to link a dog to its parents
 export const LINK_DOG_TO_PARENTS = gql`
   mutation linkDogToParents($dogId: ID!, $sireId: ID, $damId: ID) {

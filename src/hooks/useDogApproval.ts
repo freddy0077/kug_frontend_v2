@@ -51,6 +51,12 @@ export const useDogApproval = ({ onSuccess, refetchQueries = ['GetDogs'] }: UseD
 
   const handleApproveDog = async (id: string, notes?: string) => {
     try {
+      // Validate the ID to ensure it's not NaN or undefined
+      if (!id || id === 'NaN' || id === 'undefined') {
+        throw new Error('Invalid dog ID. Please select a valid dog.');
+      }
+
+      // Proceed with the mutation
       await approveDog({
         variables: {
           id,
@@ -59,11 +65,18 @@ export const useDogApproval = ({ onSuccess, refetchQueries = ['GetDogs'] }: UseD
       });
     } catch (error) {
       console.error('Error approving dog:', error);
+      throw error; // Re-throw error so we can handle it in the component
     }
   };
 
   const handleDeclineDog = async (id: string, notes?: string) => {
     try {
+      // Validate the ID to ensure it's not NaN or undefined
+      if (!id || id === 'NaN' || id === 'undefined') {
+        throw new Error('Invalid dog ID. Please select a valid dog.');
+      }
+
+      // Proceed with the mutation
       await declineDog({
         variables: {
           id,
@@ -72,6 +85,7 @@ export const useDogApproval = ({ onSuccess, refetchQueries = ['GetDogs'] }: UseD
       });
     } catch (error) {
       console.error('Error declining dog:', error);
+      throw error; // Re-throw error so we can handle it in the component
     }
   };
 
