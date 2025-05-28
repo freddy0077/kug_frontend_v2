@@ -91,7 +91,7 @@ export default function RegisterNewLitterPage() {
         </div>
         
         {/* Permissions check - using UserRole enum as required */}
-        {user?.role !== UserRole.ADMIN && user?.role !== UserRole.OWNER ? (
+        {user?.role !== UserRole.SUPER_ADMIN && user?.role !== UserRole.ADMIN && user?.role !== UserRole.OWNER ? (
           <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
             <div className="flex">
               <div className="flex-shrink-0">
@@ -101,7 +101,7 @@ export default function RegisterNewLitterPage() {
               </div>
               <div className="ml-3">
                 <p className="text-sm text-yellow-700">
-                  You don't have permission to register litters. This feature is only available for Owners and Administrators.
+                  You don't have permission to register litters. This feature is only available for Owners, Administrators, and Super Administrators.
                 </p>
               </div>
             </div>

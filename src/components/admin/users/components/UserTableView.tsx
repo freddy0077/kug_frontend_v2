@@ -149,7 +149,11 @@ const UserTableView: React.FC<UserTableViewProps> = ({
                 <div className="text-sm text-gray-900 truncate max-w-[200px]">{user.email}</div>
               </td>
               <td className="px-3 py-4 whitespace-nowrap">
-                {user.role === 'ADMIN' ? (
+                {user.role === 'SUPER_ADMIN' ? (
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-red-100 text-red-800">
+                    Super Admin
+                  </span>
+                ) : user.role === 'ADMIN' ? (
                   <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-purple-100 text-purple-800">
                     Admin
                   </span>
@@ -160,6 +164,14 @@ const UserTableView: React.FC<UserTableViewProps> = ({
                 ) : user.role === 'HANDLER' ? (
                   <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-yellow-100 text-yellow-800">
                     Handler
+                  </span>
+                ) : user.role === 'CLUB' ? (
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-green-100 text-green-800">
+                    Club
+                  </span>
+                ) : user.role === 'VIEWER' ? (
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-gray-100 text-gray-800">
+                    Viewer
                   </span>
                 ) : (
                   <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-gray-100 text-gray-800">

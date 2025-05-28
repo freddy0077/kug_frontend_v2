@@ -141,7 +141,7 @@ export default function LittersPage() {
             </div>
             
             {/* Only show register button for appropriate roles */}
-            {(user?.role === UserRole.ADMIN || user?.role === UserRole.OWNER) && (
+            {(user?.role === UserRole.SUPER_ADMIN || user?.role === UserRole.ADMIN || user?.role === UserRole.OWNER) && (
               <Link
                 href="/litters/new"
                 className="mt-4 sm:mt-0 inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-150"

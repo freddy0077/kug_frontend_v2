@@ -7,6 +7,24 @@ import { useAuth } from '@/contexts/AuthContext';
 
 // Role permissions configuration
 const rolePermissions = {
+  SUPER_ADMIN: {
+    name: 'Super Administrator',
+    description: 'Highest level access with complete system control',
+    color: 'red',
+    permissions: [
+      { id: 'manage_users', name: 'Manage Users', description: 'Can create, update, and deactivate users' },
+      { id: 'manage_roles', name: 'Manage Roles', description: 'Can assign roles to users including Admin roles' },
+      { id: 'manage_dogs', name: 'Manage Dogs', description: 'Full access to create and manage all dog records' },
+      { id: 'manage_events', name: 'Manage Events', description: 'Can create and manage all events' },
+      { id: 'manage_clubs', name: 'Manage Clubs', description: 'Can create and manage club information' },
+      { id: 'view_logs', name: 'View System Logs', description: 'Can access system and audit logs' },
+      { id: 'manage_breeds', name: 'Manage Breeds', description: 'Can create and update breed information' },
+      { id: 'approve_registrations', name: 'Approve Registrations', description: 'Can approve dog registrations' },
+      { id: 'download_kug_certificates', name: 'Download KUG Certificates', description: 'Exclusive permission to download official KUG certificates' },
+      { id: 'system_settings', name: 'System Settings', description: 'Can modify system-wide settings and configurations' },
+      { id: 'data_management', name: 'Data Management', description: 'Can perform database operations and data migrations' }
+    ]
+  },
   ADMIN: {
     name: 'Administrator',
     description: 'Full system access with all permissions',
@@ -70,10 +88,10 @@ export default function RoleManagement() {
   const [selectedRole, setSelectedRole] = useState('ADMIN');
 
   useEffect(() => {
-    // Redirect if not authenticated or not an admin
+    // Redirect if not authenticated or not an admin/super admin
     if (!authLoading && !isAuthenticated) {
       router.push('/auth/login');
-    } else if (!authLoading && isAuthenticated && user?.role !== 'ADMIN') {
+    } else if (!authLoading && isAuthenticated && user?.role !== 'ADMIN' && user?.role !== 'SUPER_ADMIN') {
       router.push('/dashboard');
     }
   }, [authLoading, isAuthenticated, user, router]);
@@ -86,7 +104,7 @@ export default function RoleManagement() {
     );
   }
   
-  if (!isAuthenticated || user?.role !== 'ADMIN') {
+  if (!isAuthenticated || (user?.role !== 'ADMIN' && user?.role !== 'SUPER_ADMIN')) {
     return null; // We already redirect in the useEffect, this is just a safeguard
   }
 

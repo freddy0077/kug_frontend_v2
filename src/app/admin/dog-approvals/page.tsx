@@ -10,9 +10,9 @@ export default function DogApprovalsPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
 
-  // Check if user is admin, redirect otherwise
+  // Check if user is admin or super admin, redirect otherwise
   useEffect(() => {
-    if (!loading && user && user.role !== UserRole.ADMIN) {
+    if (!loading && user && user.role !== UserRole.ADMIN && user.role !== UserRole.SUPER_ADMIN) {
       router.push('/dashboard');
     }
   }, [user, loading, router]);
@@ -25,7 +25,7 @@ export default function DogApprovalsPage() {
     );
   }
 
-  if (!user || user.role !== UserRole.ADMIN) {
+  if (!user || (user.role !== UserRole.ADMIN && user.role !== UserRole.SUPER_ADMIN)) {
     return null; // Will redirect, don't show anything
   }
 

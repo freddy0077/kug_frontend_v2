@@ -626,7 +626,7 @@ const LitterRegistrationForm: React.FC<LitterRegistrationFormProps> = ({
   };
   
   // If user doesn't have appropriate role, show error
-  if (userRole !== UserRole.ADMIN && userRole !== UserRole.OWNER) {
+  if (userRole !== UserRole.SUPER_ADMIN && userRole !== UserRole.ADMIN && userRole !== UserRole.OWNER) {
     return (
       <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-4">
         <div className="flex items-center">
@@ -637,7 +637,7 @@ const LitterRegistrationForm: React.FC<LitterRegistrationFormProps> = ({
           </div>
           <div className="ml-3">
             <p className="text-sm text-yellow-700">
-              You don't have permission to register litters. Please contact an administrator or owner.
+              You don't have permission to register litters. Please contact a super administrator, administrator, or owner.
             </p>
           </div>
         </div>
@@ -957,14 +957,14 @@ const LitterRegistrationForm: React.FC<LitterRegistrationFormProps> = ({
                 error={formErrors.userId}
                 required={true}
                 className="w-full"
-                disabled={userRole !== UserRole.ADMIN}
+                disabled={userRole !== UserRole.SUPER_ADMIN && userRole !== UserRole.ADMIN}
               />
               <p className="mt-1 text-xs text-gray-500">
                 Select the owner of this litter
               </p>
-              {userRole !== UserRole.ADMIN && (
+              {userRole !== UserRole.SUPER_ADMIN && userRole !== UserRole.ADMIN && (
                 <p className="mt-1 text-xs text-gray-500">
-                  Only administrators can change the owner. The current user will be set as the owner.
+                  Only super administrators and administrators can change the owner. The current user will be set as the owner.
                 </p>
               )}
             </div>

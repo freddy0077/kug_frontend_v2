@@ -33,19 +33,19 @@ export default function Navbar() {
     { 
       href: '#', // This will be overridden in filterMenuItems
       label: 'Dashboard', 
-      roles: [UserRole.ADMIN, UserRole.OWNER, UserRole.HANDLER, UserRole.CLUB, UserRole.VIEWER]
+      roles: [UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.OWNER, UserRole.HANDLER, UserRole.CLUB, UserRole.VIEWER]
     },
     
     // Admin sections
     { 
       href: '#',
       label: 'Admin Panel', 
-      roles: [UserRole.ADMIN],
+      roles: [UserRole.SUPER_ADMIN, UserRole.ADMIN],
       submenu: [
-        { href: '/admin/users', label: 'User Management', roles: [UserRole.ADMIN] },
-        { href: '/admin/roles', label: 'Role Management', roles: [UserRole.ADMIN] },
-        { href: '/admin/dog-approvals', label: 'Dog Approvals', roles: [UserRole.ADMIN] },
-        { href: '/admin/logs', label: 'System Logs', roles: [UserRole.ADMIN] },
+        { href: '/admin/users', label: 'User Management', roles: [UserRole.SUPER_ADMIN, UserRole.ADMIN] },
+        { href: '/admin/roles', label: 'Role Management', roles: [UserRole.SUPER_ADMIN, UserRole.ADMIN] },
+        { href: '/admin/dog-approvals', label: 'Dog Approvals', roles: [UserRole.SUPER_ADMIN, UserRole.ADMIN] },
+        { href: '/admin/logs', label: 'System Logs', roles: [UserRole.SUPER_ADMIN, UserRole.ADMIN] },
       ]
     },
     
@@ -53,11 +53,11 @@ export default function Navbar() {
     { 
       href: '#',
       label: 'Dog Registry', 
-      roles: [UserRole.ADMIN],
+      roles: [UserRole.SUPER_ADMIN, UserRole.ADMIN],
       submenu: [
-        { href: '/pedigrees', label: 'Pedigrees', roles: [UserRole.ADMIN] },
-        { href: '/breeds', label: 'Breeds', roles: [UserRole.ADMIN] },
-        { href: '/dogs/new', label: 'Register New Dog', roles: [UserRole.ADMIN] },
+        { href: '/pedigrees', label: 'Pedigrees', roles: [UserRole.SUPER_ADMIN, UserRole.ADMIN] },
+        { href: '/breeds', label: 'Breeds', roles: [UserRole.SUPER_ADMIN, UserRole.ADMIN] },
+        { href: '/dogs/new', label: 'Register New Dog', roles: [UserRole.SUPER_ADMIN, UserRole.ADMIN] },
       ]
     },
     
@@ -65,35 +65,35 @@ export default function Navbar() {
     { 
       href: '/litters', 
       label: 'Litters', 
-      roles: [UserRole.ADMIN, UserRole.OWNER],
+      roles: [UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.OWNER],
       submenu: [
-        { href: '/litters', label: 'View All Litters', roles: [UserRole.ADMIN, UserRole.OWNER] },
-        { href: '/litters/new', label: 'Register New Litter', roles: [UserRole.ADMIN, UserRole.OWNER] },
+        { href: '/litters', label: 'View All Litters', roles: [UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.OWNER] },
+        { href: '/litters/new', label: 'Register New Litter', roles: [UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.OWNER] },
       ]
     },
     
     // Health & Competition Records
-    { 
-      href: '#',
-      label: 'Records', 
-      roles: [UserRole.ADMIN, UserRole.OWNER, UserRole.HANDLER, UserRole.CLUB],
-      submenu: [
-        // { href: '/health-records', label: 'Health Records', roles: [UserRole.ADMIN, UserRole.OWNER] },
-        { href: '/competitions', label: 'View Competitions', roles: [UserRole.ADMIN, UserRole.OWNER, UserRole.HANDLER, UserRole.CLUB] },
-        { href: '/competitions/new', label: 'Add Competition Result', roles: [UserRole.ADMIN, UserRole.OWNER, UserRole.HANDLER] },
-        // { href: '/ownerships', label: 'Ownership Records', roles: [UserRole.ADMIN, UserRole.OWNER] },
-      ]
-    },
+    // { 
+    //   href: '#',
+    //   label: 'Records', 
+    //   roles: [UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.OWNER, UserRole.HANDLER, UserRole.CLUB],
+    //   submenu: [
+    //     // { href: '/health-records', label: 'Health Records', roles: [UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.OWNER] },
+    //     { href: '/competitions', label: 'View Competitions', roles: [UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.OWNER, UserRole.HANDLER, UserRole.CLUB] },
+    //     { href: '/competitions/new', label: 'Add Competition Result', roles: [UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.OWNER, UserRole.HANDLER] },
+    //     // { href: '/ownerships', label: 'Ownership Records', roles: [UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.OWNER] },
+    //   ]
+    // },
     
     // Club specific menu (uncomment when needed)
-    { 
-      href: '#',
-      label: 'Club Management', 
-      roles: [UserRole.CLUB],
-      submenu: [
-        { href: '/club-events', label: 'Club Events', roles: [UserRole.CLUB] },
-      ]
-    },
+    // { 
+    //   href: '#',
+    //   label: 'Club Management', 
+    //   roles: [UserRole.CLUB],
+    //   submenu: [
+    //     { href: '/club-events', label: 'Club Events', roles: [UserRole.CLUB] },
+    //   ]
+    // },
     
     // Breeding Management
     // { 
@@ -154,7 +154,7 @@ export default function Navbar() {
   const getDashboardLink = () => {
     if (!user) return { href: '/user-dashboard', label: 'Dashboard' };
 
-    return user.role === UserRole.ADMIN
+    return user.role === UserRole.ADMIN || user.role === UserRole.SUPER_ADMIN
       ? { href: '/admin/dashboard', label: 'Admin Dashboard' }
       : { href: '/user-dashboard', label: 'Dashboard' };
   };
@@ -175,7 +175,7 @@ export default function Navbar() {
       if (item.label === 'Dashboard') {
         return {
           ...item,
-          href: userRole === UserRole.ADMIN ? '/admin/dashboard' : '/user-dashboard'
+          href: userRole === UserRole.ADMIN || userRole === UserRole.SUPER_ADMIN ? '/admin/dashboard' : '/user-dashboard'
         };
       }
       
@@ -204,7 +204,7 @@ export default function Navbar() {
     
     // Filter the top-level items based on role
     // If user is not an admin, only show permitted items
-    if (userRole !== UserRole.ADMIN) {
+    if (userRole !== UserRole.ADMIN && userRole !== UserRole.SUPER_ADMIN) {
       return processedItems.filter(item => 
         item.roles.length === 0 || // Public items
         item.label === 'Dashboard' || // Dashboard is always visible for logged-in users

@@ -5,6 +5,7 @@ export enum ApprovalStatus {
 }
 
 export enum UserRole {
+  SUPER_ADMIN = 'SUPER_ADMIN',
   ADMIN = 'ADMIN',
   OWNER = 'OWNER',
   HANDLER = 'HANDLER',

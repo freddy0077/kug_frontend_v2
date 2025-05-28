@@ -8,6 +8,7 @@ export type Entity = 'dog' | 'health-record' | 'competition' | 'ownership' | 'br
 
 // Define user roles to match GraphQL schema
 export enum UserRole {
+  SUPER_ADMIN = 'SUPER_ADMIN',
   ADMIN = 'ADMIN',
   OWNER = 'OWNER',
   HANDLER = 'HANDLER',
@@ -36,8 +37,8 @@ export const hasPermission = (
   ownerId?: string,
   userId?: string
 ): boolean => {
-  // Admin has all permissions
-  if (userRole === UserRole.ADMIN) {
+  // Super Admin and Admin have all permissions
+  if (userRole === UserRole.SUPER_ADMIN || userRole === UserRole.ADMIN) {
     return true;
   }
 

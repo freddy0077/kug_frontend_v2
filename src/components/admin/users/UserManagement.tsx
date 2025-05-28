@@ -79,7 +79,7 @@ const UserManagement: React.FC = () => {
       sortField: filterOptions.sortField,
       sortDirection: filterOptions.sortDirection
     },
-    skip: !isAuthenticated || user?.role !== 'ADMIN',
+    skip: !isAuthenticated || (user?.role !== 'ADMIN' && user?.role !== 'SUPER_ADMIN'),
     fetchPolicy: 'network-only',
     onCompleted: () => {
       setIsLoading(false);
@@ -170,7 +170,7 @@ const UserManagement: React.FC = () => {
   };
   
   // Handle access control
-  if (!isAuthenticated || user?.role !== 'ADMIN') {
+  if (!isAuthenticated || (user?.role !== 'ADMIN' && user?.role !== 'SUPER_ADMIN')) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4">

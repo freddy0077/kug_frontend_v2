@@ -48,7 +48,7 @@ const AuditLogsManagement: React.FC = () => {
       entityType: filters.entityType,
       action: filters.action
     },
-    skip: !isAuthenticated || user?.role !== 'ADMIN',
+    skip: !isAuthenticated || (user?.role !== 'ADMIN' && user?.role !== 'SUPER_ADMIN'),
     fetchPolicy: 'no-cache', // Use no-cache to ensure fresh data
     nextFetchPolicy: 'no-cache' // Ensure subsequent fetches also bypass cache
   });
@@ -111,7 +111,7 @@ const AuditLogsManagement: React.FC = () => {
   };
   
   // Handle access control
-  if (!isAuthenticated || user?.role !== 'ADMIN') {
+  if (!isAuthenticated || (user?.role !== 'ADMIN' && user?.role !== 'SUPER_ADMIN')) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4">

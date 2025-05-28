@@ -109,9 +109,12 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
                 className="focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-lg"
               >
                 <option value="">All Roles</option>
+                <option value="SUPER_ADMIN">Super Admin</option>
                 <option value="ADMIN">Administrator</option>
-                <option value="USER">Regular User</option>
-                <option value="MODERATOR">Moderator</option>
+                <option value="OWNER">Owner</option>
+                <option value="HANDLER">Handler</option>
+                <option value="CLUB">Club</option>
+                <option value="VIEWER">Viewer</option>
               </select>
             </div>
             

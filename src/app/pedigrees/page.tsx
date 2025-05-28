@@ -18,7 +18,7 @@ import { downloadPedigreeCertificate } from '@/utils/pedigreePdfGenerator';
 // Export the main component without directly using useSearchParams
 export default function Pedigrees() {
   return (
-    <ProtectedRoute allowedRoles={[UserRole.ADMIN, UserRole.OWNER, UserRole.HANDLER, UserRole.VIEWER]}>
+    <ProtectedRoute allowedRoles={[UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.OWNER, UserRole.HANDLER, UserRole.VIEWER]}>
       <Suspense fallback={<PedigreesLoadingFallback />}>
         <PedigreesContentWrapper />
       </Suspense>
@@ -381,6 +381,21 @@ function PedigreesContent() {
       return;
     }
     
+    // Check if the user is a SUPER_ADMIN
+    if (user?.role !== UserRole.SUPER_ADMIN) {
+      toast.error('Only Super Administrators can download KUG certificates. Please contact a Super Admin for assistance.', {
+        duration: 5000, // Longer duration for this important message
+        style: {
+          background: '#FEF2F2',
+          color: '#B91C1C',
+          padding: '16px',
+          borderRadius: '8px',
+        },
+        icon: '🔒',
+      });
+      return;
+    }
+    
     // Debug log to verify checkbox state
     console.log('Export certificate selected:', isExportCertificate);
     console.log('FCI certificate selected:', isFciCertificate);
@@ -539,7 +554,7 @@ function PedigreesContent() {
 
   // Check if user has permission to access this page
   useEffect(() => {
-    if (!authLoading && (!user || user.role !== UserRole.ADMIN)) {
+    if (!authLoading && (!user || (user.role !== UserRole.ADMIN && user.role !== UserRole.SUPER_ADMIN))) {
       router.push('/auth/login');
     }
   }, [user, authLoading, router]);
@@ -549,8 +564,8 @@ function PedigreesContent() {
     return <div className="flex justify-center items-center h-64">Loading...</div>;
   }
 
-  // If not authenticated or not admin, don't render content
-  if (!user || user.role !== UserRole.ADMIN) {
+  // If not authenticated or not admin/super admin, don't render content
+  if (!user || (user.role !== UserRole.ADMIN && user.role !== UserRole.SUPER_ADMIN)) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen">
         <div className="bg-white p-8 rounded shadow-md text-center">

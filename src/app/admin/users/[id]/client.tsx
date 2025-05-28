@@ -9,12 +9,16 @@ import { useAuth } from '@/contexts/AuthContext';
 import { UserRole } from '@/utils/permissionUtils';
 import Link from 'next/link';
 import Image from 'next/image';
+import { toast } from 'react-hot-toast';
 
 export default function UserDetailsClient({ userId }: { userId: string }) {
   const router = useRouter();
   const { user: currentUser, isAuthenticated } = useAuth();
   
   const [isEditing, setIsEditing] = useState(false);
+  const [isResettingPassword, setIsResettingPassword] = useState(false);
+  const [generatedPassword, setGeneratedPassword] = useState('');
+  
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -22,13 +26,21 @@ export default function UserDetailsClient({ userId }: { userId: string }) {
     role: '',
     profileImageUrl: ''
   });
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  
+  const [errors, setErrors] = useState<{
+    firstName?: string;
+    lastName?: string;
+    email?: string;
+    role?: string;
+    form?: string;
+    password?: string;
+  }>({});
   const [successMessage, setSuccessMessage] = useState('');
 
   // Fetch user data
   const { loading, error, data, refetch } = useQuery(GET_USER_BY_ID, {
     variables: { id: userId },
-    skip: !isAuthenticated || currentUser?.role !== UserRole.ADMIN,
+    skip: !isAuthenticated || (currentUser?.role !== UserRole.ADMIN && currentUser?.role !== UserRole.SUPER_ADMIN),
     fetchPolicy: 'network-only'
   });
 
@@ -55,7 +67,7 @@ export default function UserDetailsClient({ userId }: { userId: string }) {
       setErrors({ role: error.message });
     }
   });
-
+  
   // Initialize form data when user data is loaded
   useEffect(() => {
     if (data?.user) {
@@ -70,11 +82,11 @@ export default function UserDetailsClient({ userId }: { userId: string }) {
     }
   }, [data]);
 
-  // Redirect if not authenticated or not admin
+  // Redirect if not authenticated or not admin/super admin
   useEffect(() => {
     if (!isAuthenticated && !loading) {
       router.push('/auth/login');
-    } else if (currentUser?.role !== UserRole.ADMIN && !loading) {
+    } else if (currentUser?.role !== UserRole.ADMIN && currentUser?.role !== UserRole.SUPER_ADMIN && !loading) {
       router.push('/dashboard');
     }
   }, [isAuthenticated, currentUser, loading, router]);
@@ -97,6 +109,40 @@ export default function UserDetailsClient({ userId }: { userId: string }) {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+  
+  // Function to generate a secure random password
+  const generateSecurePassword = () => {
+    const length = 12;
+    const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*';
+    let password = '';
+    for (let i = 0; i < length; i++) {
+      const randomIndex = Math.floor(Math.random() * charset.length);
+      password += charset[randomIndex];
+    }
+    return password;
+  };
+  
+  const handleGenerateTemporaryPassword = () => {
+    // Generate a secure random password
+    const tempPassword = generateSecurePassword();
+    setGeneratedPassword(tempPassword);
+    
+    // Set success message
+    setSuccessMessage('Temporary password generated successfully');
+    setTimeout(() => setSuccessMessage(''), 10000); // Keep message visible longer
+  };
+  
+  // Function to copy password to clipboard
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast.success('Password copied to clipboard', {
+      duration: 2000,
+      style: {
+        background: '#10B981',
+        color: '#fff',
+      },
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -283,6 +329,7 @@ export default function UserDetailsClient({ userId }: { userId: string }) {
                             value={user.role}
                             onChange={(e) => handleRoleChange(e.target.value)}
                           >
+                            <option value={UserRole.SUPER_ADMIN}>Super Admin</option>
                             <option value={UserRole.ADMIN}>Admin</option>
                             <option value={UserRole.OWNER}>Owner</option>
                             <option value={UserRole.HANDLER}>Handler</option>
@@ -291,6 +338,78 @@ export default function UserDetailsClient({ userId }: { userId: string }) {
                           </select>
                         </div>
                       </div>
+                    </dd>
+                  </div>
+                  
+                  {/* Password Management Section */}
+                  <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 border-t border-gray-200">
+                    <dt className="text-sm font-medium text-gray-500">Password Management</dt>
+                    <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                      {!isResettingPassword ? (
+                        <button
+                          type="button"
+                          onClick={() => setIsResettingPassword(true)}
+                          className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                          </svg>
+                          Generate Temporary Password
+                        </button>
+                      ) : (
+                        <div className="bg-gray-50 p-4 rounded-md border border-gray-200">
+                          <h4 className="text-sm font-medium text-gray-900 mb-3">Generate Temporary Password</h4>
+                          <p className="text-sm text-gray-600 mb-4">
+                            This will generate a secure temporary password for the user. The user will need to change this password upon login.
+                          </p>
+                          
+                          {generatedPassword ? (
+                            <div className="mb-4">
+                              <label className="block text-sm font-medium text-gray-700 mb-1">Temporary Password</label>
+                              <div className="flex items-center">
+                                <div className="flex-grow p-2 bg-gray-100 border border-gray-300 rounded-md font-mono text-sm">
+                                  {generatedPassword}
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => copyToClipboard(generatedPassword)}
+                                  className="ml-2 p-2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                                  title="Copy to clipboard"
+                                >
+                                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                                  </svg>
+                                </button>
+                              </div>
+                              <p className="mt-2 text-xs text-gray-500">
+                                Make sure to copy this password and provide it to the user securely.
+                              </p>
+                            </div>
+                          ) : null}
+                          
+                          <div className="flex justify-end space-x-3">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setIsResettingPassword(false);
+                                setGeneratedPassword('');
+                              }}
+                              className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                            >
+                              Close
+                            </button>
+                            {!generatedPassword && (
+                              <button
+                                type="button"
+                                onClick={handleGenerateTemporaryPassword}
+                                className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                              >
+                                Generate Password
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      )}
                     </dd>
                   </div>
                 </dl>
